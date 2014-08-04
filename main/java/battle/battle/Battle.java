@@ -12,12 +12,11 @@ public class Battle implements Runnable {
     private Clock battleClock;
 
     private BattleScreen battleScreen;
-    private Handler uiHandler;
     private String status;
+    private boolean going;
 
-    public Battle(BattleScreen scr, Handler h){
+    public Battle(BattleScreen scr){//}, Handler h){
         battleScreen = scr;
-        uiHandler = h;
         status = "";
 
         fighter1 = loadFighter();
@@ -26,22 +25,50 @@ public class Battle implements Runnable {
         enviro = new Environment();
 
         battleClock = new Clock();
+
+        going = true;
     }
 
     public void run(){
+        //set this thread to background priority
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-        for(int i = 0; i < 1000000; ++i){
+        //main logic loop
+        for(int i = 0; i < 500000; ++i){
             if (i%1000 == 0){
-                final String s = i + " " + status;
+                String s = i + " " + status + " " + going;
 
-                uiHandler.post(new Runnable(){
-                    public void run(){
-                        battleScreen.update(s);
-                    }
-                });
+                report(s);
             }
         }
+
+       notifyDone();
+    }
+
+    private void report(final String r){
+        battleScreen.uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                battleScreen.update(r);
+            }
+        });
+    }
+
+    private void notifyDone(){
+        battleScreen.uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                battleScreen.notifyDone();
+            }
+        });
+    }
+
+    public void updateStatus(String s){
+        status = s;
+    }
+
+    public void stop(){
+        going = false;
     }
 
     private Fighter loadFighter(){

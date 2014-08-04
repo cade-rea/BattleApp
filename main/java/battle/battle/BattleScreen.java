@@ -9,22 +9,20 @@ import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-
-import battle.battle.R;
 
 public class BattleScreen extends Activity {
     private ArrayList<String> output;
     private TextView battleText;
     private Battle battle;
-    private BattleTest bt;
 
     private float dpHeight;
     private float dpWidth;
 
-    private Handler UIHandler;
+    public Handler uiHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,29 +39,20 @@ public class BattleScreen extends Activity {
         battleText = (TextView)findViewById(R.id.battle_display);
         battleText.setHeight((int)(dpHeight*3/4));
 
-        //battle = new Battle(this);
-        //battle.execute("Param");
-
-
         //this handler can be passed to other threads to refer to the UI thread
-        UIHandler = new Handler(){
-            //responds to UIHandler.sendMessage()
+        uiHandler = new Handler(){
+            //responds to uiHandler.sendMessage()
             public void handleMessage(Message msg){
                 update((String)msg.obj);
             }
         };
 
-        //create a new battleTest and pass this activity and the UIHandler
-        //probably don't need to pass the activity, probably just the handler
-        bt = new BattleTest(this, UIHandler);
+        //create a new Battle and pass this activity
+        battle = new Battle(this);
+        //start the battle
+        (new Thread(battle)).start();
 
-
-        Thread thread = new Thread(bt);
-        thread.start();
-
-
-
-/*
+    /*
         //this handler is created on the UI thread
         //any calls to this thread will be on UI thread
         final Handler myHandler = new Handler();
@@ -85,7 +74,7 @@ public class BattleScreen extends Activity {
         ).start();//this starts the execution of the new thread
 
 
-*/
+    */
     }
 
     public void update(String msg){
@@ -106,18 +95,17 @@ public class BattleScreen extends Activity {
     public void buttonPushed(View view){
         switch(view.getId()){
             case R.id.button1:
-                update("button 1");
+                battle.updateStatus("button 1");
                 break;
             case R.id.button2:
-                update("button 2");
-                bt.setButtonClicked();
+                battle.updateStatus("button 2");
                 break;
             case R.id.button3:
-                update("button 3");
+                battle.updateStatus("button 3");
                 break;
             case R.id.button4:
-                update("button 4");
-                exitToMenu();
+                battle.updateStatus("button 4");
+                stopBattle();
                 break;
             default:
                 update("default");
@@ -125,9 +113,25 @@ public class BattleScreen extends Activity {
         }
     }
 
-    private void exitToMenu(){
-        //battle.cancel(false);
-        startActivity(new Intent(this, main_menu.class));
+    private void stopBattle(){
+        battle.stop();
+    }
+
+    public void notifyDone(){
+        update("Battle Finished");
+
+        //change button 4 to return to the main menu
+        Button btn = (Button)findViewById(R.id.button4);
+        btn.setText("Return to Menu");
+
+        final Activity thisBattleScreen = this;
+
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(thisBattleScreen, main_menu.class));
+            }
+        });
     }
 
     @Override
