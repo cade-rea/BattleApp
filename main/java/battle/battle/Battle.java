@@ -34,7 +34,7 @@ public class Battle implements Runnable {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
         //main logic loop
-        for(int i = 0; i < 500000; ++i){
+        for(int i = 0; going; ++i){
             if (i%1000 == 0){
                 String s = i + " " + status + " " + going;
 
