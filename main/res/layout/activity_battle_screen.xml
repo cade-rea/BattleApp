@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="battle.battle.BattleScreen">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/battle_display"
+        android:lines="20" />
+
+    <Button
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:text="Go"
+        android:id="@+id/button1"
+        android:layout_below="@+id/battle_display"
+        android:layout_toLeftOf="@+id/button2"
+        android:layout_toStartOf="@+id/button2"
+        android:onClick="buttonPushed"
+        android:layout_marginBottom="5dp" />
+
+    <Button
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:text="Button 2"
+        android:id="@+id/button2"
+        android:layout_below="@+id/battle_display"
+        android:layout_centerHorizontal="true"
+        android:onClick="buttonPushed" />
+
+    <Button
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:text="Button 3"
+        android:id="@+id/button3"
+        android:layout_below="@+id/battle_display"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="buttonPushed" />
+
+    <Button
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:text="Exit"
+        android:id="@+id/button4"
+        android:layout_below="@id/button1"
+        android:onClick="buttonPushed" />
+
+</RelativeLayout>
