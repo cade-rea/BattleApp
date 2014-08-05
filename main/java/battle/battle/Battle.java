@@ -1,7 +1,6 @@
 package battle.battle;
 
-import android.os.AsyncTask;
-import android.os.Handler;
+import java.util.Queue;
 
 /**
  * Created by Cade on 7/31/2014.
@@ -11,17 +10,20 @@ public class Battle implements Runnable {
     private Environment enviro;
     private Clock battleClock;
     private int gameTick;
-
+    private BattleQueue p1Actions, p2Actions;
     private BattleScreen battleScreen;
     private String status;
     private boolean going;
 
-    public Battle(BattleScreen scr){//}, Handler h){
+    public Battle(BattleScreen scr){
         battleScreen = scr;
         status = "";
 
         fighter1 = loadFighter();
         fighter2 = loadFighter();
+
+        p1Actions = new BattleQueue();
+        p2Actions = new BattleQueue();
 
         enviro = new Environment();
 
@@ -35,8 +37,11 @@ public class Battle implements Runnable {
         //set this thread to background priority
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-        gameTick = 1;
+        //setup user actions
+        battleScreen.updateButtons(fighter1.getActions());
 
+        //start clock
+        gameTick = 1;
         Thread clockThread = new Thread(battleClock);
         clockThread.start();
 
@@ -48,8 +53,16 @@ public class Battle implements Runnable {
                 String s = "Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " + fighter2.getName() + ":" + fighter2.getHealth();
                 report(s);
 
-                fighter1.health -= fighter2.getStr();
-                fighter2.health -= fighter1.getStr();
+                if(p1Actions.isNotEmpty()){
+                    BattleAction ba = p1Actions.poll();
+                    ba.performAction(fighter2);
+                    report("Player 1 uses " + ba.getName());
+                }
+                if(p2Actions.isNotEmpty()){
+                    BattleAction ba = p2Actions.poll();
+                    ba.performAction(fighter1);
+                    report("Player 1 uses " + ba.getName());
+                }
 
                 s = "";
 
@@ -92,8 +105,12 @@ public class Battle implements Runnable {
         });
     }
 
-    public void updateStatus(String s){
-        status = s;
+    public void updateStatus(int a){
+        queueAction(a);
+    }
+
+    private void queueAction(int a){
+        p1Actions.offer(fighter1.getActions()[a]);
     }
 
     public void stop(){

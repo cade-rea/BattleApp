@@ -12,44 +12,51 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/battle_display"
-        android:lines="20" />
+        android:minLines="25" />
 
     <Button
         android:layout_width="120dp"
         android:layout_height="50dp"
         android:text="Go"
         android:id="@+id/button1"
-        android:layout_below="@+id/battle_display"
-        android:layout_toLeftOf="@+id/button2"
-        android:layout_toStartOf="@+id/button2"
         android:onClick="buttonPushed"
-        android:layout_marginBottom="5dp" />
+        android:layout_below="@id/battle_display" />
 
     <Button
         android:layout_width="120dp"
         android:layout_height="50dp"
         android:text="Button 2"
         android:id="@+id/button2"
-        android:layout_below="@+id/battle_display"
-        android:layout_centerHorizontal="true"
-        android:onClick="buttonPushed" />
+        android:onClick="buttonPushed"
+        android:layout_toEndOf="@+id/button1"
+        android:layout_below="@+id/battle_display" />
 
     <Button
         android:layout_width="120dp"
         android:layout_height="50dp"
         android:text="Button 3"
         android:id="@+id/button3"
-        android:layout_below="@+id/battle_display"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="buttonPushed" />
+        android:onClick="buttonPushed"
+        android:layout_below="@id/button1"/>
+
+    <Button
+        android:layout_width="120dp"
+        android:layout_height="50dp"
+        android:text="Button 4"
+        android:id="@+id/button4"
+        android:onClick="buttonPushed"
+        android:layout_toEndOf="@+id/button3"
+        android:layout_below="@id/button2"/>
 
     <Button
         android:layout_width="120dp"
         android:layout_height="50dp"
         android:text="Stop"
-        android:id="@+id/button4"
-        android:layout_below="@id/button1"
-        android:onClick="buttonPushed" />
+        android:id="@+id/buttonStop"
+        android:onClick="buttonPushed"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/button3"
+        android:layout_alignStart="@+id/button3" />
+
 
 </RelativeLayout>
