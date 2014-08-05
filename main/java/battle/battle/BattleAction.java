@@ -36,4 +36,8 @@ public class BattleAction {
     public void performAction(Fighter p2){
         p2.health -= owner.getStr();
     }
+
+    public String toString(){
+        return "Action:" + name;
+    }
 }
