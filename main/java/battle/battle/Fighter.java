@@ -8,6 +8,8 @@ public class Fighter {
     private int str;
     public int health;
 
+    private BattleAction[] actions;
+
     public Fighter(){
         this("default",1,50);
     }
@@ -16,6 +18,11 @@ public class Fighter {
         name = n;
         str = s;
         health = h;
+
+        actions = new BattleAction[4];
+
+        for(int i = 0; i < 4; ++i)
+            actions[i] = new BattleAction(this);
     }
 
     public String getName(){
@@ -28,5 +35,9 @@ public class Fighter {
 
     public int getHealth(){
         return health;
+    }
+
+    public BattleAction[] getActions(){
+        return actions;
     }
 }

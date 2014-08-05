@@ -22,6 +22,8 @@ public class BattleScreen extends Activity {
     private float dpHeight;
     private float dpWidth;
 
+    private Button[] battleButtons;
+
     public Handler uiHandler;
 
     @Override
@@ -39,6 +41,12 @@ public class BattleScreen extends Activity {
         battleText = (TextView)findViewById(R.id.battle_display);
         battleText.setHeight((int)(dpHeight*3/4));
 
+        battleButtons = new Button[4];
+        battleButtons[0] = (Button)findViewById(R.id.button1);
+        battleButtons[1] = (Button)findViewById(R.id.button2);
+        battleButtons[2] = (Button)findViewById(R.id.button3);
+        battleButtons[3] = (Button)findViewById(R.id.button4);
+
         //this handler can be passed to other threads to refer to the UI thread
         uiHandler = new Handler(){
             //responds to uiHandler.sendMessage()
@@ -51,30 +59,6 @@ public class BattleScreen extends Activity {
         battle = new Battle(this);
         //start the battle
         (new Thread(battle)).start();
-
-    /*
-        //this handler is created on the UI thread
-        //any calls to this thread will be on UI thread
-        final Handler myHandler = new Handler();
-
-        //this creates a new thread
-        (new Thread(
-                new Runnable() { //executed on new thread
-                    @Override
-                    public void run() { //new thread
-                        final int b = 1;
-                        myHandler.post(new Runnable() { //this calls the handler on the UI thread
-                            @Override
-                            public void run() {//this is run on the UI thread
-                                mImageView.setImageBitmap(b);
-                            }
-                        });
-                    }
-                })
-        ).start();//this starts the execution of the new thread
-
-
-    */
     }
 
     public void update(String msg){
@@ -95,16 +79,18 @@ public class BattleScreen extends Activity {
     public void buttonPushed(View view){
         switch(view.getId()){
             case R.id.button1:
-                battle.updateStatus("button 1");
+                battle.updateStatus(0);
                 break;
             case R.id.button2:
-                battle.updateStatus("button 2");
+                battle.updateStatus(1);
                 break;
             case R.id.button3:
-                battle.updateStatus("button 3");
+                battle.updateStatus(2);
                 break;
             case R.id.button4:
-                battle.updateStatus("button 4");
+                battle.updateStatus(3);
+                break;
+            case R.id.buttonStop:
                 stopBattle();
                 break;
             default:
@@ -132,6 +118,12 @@ public class BattleScreen extends Activity {
                 startActivity(new Intent(thisBattleScreen, main_menu.class));
             }
         });
+    }
+
+    public void updateButtons(BattleAction[] btns){
+        for(int i = 0; i < btns.length; ++i){
+            battleButtons[i].setText(btns[i].getName());
+        }
     }
 
     @Override

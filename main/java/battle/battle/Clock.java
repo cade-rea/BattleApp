@@ -9,6 +9,7 @@ public class Clock implements Runnable {
     long time;
     int tick;
     boolean going;
+    int factor = 500; // uptimeMillis/factor
 
     public Clock(){
         time = 0;
@@ -19,10 +20,10 @@ public class Clock implements Runnable {
     public void run() {
         going = true;
         tick = 1;
-        time = SystemClock.uptimeMillis()/100;
+        time = SystemClock.uptimeMillis()/factor;
 
         while(going){
-            long rightNow = SystemClock.uptimeMillis()/100;
+            long rightNow = SystemClock.uptimeMillis()/factor;
             if(time < rightNow){
                 time = rightNow;
                 ++tick;
