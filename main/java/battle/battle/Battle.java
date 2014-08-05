@@ -1,5 +1,7 @@
 package battle.battle;
 
+import android.util.Log;
+
 import java.util.Queue;
 
 /**
@@ -14,6 +16,8 @@ public class Battle implements Runnable {
     private BattleScreen battleScreen;
     private String status;
     private boolean going;
+
+    private static final String TAG = "BATTLE";
 
     public Battle(BattleScreen scr){
         battleScreen = scr;
@@ -34,6 +38,7 @@ public class Battle implements Runnable {
     }
 
     public void run(){
+        Log.d(TAG,"running");
         //set this thread to background priority
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -46,6 +51,7 @@ public class Battle implements Runnable {
         clockThread.start();
 
         //main logic loop
+        Log.d(TAG, "starting loop");
         while(going) {
             if(gameTick < battleClock.getTick()) {
                 ++gameTick;
@@ -54,11 +60,13 @@ public class Battle implements Runnable {
                 report(s);
 
                 if(p1Actions.isNotEmpty()){
+                    Log.d(TAG, "p1 has action:" + p1Actions.toString());
                     BattleAction ba = p1Actions.poll();
                     ba.performAction(fighter2);
                     report("Player 1 uses " + ba.getName());
                 }
                 if(p2Actions.isNotEmpty()){
+                    Log.d(TAG, "p2 has action:" + p2Actions.toString());
                     BattleAction ba = p2Actions.poll();
                     ba.performAction(fighter1);
                     report("Player 1 uses " + ba.getName());
@@ -110,6 +118,7 @@ public class Battle implements Runnable {
     }
 
     private void queueAction(int a){
+        Log.d(TAG,"queing action" + a +"::" + fighter1.getActions()[a]);
         p1Actions.offer(fighter1.getActions()[a]);
     }
 

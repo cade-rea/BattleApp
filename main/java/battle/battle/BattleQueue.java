@@ -44,11 +44,11 @@ public class BattleQueue implements Queue<BattleAction>{
     public boolean offer(BattleAction battleAction) {
         if(full)
             return false;
-        int place = front + position;
+        /*int place = position;
         if(place >= maxSize)
-            place -= maxSize;
+            place -= maxSize;*/
 
-        queue[place] = battleAction;
+        queue[position] = battleAction;
 
         if(++position == maxSize)
             position = 0;
@@ -71,6 +71,7 @@ public class BattleQueue implements Queue<BattleAction>{
             return null;
 
         BattleAction toReturn = queue[front];
+        queue[front] = null;
 
         if(++front == maxSize)
             front = 0;
@@ -170,5 +171,13 @@ public class BattleQueue implements Queue<BattleAction>{
     @Override
     public boolean containsAll(Collection<?> objects) {
         return false;
+    }
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < maxSize; ++i){
+            sb.append("[" + i + "] " + queue[i]);
+        }
+        return sb.toString();
     }
 }
