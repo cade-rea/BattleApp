@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/battle_display"
-        android:minLines="25" />
+        android:minLines="25"
+        android:layout_below="@+id/progressBar" />
 
     <Button
         android:layout_width="120dp"
@@ -57,6 +58,18 @@
         android:layout_alignParentBottom="true"
         android:layout_alignLeft="@+id/button3"
         android:layout_alignStart="@+id/button3" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:progress="50"
+        android:id="@+id/tickProgressBar"
+        android:layout_alignRight="@+id/battle_display"
+        android:layout_alignEnd="@+id/battle_display"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

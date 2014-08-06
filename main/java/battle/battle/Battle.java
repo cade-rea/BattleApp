@@ -53,8 +53,10 @@ public class Battle implements Runnable {
         //main logic loop
         Log.d(TAG, "starting loop");
         while(going) {
+            Log.d(TAG, "going...");
             if(gameTick < battleClock.getTick()) {
                 ++gameTick;
+
 
                 String s = "Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " + fighter2.getName() + ":" + fighter2.getHealth();
                 report(s);
@@ -87,6 +89,10 @@ public class Battle implements Runnable {
             }
             else{
                 //if a tick has not happened
+                int st = battleClock.getProgress();
+                Log.d(TAG,"No tick. Subtick:" + st);
+                updateTickProgress(st);
+
                 //sleep maybe?
             }
         }
@@ -94,6 +100,22 @@ public class Battle implements Runnable {
         battleClock.stop();
         notifyDone();
     }
+
+    /***
+    Screen Reporting
+     To call methods in BattleScreen, use:
+
+     battleScreen.uiHandler.post(new Runnable() {
+        @Override
+        public void run() {
+            battleScreen.METHOD_TO_CALL(r);
+        }
+        });
+
+
+     These methods update the screen by calling corresponding methods in BattleScreen
+     */
+
 
     private void report(final String r){
         battleScreen.uiHandler.post(new Runnable() {
@@ -109,6 +131,15 @@ public class Battle implements Runnable {
             @Override
             public void run() {
                 battleScreen.notifyDone();
+            }
+        });
+    }
+
+    private void updateTickProgress(final int progress){
+        battleScreen.uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                battleScreen.updateTickProgress(progress);
             }
         });
     }

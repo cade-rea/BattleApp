@@ -1,6 +1,7 @@
 package battle.battle;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * Created by Cade on 7/31/2014.
@@ -8,12 +9,15 @@ import android.os.SystemClock;
 public class Clock implements Runnable {
     long time;
     int tick;
+    int subTick;
+    int factor;
     boolean going;
-    int factor = 500; // uptimeMillis/factor
 
     public Clock(){
         time = 0;
         tick = 0;
+        subTick = 0;
+        factor = 5000; // uptimeMillis/factor
     }
 
     @Override
@@ -23,13 +27,17 @@ public class Clock implements Runnable {
         time = SystemClock.uptimeMillis()/factor;
 
         while(going){
-            long rightNow = SystemClock.uptimeMillis()/factor;
-            if(time < rightNow){
-                time = rightNow;
+            long rightNow = SystemClock.uptimeMillis();
+
+            subTick = (int)((( (double)rightNow % (double)factor) / (double)factor) * 100); //percentage of tick for progress bar
+            long nowish = rightNow / factor;
+
+            if(time < nowish){
+                time = nowish;
                 ++tick;
             }
             else {
-                SystemClock.sleep(50);
+                SystemClock.sleep(factor/20);
             }
         }
     }
@@ -40,5 +48,10 @@ public class Clock implements Runnable {
 
     public void stop(){
         going = false;
+    }
+
+    public int getProgress(){
+        Log.d("CLOCK","Progress:" + (((double)SystemClock.uptimeMillis() % (double)factor) / (double)factor)*100);
+        return subTick;
     }
 }

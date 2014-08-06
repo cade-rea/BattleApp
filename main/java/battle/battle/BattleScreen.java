@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class BattleScreen extends Activity {
     private float dpWidth;
 
     private Button[] battleButtons;
+    private ProgressBar tickProgress;
 
     public Handler uiHandler;
 
@@ -46,6 +48,8 @@ public class BattleScreen extends Activity {
         battleButtons[1] = (Button)findViewById(R.id.button2);
         battleButtons[2] = (Button)findViewById(R.id.button3);
         battleButtons[3] = (Button)findViewById(R.id.button4);
+
+        tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
 
         //this handler can be passed to other threads to refer to the UI thread
         uiHandler = new Handler(){
@@ -124,6 +128,10 @@ public class BattleScreen extends Activity {
         for(int i = 0; i < btns.length; ++i){
             battleButtons[i].setText(btns[i].getName());
         }
+    }
+
+    public void updateTickProgress(int progress){
+        tickProgress.setProgress(progress);
     }
 
     @Override
