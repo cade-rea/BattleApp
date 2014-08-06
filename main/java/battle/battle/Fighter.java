@@ -11,7 +11,7 @@ public class Fighter {
     private BattleAction[] actions;
 
     public Fighter(){
-        this("default",1,50);
+        this("default",1,20);
     }
 
     public Fighter(String n, int s, int h){
