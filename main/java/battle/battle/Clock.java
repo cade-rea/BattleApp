@@ -17,7 +17,7 @@ public class Clock implements Runnable {
         time = 0;
         tick = 0;
         subTick = 0;
-        factor = 5000; // uptimeMillis/factor
+        factor = 1000; // uptimeMillis/factor
     }
 
     @Override
@@ -51,7 +51,7 @@ public class Clock implements Runnable {
     }
 
     public int getProgress(){
-        Log.d("CLOCK","Progress:" + (((double)SystemClock.uptimeMillis() % (double)factor) / (double)factor)*100);
+        Log.d("CLOCK","Progress:" + (int)(((double)SystemClock.uptimeMillis() % (double)factor) / (double)factor)*100);
         return subTick;
     }
 }
