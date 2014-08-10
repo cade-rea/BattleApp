@@ -1,5 +1,12 @@
 package battle.battle;
 
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.util.AttributeSet;
+import android.widget.TextView;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
@@ -179,5 +186,17 @@ public class BattleQueue implements Queue<BattleAction>{
             sb.append("[" + i + "] " + queue[i]);
         }
         return sb.toString();
+    }
+
+    public String getName(int index) {
+        int target = front + index;
+
+        if (target > maxSize)
+            target -= maxSize;
+
+        if (queue[target] != null)
+            return queue[target].toString();
+
+        return "null";
     }
 }

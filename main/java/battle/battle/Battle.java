@@ -29,6 +29,8 @@ public class Battle implements Runnable {
         p1Actions = new BattleQueue();
         p2Actions = new BattleQueue();
 
+        battleScreen.setP1Queue(p1Actions);
+
         enviro = new Environment();
 
         battleClock = new Clock();
@@ -43,7 +45,7 @@ public class Battle implements Runnable {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
         //setup user actions
-        battleScreen.updateButtons(fighter1.getActions());
+        updateButtons();
 
         //start clock
         gameTick = 1;
@@ -53,10 +55,10 @@ public class Battle implements Runnable {
         //main logic loop
         Log.d(TAG, "starting loop");
         while(going) {
-            Log.d(TAG, "going...");
             if(gameTick < battleClock.getTick()) {
                 ++gameTick;
 
+                refreshQueues();
 
                 String s = "Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " + fighter2.getName() + ":" + fighter2.getHealth();
                 report(s);
@@ -91,7 +93,7 @@ public class Battle implements Runnable {
                 //if a tick has not happened
                 int st = battleClock.getProgress();
                 Log.d(TAG,"No tick. Subtick:" + st);
-                updateTickProgress(st);
+                battleScreen.updateTickProgress(st);
 
                 //sleep maybe?
             }
@@ -148,9 +150,40 @@ public class Battle implements Runnable {
         queueAction(a);
     }
 
+    /*private void updateQueue(){
+        battleScreen.uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                battleScreen.updateQueue(p1Actions);
+            }
+        });
+    }*/
+
+    private void updateButtons(){
+        battleScreen.uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                battleScreen.updateButtons(fighter1.getActions());
+            }
+        });
+    }
+
     private void queueAction(int a){
         Log.d(TAG,"queing action" + a +"::" + fighter1.getActions()[a]);
         p1Actions.offer(fighter1.getActions()[a]);
+    }
+
+    private void refreshQueues(){
+        battleScreen.uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                battleScreen.refreshQueues();
+            }
+        });
+    }
+
+    public BattleQueue getQueue(){
+        return p1Actions;
     }
 
     public void stop(){

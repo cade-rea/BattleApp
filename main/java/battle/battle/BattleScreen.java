@@ -1,15 +1,21 @@
 package battle.battle;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -25,6 +31,8 @@ public class BattleScreen extends Activity {
 
     private Button[] battleButtons;
     private ProgressBar tickProgress;
+    private QueueDrawer p1Q;
+    private QueueDrawer p2Q;
 
     public Handler uiHandler;
 
@@ -50,6 +58,7 @@ public class BattleScreen extends Activity {
         battleButtons[3] = (Button)findViewById(R.id.button4);
 
         tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
+        p1Q = (QueueDrawer)findViewById(R.id.playerQDrawer);
 
         //this handler can be passed to other threads to refer to the UI thread
         uiHandler = new Handler(){
@@ -111,7 +120,7 @@ public class BattleScreen extends Activity {
         update("Battle Finished");
 
         //change button 4 to return to the main menu
-        Button btn = (Button)findViewById(R.id.button4);
+        Button btn = (Button)findViewById(R.id.buttonStop);
         btn.setText("Return to Menu");
 
         final Activity thisBattleScreen = this;
@@ -134,6 +143,14 @@ public class BattleScreen extends Activity {
         tickProgress.setProgress(progress);
     }
 
+    public void setP1Queue(BattleQueue queue){
+        p1Q.setQueue(queue);
+    }
+
+    public void refreshQueues(){
+        p1Q.forceDraw();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -152,4 +169,6 @@ public class BattleScreen extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 }
