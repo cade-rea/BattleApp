@@ -145,6 +145,7 @@ public class BattleScreen extends Activity {
 
     public void setP1Queue(BattleQueue queue){
         p1Q.setQueue(queue);
+        refreshQueues();
     }
 
     public void refreshQueues(){

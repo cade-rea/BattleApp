@@ -191,12 +191,16 @@ public class BattleQueue implements Queue<BattleAction>{
     public String getName(int index) {
         int target = front + index;
 
-        if (target > maxSize)
+        if (target >= maxSize)
             target -= maxSize;
 
         if (queue[target] != null)
             return queue[target].toString();
 
-        return "null";
+        return "empty";
+    }
+
+    public int getMaxSize(){
+        return maxSize;
     }
 }
