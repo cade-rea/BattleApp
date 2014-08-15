@@ -37,15 +37,14 @@ public class QueueDrawer extends TextView {
             int baseline = getLineBounds(0, area);
             paint.setTextSize(baseline - 5);
 
-            Log.d("DRAWER","Baseline:"+baseline + ", area.left:"+area.left + ", area.right"+area.right + ", area.top"+area.top + ", area.bottom:"+area.bottom );
-            //canvas.drawText("Text",area.left+5 , baseline, paint);
+            Log.d("DRAWER","Queue size:"+baseline + ", area.left:"+area.left + ", area.right"+area.right + ", area.top"+area.top + ", area.bottom:"+area.bottom );
 
             //canvas.drawLine(startX, startY, stopX, stopY, paint);
 
-            //horizontal line all the way accross the bottom
+            //horizontal line all the way across the bottom
             canvas.drawLine(area.left, baseline, area.right, baseline, paint);
-            float len = area.right/queue.size(); //length of each queue element
-            for(int i = 0; i < queue.size();++i){
+            float len = area.right/queue.getMaxSize(); //length of each queue element
+            for(int i = 0; i < queue.getMaxSize();++i){
                 float vertical = area.left + len * i;
 
                 canvas.drawText(queue.getName(i), vertical + 5, baseline - 1, paint);

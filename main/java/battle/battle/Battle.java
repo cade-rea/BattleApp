@@ -55,10 +55,10 @@ public class Battle implements Runnable {
         //main logic loop
         Log.d(TAG, "starting loop");
         while(going) {
+            refreshQueues();
+
             if(gameTick < battleClock.getTick()) {
                 ++gameTick;
-
-                refreshQueues();
 
                 String s = "Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " + fighter2.getName() + ":" + fighter2.getHealth();
                 report(s);
