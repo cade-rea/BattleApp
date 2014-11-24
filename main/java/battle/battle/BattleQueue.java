@@ -200,6 +200,18 @@ public class BattleQueue implements Queue<BattleAction>{
         return "empty";
     }
 
+    public BattleAction get(int index){
+        int target = front + index;
+
+        if (target >= maxSize)
+            target -= maxSize;
+
+        if (queue[target] != null)
+            return queue[target];
+
+        return null;
+    }
+
     public int getMaxSize(){
         return maxSize;
     }
