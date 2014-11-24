@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -33,6 +34,7 @@ public class BattleScreen extends Activity {
     private ProgressBar tickProgress;
     private QueueDrawer p1Q;
     private QueueDrawer p2Q;
+    private BQ bq;
 
     public Handler uiHandler;
 
@@ -57,8 +59,10 @@ public class BattleScreen extends Activity {
         battleButtons[2] = (Button)findViewById(R.id.button3);
         battleButtons[3] = (Button)findViewById(R.id.button4);
 
-        tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
-        p1Q = (QueueDrawer)findViewById(R.id.playerQDrawer);
+        //tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
+        //p1Q = (QueueDrawer)findViewById(R.id.playerQDrawer);
+        bq = (BQ)findViewById(R.id.qBlock);
+
 
         //this handler can be passed to other threads to refer to the UI thread
         uiHandler = new Handler(){
@@ -140,7 +144,7 @@ public class BattleScreen extends Activity {
     }
 
     public void updateTickProgress(int progress){
-        tickProgress.setProgress(progress);
+        bq.updateTickProgress(progress);
     }
 
     public void setP1Queue(BattleQueue queue){
@@ -148,8 +152,14 @@ public class BattleScreen extends Activity {
         refreshQueues();
     }
 
+    public void setQueues(BattleQueue q1, BattleQueue q2){
+        bq.setQueues(q1, q2);
+        refreshQueues();
+    }
+
     public void refreshQueues(){
         p1Q.forceDraw();
+        p2Q.forceDraw();
     }
 
     @Override

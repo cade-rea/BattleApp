@@ -17,7 +17,7 @@ public class Clock implements Runnable {
         time = 0;
         tick = 0;
         subTick = 0;
-        factor = 2000; // uptimeMillis/factor, higher factor, slower ticks
+        factor = 2000; // uptimeMillis/factor, higher factor = slower ticks
     }
 
     @Override

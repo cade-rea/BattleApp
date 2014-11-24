@@ -29,7 +29,7 @@ public class Battle implements Runnable {
         p1Actions = new BattleQueue();
         p2Actions = new BattleQueue();
 
-        battleScreen.setP1Queue(p1Actions);
+        battleScreen.setQueues(p1Actions, p2Actions);
 
         enviro = new Environment();
 

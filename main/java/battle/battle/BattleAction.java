@@ -9,20 +9,13 @@ public class BattleAction {
     private String name;
     private int power;
     private Fighter owner;
-
-    private View.OnClickListener action;
+    private int time;
 
     public BattleAction(Fighter f){
         name="Attack";
         power = 1;
         owner = f;
-
-        action = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        };
+        time = 2;
     }
 
     public String getName(){
@@ -39,5 +32,9 @@ public class BattleAction {
 
     public String toString(){
         return "Action:" + name;
+    }
+
+    public int getTime(){
+        return time;
     }
 }

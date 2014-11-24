@@ -2,6 +2,7 @@ package battle.battle;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -15,6 +16,7 @@ public class QueueDrawer extends TextView {
         Rect area;
         Paint paint;
         BattleQueue queue;
+        Paint rectPaint;
 
     public QueueDrawer(Context context){
         super(context);
@@ -29,6 +31,8 @@ public class QueueDrawer extends TextView {
     private void init(){
         area = new Rect();
         paint = new Paint();
+        rectPaint = new Paint();
+        rectPaint.setColor(Color.YELLOW);
         queue = new BattleQueue(); //setup an empty BattleQueue until Battle sets the queue for each QueueDrawer
     }
 
@@ -43,12 +47,21 @@ public class QueueDrawer extends TextView {
 
             //horizontal line all the way across the bottom
             canvas.drawLine(area.left, baseline, area.right, baseline, paint);
-            float len = area.right/queue.getMaxSize(); //length of each queue element
+            //float len = area.right/queue.getMaxSize(); //length of each queue element
+            float len = area.right/10; //see 10 ticks into the future
+
+            BattleAction ba;
+
             for(int i = 0; i < queue.getMaxSize();++i){
                 float vertical = area.left + len * i;
 
-                canvas.drawText(queue.getName(i), vertical + 5, baseline - 1, paint);
-                canvas.drawLine(vertical, baseline, vertical, area.top, paint);
+                ba = queue.get(i);
+
+                if(ba != null) {
+                    canvas.drawText(ba.toString(), vertical + 5, baseline - 1, paint);
+                    canvas.drawLine(vertical, baseline, vertical, area.top, paint);
+                    canvas.drawRect(vertical, area.top, vertical + (ba.getTime()*5), baseline, rectPaint);
+                }
             }
     }
 
