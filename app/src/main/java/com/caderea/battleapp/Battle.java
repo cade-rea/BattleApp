@@ -1,4 +1,4 @@
-package battle.battle;
+package com.caderea.battleapp;
 
 import android.util.Log;
 

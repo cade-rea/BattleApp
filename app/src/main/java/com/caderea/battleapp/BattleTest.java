@@ -1,4 +1,4 @@
-package battle.battle;
+package com.caderea.battleapp;
 
 import android.os.Handler;
 import android.os.Message;

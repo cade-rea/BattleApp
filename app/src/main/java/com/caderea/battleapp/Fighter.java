@@ -1,4 +1,4 @@
-package battle.battle;
+package com.caderea.battleapp;
 
 /**
  * Created by Cade on 7/31/2014.
