@@ -47,12 +47,12 @@ public class QueueDrawer extends TextView {
 
         //horizontal line all the way across the bottom
         canvas.drawLine(area.left, baseline, area.right, baseline, paint);
-        //float len = area.right/queue.getMaxSize(); //length of each queue element
+        //float len = area.right/queue.getMAX_QUEUE_SIZE(); //length of each queue element
         float len = area.right/10; //see 10 ticks into the future
 
         BattleAction ba;
 
-        for(int i = 0; i < queue.getMaxSize();++i){
+        for(int i = 0; i < queue.getMAX_QUEUE_SIZE(); ++i){
             float vertical = area.left + len * i;
 
             ba = queue.get(i);

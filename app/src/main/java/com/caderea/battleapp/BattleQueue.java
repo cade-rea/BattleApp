@@ -1,12 +1,5 @@
 package com.caderea.battleapp;
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.util.AttributeSet;
-import android.widget.TextView;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
@@ -15,15 +8,16 @@ import java.util.Queue;
  * Created by Cade on 8/4/2014.
  */
 public class BattleQueue implements Queue<BattleAction>{
+
+    private static int MAX_QUEUE_SIZE = 10;
+
     private BattleAction[] queue;
-    private int maxSize;
     private int front;
     private int position;
     boolean full;
 
     public BattleQueue(){
-        maxSize = 5;
-        queue = new BattleAction[maxSize];
+        queue = new BattleAction[MAX_QUEUE_SIZE];
         front = 0;
         position = 0;
         full = false;
@@ -31,8 +25,8 @@ public class BattleQueue implements Queue<BattleAction>{
 
     private int getPlace(){
         int place = front + position;
-        if(place >= maxSize)
-            place -= maxSize;
+        if(place >= MAX_QUEUE_SIZE)
+            place -= MAX_QUEUE_SIZE;
 
         return place;
     }
@@ -51,13 +45,10 @@ public class BattleQueue implements Queue<BattleAction>{
     public boolean offer(BattleAction battleAction) {
         if(full)
             return false;
-        /*int place = position;
-        if(place >= maxSize)
-            place -= maxSize;*/
 
         queue[position] = battleAction;
 
-        if(++position == maxSize)
+        if(++position == MAX_QUEUE_SIZE)
             position = 0;
 
         if(position == front){
@@ -80,7 +71,7 @@ public class BattleQueue implements Queue<BattleAction>{
         BattleAction toReturn = queue[front];
         queue[front] = null;
 
-        if(++front == maxSize)
+        if(++front == MAX_QUEUE_SIZE)
             front = 0;
 
         full = false;
@@ -148,7 +139,7 @@ public class BattleQueue implements Queue<BattleAction>{
     public int size() {
         int size = position-front;
         if(size <= 0)
-            size += maxSize;
+            size += MAX_QUEUE_SIZE;
 
         return size;
     }
@@ -165,7 +156,7 @@ public class BattleQueue implements Queue<BattleAction>{
 
     @Override
     public void clear() {
-        queue = new BattleAction[maxSize];
+        queue = new BattleAction[MAX_QUEUE_SIZE];
         front = position = 0;
         full = false;
     }
@@ -182,7 +173,7 @@ public class BattleQueue implements Queue<BattleAction>{
 
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < maxSize; ++i){
+        for(int i = 0; i < MAX_QUEUE_SIZE; ++i){
             sb.append("[" + i + "] " + queue[i]);
         }
         return sb.toString();
@@ -191,8 +182,8 @@ public class BattleQueue implements Queue<BattleAction>{
     public String getName(int index) {
         int target = front + index;
 
-        if (target >= maxSize)
-            target -= maxSize;
+        if (target >= MAX_QUEUE_SIZE)
+            target -= MAX_QUEUE_SIZE;
 
         if (queue[target] != null)
             return queue[target].toString();
@@ -203,8 +194,8 @@ public class BattleQueue implements Queue<BattleAction>{
     public BattleAction get(int index){
         int target = front + index;
 
-        if (target >= maxSize)
-            target -= maxSize;
+        if (target >= MAX_QUEUE_SIZE)
+            target -= MAX_QUEUE_SIZE;
 
         if (queue[target] != null)
             return queue[target];
@@ -212,7 +203,7 @@ public class BattleQueue implements Queue<BattleAction>{
         return null;
     }
 
-    public int getMaxSize(){
-        return maxSize;
+    public int getMAX_QUEUE_SIZE(){
+        return MAX_QUEUE_SIZE;
     }
 }

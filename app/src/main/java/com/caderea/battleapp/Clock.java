@@ -7,37 +7,43 @@ import android.util.Log;
  * Created by Cade on 7/31/2014.
  */
 public class Clock implements Runnable {
+
+    private static long SUBTICKS_PER_TICK = 4;
+    private static long MILLISECONDS_PER_TICK = 1000;
+
     long time;
     int tick;
-    int subTick;
-    int factor;
+    long subTick;
     boolean going;
 
     public Clock(){
         time = 0;
         tick = 0;
         subTick = 0;
-        factor = 2000; // uptimeMillis/factor, higher factor = slower ticks
     }
 
     @Override
     public void run() {
         going = true;
         tick = 1;
-        time = SystemClock.uptimeMillis()/factor;
+        time = SystemClock.uptimeMillis() / MILLISECONDS_PER_TICK;
 
         while(going){
             long rightNow = SystemClock.uptimeMillis();
 
-            subTick = (int)((( (double)rightNow % (double)factor) / (double)factor) * 100); //percentage of tick for progress bar
-            long nowish = rightNow / factor;
+            long msSinceLastTick = rightNow % MILLISECONDS_PER_TICK;
+            long tickFraction = msSinceLastTick / MILLISECONDS_PER_TICK;
+
+            subTick = tickFraction * SUBTICKS_PER_TICK;
+
+            long nowish = rightNow / MILLISECONDS_PER_TICK;
 
             if(time < nowish){
                 time = nowish;
                 ++tick;
             }
             else {
-                SystemClock.sleep(factor/20);
+                SystemClock.sleep(MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * 5));
             }
         }
     }
@@ -51,7 +57,7 @@ public class Clock implements Runnable {
     }
 
     public int getProgress(){
-        Log.d("CLOCK","Progress:" + (int)(((double)SystemClock.uptimeMillis() % (double)factor) / (double)factor)*100);
-        return subTick;
+        Log.d("CLOCK","Progress:" + SystemClock.uptimeMillis() % SUBTICKS_PER_TICK / SUBTICKS_PER_TICK * 100);
+        return (int)( (double) subTick / (double) SUBTICKS_PER_TICK * 100);
     }
 }
