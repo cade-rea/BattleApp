@@ -38,31 +38,31 @@ public class QueueDrawer extends TextView {
 
     protected void onDraw(Canvas canvas){
 
-            int baseline = getLineBounds(0, area);
-            paint.setTextSize(baseline - 5);
+        int baseline = getLineBounds(0, area);
+        paint.setTextSize(baseline - 5);
 
-            Log.d("DRAWER","Queue size:"+baseline + ", area.left:"+area.left + ", area.right"+area.right + ", area.top"+area.top + ", area.bottom:"+area.bottom );
+        Log.d("DRAWER","Queue size:"+baseline + ", area.left:"+area.left + ", area.right"+area.right + ", area.top"+area.top + ", area.bottom:"+area.bottom );
 
-            //canvas.drawLine(startX, startY, stopX, stopY, paint);
+        //canvas.drawLine(startX, startY, stopX, stopY, paint);
 
-            //horizontal line all the way across the bottom
-            canvas.drawLine(area.left, baseline, area.right, baseline, paint);
-            //float len = area.right/queue.getMaxSize(); //length of each queue element
-            float len = area.right/10; //see 10 ticks into the future
+        //horizontal line all the way across the bottom
+        canvas.drawLine(area.left, baseline, area.right, baseline, paint);
+        //float len = area.right/queue.getMaxSize(); //length of each queue element
+        float len = area.right/10; //see 10 ticks into the future
 
-            BattleAction ba;
+        BattleAction ba;
 
-            for(int i = 0; i < queue.getMaxSize();++i){
-                float vertical = area.left + len * i;
+        for(int i = 0; i < queue.getMaxSize();++i){
+            float vertical = area.left + len * i;
 
-                ba = queue.get(i);
+            ba = queue.get(i);
 
-                if(ba != null) {
-                    canvas.drawText(ba.toString(), vertical + 5, baseline - 1, paint);
-                    canvas.drawLine(vertical, baseline, vertical, area.top, paint);
-                    canvas.drawRect(vertical, area.top, vertical + (ba.getTime()*5), baseline, rectPaint);
-                }
+            if(ba != null) {
+                canvas.drawText(ba.toString(), vertical + 5, baseline - 1, paint);
+                canvas.drawLine(vertical, baseline, vertical, area.top, paint);
+                canvas.drawRect(vertical, area.top, vertical + (ba.getTime()*5), baseline, rectPaint);
             }
+        }
     }
 
     public void setQueue(BattleQueue q){

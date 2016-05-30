@@ -10,20 +10,20 @@ import android.widget.ProgressBar;
 /**
  * Created by Cade on 8/16/2014.
  */
-public class BQ extends LinearLayout {
+public class QueueLayout extends LinearLayout {
     QueueDrawer p1q, p2q;
     ProgressBar tickProgress;
 
-    public BQ(Context context){
+    public QueueLayout(Context context){
         super(context);
 
-        init();
+        //init();
     }
 
-    public BQ(Context context, AttributeSet attributeSet){
+    public QueueLayout(Context context, AttributeSet attributeSet){
         super(context, attributeSet);
 
-        init();
+        //init();
     }
 
     private void init(){
@@ -33,11 +33,21 @@ public class BQ extends LinearLayout {
     }
 
     public void setQueues(BattleQueue q1, BattleQueue q2){
-        p1q.setQueue(q1);
-        p2q.setQueue(q2);
+        //init();
+       p1q.setQueue(q1);
+       p2q.setQueue(q2);
+    }
+
+    public void initQueues() {
+        init();
     }
 
     public void updateTickProgress(int progress){
         tickProgress.setProgress(progress);
+    }
+
+    public void refreshQueues(){
+        p1q.forceDraw();
+        p2q.forceDraw();
     }
 }

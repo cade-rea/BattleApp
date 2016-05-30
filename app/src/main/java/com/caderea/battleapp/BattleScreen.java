@@ -1,22 +1,15 @@
 package com.caderea.battleapp;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -34,7 +27,7 @@ public class BattleScreen extends Activity {
     private ProgressBar tickProgress;
     private QueueDrawer p1Q;
     private QueueDrawer p2Q;
-    private BQ bq;
+    private QueueLayout queueLayout;
 
     public Handler uiHandler;
 
@@ -61,7 +54,8 @@ public class BattleScreen extends Activity {
 
         //tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
         //p1Q = (QueueDrawer)findViewById(R.id.playerQDrawer);
-        bq = (BQ)findViewById(R.id.qBlock);
+        queueLayout = (QueueLayout)findViewById(R.id.queueLayout);
+        queueLayout.initQueues();
 
 
         //this handler can be passed to other threads to refer to the UI thread
@@ -144,7 +138,7 @@ public class BattleScreen extends Activity {
     }
 
     public void updateTickProgress(int progress){
-        bq.updateTickProgress(progress);
+        queueLayout.updateTickProgress(progress);
     }
 
     public void setP1Queue(BattleQueue queue){
@@ -153,13 +147,12 @@ public class BattleScreen extends Activity {
     }
 
     public void setQueues(BattleQueue q1, BattleQueue q2){
-        bq.setQueues(q1, q2);
+        queueLayout.setQueues(q1, q2);
         refreshQueues();
     }
 
     public void refreshQueues(){
-        p1Q.forceDraw();
-        p2Q.forceDraw();
+        queueLayout.refreshQueues();
     }
 
     @Override

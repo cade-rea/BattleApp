@@ -4,10 +4,10 @@
     android:layout_height="match_parent"
     tools:context="com.caderea.battleapp.BattleScreen">
 
-    <com.caderea.battleapp.BQ
+    <com.caderea.battleapp.QueueLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/qBlock"
+        android:id="@+id/queueLayout"
         android:orientation="vertical"
         >
 
@@ -44,14 +44,14 @@
             android:lines="1"
             android:id="@+id/playerQueue"
         /-->
-    </com.caderea.battleapp.BQ>
+    </com.caderea.battleapp.QueueLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/battle_display"
         android:minLines="25"
-        android:layout_below="@id/qBlock" />
+        android:layout_below="@id/queueLayout" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
