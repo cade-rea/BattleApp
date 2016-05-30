@@ -32,9 +32,9 @@ public class Clock implements Runnable {
             long rightNow = SystemClock.uptimeMillis();
 
             long msSinceLastTick = rightNow % MILLISECONDS_PER_TICK;
-            long tickFraction = msSinceLastTick / MILLISECONDS_PER_TICK;
+            double tickFraction = (double) msSinceLastTick / (double) MILLISECONDS_PER_TICK;
 
-            subTick = tickFraction * SUBTICKS_PER_TICK;
+            subTick = (int) (tickFraction * SUBTICKS_PER_TICK);
 
             long nowish = rightNow / MILLISECONDS_PER_TICK;
 
@@ -57,7 +57,7 @@ public class Clock implements Runnable {
     }
 
     public int getProgress(){
-        Log.d("CLOCK","Progress:" + SystemClock.uptimeMillis() % SUBTICKS_PER_TICK / SUBTICKS_PER_TICK * 100);
+        Log.d("CLOCK","Progress:" + SystemClock.uptimeMillis() % (double) SUBTICKS_PER_TICK / (double) SUBTICKS_PER_TICK * 100);
         return (int)( (double) subTick / (double) SUBTICKS_PER_TICK * 100);
     }
 }

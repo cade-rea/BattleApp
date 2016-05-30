@@ -24,9 +24,6 @@ public class BattleScreen extends Activity {
     private float dpWidth;
 
     private Button[] battleButtons;
-    private ProgressBar tickProgress;
-    private QueueDrawer p1Q;
-    private QueueDrawer p2Q;
     private QueueLayout queueLayout;
 
     public Handler uiHandler;
@@ -52,11 +49,8 @@ public class BattleScreen extends Activity {
         battleButtons[2] = (Button)findViewById(R.id.button3);
         battleButtons[3] = (Button)findViewById(R.id.button4);
 
-        //tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
-        //p1Q = (QueueDrawer)findViewById(R.id.playerQDrawer);
         queueLayout = (QueueLayout)findViewById(R.id.queueLayout);
         queueLayout.initQueues();
-
 
         //this handler can be passed to other threads to refer to the UI thread
         uiHandler = new Handler(){
@@ -139,11 +133,6 @@ public class BattleScreen extends Activity {
 
     public void updateTickProgress(int progress){
         queueLayout.updateTickProgress(progress);
-    }
-
-    public void setP1Queue(BattleQueue queue){
-        p1Q.setQueue(queue);
-        refreshQueues();
     }
 
     public void setQueues(BattleQueue q1, BattleQueue q2){

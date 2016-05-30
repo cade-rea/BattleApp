@@ -16,30 +16,22 @@ public class QueueLayout extends LinearLayout {
 
     public QueueLayout(Context context){
         super(context);
-
-        //init();
     }
 
     public QueueLayout(Context context, AttributeSet attributeSet){
         super(context, attributeSet);
-
-        //init();
     }
 
-    private void init(){
+    public void initQueues(){
         p1q = (QueueDrawer)findViewById(R.id.player1QDrawer);
         p2q = (QueueDrawer)findViewById(R.id.player2QDrawer);
         tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
     }
 
     public void setQueues(BattleQueue q1, BattleQueue q2){
-        //init();
-       p1q.setQueue(q1);
-       p2q.setQueue(q2);
-    }
-
-    public void initQueues() {
-        init();
+        initQueues();
+        p1q.setQueue(q1);
+        p2q.setQueue(q2);
     }
 
     public void updateTickProgress(int progress){
