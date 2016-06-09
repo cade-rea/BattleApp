@@ -4,11 +4,11 @@ package com.caderea.battleapp;
  * Created by Cade on 7/31/2014.
  */
 public class Fighter {
-    private String name;
-    private int str;
+    protected String name;
+    protected int str;
     public int health;
 
-    private BattleAction[] actions;
+    protected BattleAction[] actions;
 
     public Fighter(){
         this("default",1,20);

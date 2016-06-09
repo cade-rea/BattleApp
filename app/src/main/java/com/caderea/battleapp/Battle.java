@@ -2,13 +2,12 @@ package com.caderea.battleapp;
 
 import android.util.Log;
 
-import java.util.Queue;
-
 /**
  * Created by Cade on 7/31/2014.
  */
 public class Battle implements Runnable {
-    private Fighter fighter1, fighter2;
+    private Fighter fighter1;
+    private EnemyFighter fighter2;
     private Environment enviro;
     private Clock battleClock;
     private int gameTick;
@@ -24,7 +23,7 @@ public class Battle implements Runnable {
         status = "";
 
         fighter1 = loadFighter();
-        fighter2 = loadFighter();
+        fighter2 = new EnemyFighter();
 
         p1Actions = new BattleQueue();
         p2Actions = new BattleQueue();
@@ -73,7 +72,7 @@ public class Battle implements Runnable {
                     Log.d(TAG, "p2 has action:" + p2Actions.toString());
                     BattleAction ba = p2Actions.poll();
                     ba.performAction(fighter1);
-                    report("Player 1 uses " + ba.getName());
+                    report("Player 2 uses " + ba.getName());
                 }
 
                 s = "";
@@ -88,6 +87,11 @@ public class Battle implements Runnable {
                 }
 
                 report(s);
+
+                //Bot Logic
+                if (gameTick % 2 == 0) {
+                    fighter2.doAction(p2Actions);
+                }
             }
             else{
                 //if a tick has not happened
