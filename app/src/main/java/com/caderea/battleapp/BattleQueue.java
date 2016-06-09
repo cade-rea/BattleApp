@@ -7,23 +7,23 @@ import java.util.Queue;
 /**
  * Created by Cade on 8/4/2014.
  */
-public class BattleQueue implements Queue<BattleAction>{
+public class BattleQueue implements Queue<BattleAction> {
 
     private static int MAX_QUEUE_SIZE = 10;
 
     private BattleAction[] queue;
     private int front;
     private int position;
-    boolean full;
+    private boolean full;
 
-    public BattleQueue(){
+    public BattleQueue() {
         queue = new BattleAction[MAX_QUEUE_SIZE];
         front = 0;
         position = 0;
         full = false;
     }
 
-    private int getPlace(){
+    private int getPlace() {
         int place = front + position;
         if(place >= MAX_QUEUE_SIZE)
             place -= MAX_QUEUE_SIZE;
@@ -51,7 +51,7 @@ public class BattleQueue implements Queue<BattleAction>{
         if(++position == MAX_QUEUE_SIZE)
             position = 0;
 
-        if(position == front){
+        if(position == front) {
             full = true;
         }
 
@@ -95,7 +95,7 @@ public class BattleQueue implements Queue<BattleAction>{
     }
 
     //possibly more useful than isEmpty for Battle
-    public boolean isNotEmpty(){
+    public boolean isNotEmpty() {
         return (full || (front != position));
     }
 
@@ -137,7 +137,7 @@ public class BattleQueue implements Queue<BattleAction>{
 
     @Override
     public int size() {
-        int size = position-front;
+        int size = position - front;
         if(size <= 0)
             size += MAX_QUEUE_SIZE;
 
@@ -171,9 +171,9 @@ public class BattleQueue implements Queue<BattleAction>{
         return false;
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < MAX_QUEUE_SIZE; ++i){
+        for(int i = 0; i < MAX_QUEUE_SIZE; ++i) {
             sb.append("[" + i + "] " + queue[i]);
         }
         return sb.toString();
@@ -191,7 +191,7 @@ public class BattleQueue implements Queue<BattleAction>{
         return "empty";
     }
 
-    public BattleAction get(int index){
+    public BattleAction get(int index) {
         int target = front + index;
 
         if (target >= MAX_QUEUE_SIZE)
@@ -203,7 +203,7 @@ public class BattleQueue implements Queue<BattleAction>{
         return null;
     }
 
-    public int getMAX_QUEUE_SIZE(){
+    public int getMAX_QUEUE_SIZE() {
         return MAX_QUEUE_SIZE;
     }
 }

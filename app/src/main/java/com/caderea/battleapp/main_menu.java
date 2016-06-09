@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 
 public class main_menu extends Activity {
@@ -37,8 +36,8 @@ public class main_menu extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void startBattle(View view){
-        Intent intent = new Intent(this, BattleScreen.class);
+    public void startBattle(View view) {
+        Intent intent = new Intent(this, BattleActivity.class);
         startActivity(intent);
     }
 }

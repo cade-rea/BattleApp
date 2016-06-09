@@ -18,17 +18,17 @@ public class QueueDrawer extends TextView {
         BattleQueue queue;
         Paint rectPaint;
 
-    public QueueDrawer(Context context){
+    public QueueDrawer(Context context) {
         super(context);
         init();
     }
 
-    public QueueDrawer(Context context, AttributeSet attrs){
+    public QueueDrawer(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    private void init(){
+    private void init() {
         area = new Rect();
         paint = new Paint();
         rectPaint = new Paint();
@@ -36,23 +36,25 @@ public class QueueDrawer extends TextView {
         queue = new BattleQueue(); //setup an empty BattleQueue until Battle sets the queue for each QueueDrawer
     }
 
-    protected void onDraw(Canvas canvas){
+    protected void onDraw(Canvas canvas) {
 
         int baseline = getLineBounds(0, area);
         paint.setTextSize(baseline - 5);
 
-        Log.d("DRAWER","Queue size:"+baseline + ", area.left:"+area.left + ", area.right"+area.right + ", area.top"+area.top + ", area.bottom:"+area.bottom );
+        Log.d("DRAWER","Queue size:"+baseline + ", area.left:"+area.left + ", area.right"+area.right +
+                ", area.top"+area.top + ", area.bottom:"+area.bottom );
 
         //canvas.drawLine(startX, startY, stopX, stopY, paint);
 
         //horizontal line all the way across the bottom
         canvas.drawLine(area.left, baseline, area.right, baseline, paint);
+
         //float len = area.right/queue.getMAX_QUEUE_SIZE(); //length of each queue element
-        float len = area.right/10; //see 10 ticks into the future
+        float len = area.right / 10; //see 10 ticks into the future
 
         BattleAction ba;
 
-        for(int i = 0; i < queue.getMAX_QUEUE_SIZE(); ++i){
+        for(int i = 0; i < queue.getMAX_QUEUE_SIZE(); ++i) {
             float vertical = area.left + len * i;
 
             ba = queue.get(i);
@@ -65,11 +67,11 @@ public class QueueDrawer extends TextView {
         }
     }
 
-    public void setQueue(BattleQueue q){
+    public void setQueue(BattleQueue q) {
         queue = q;
     }
 
-    public void forceDraw(){
+    public void forceDraw() {
         invalidate();
     }
 }

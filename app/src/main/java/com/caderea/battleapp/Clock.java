@@ -16,7 +16,7 @@ public class Clock implements Runnable {
     long subTick;
     boolean going;
 
-    public Clock(){
+    public Clock() {
         time = 0;
         tick = 0;
         subTick = 0;
@@ -28,7 +28,7 @@ public class Clock implements Runnable {
         tick = 1;
         time = SystemClock.uptimeMillis() / MILLISECONDS_PER_TICK;
 
-        while(going){
+        while(going) {
             long rightNow = SystemClock.uptimeMillis();
 
             long msSinceLastTick = rightNow % MILLISECONDS_PER_TICK;
@@ -38,11 +38,10 @@ public class Clock implements Runnable {
 
             long nowish = rightNow / MILLISECONDS_PER_TICK;
 
-            if(time < nowish){
+            if(time < nowish) {
                 time = nowish;
                 ++tick;
-            }
-            else {
+            } else {
                 SystemClock.sleep(MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * 5));
             }
         }
@@ -52,11 +51,11 @@ public class Clock implements Runnable {
         return tick;
     }
 
-    public void stop(){
+    public void stop() {
         going = false;
     }
 
-    public int getProgress(){
+    public int getProgress() {
         Log.d("CLOCK","Progress:" + SystemClock.uptimeMillis() % (double) SUBTICKS_PER_TICK / (double) SUBTICKS_PER_TICK * 100);
         return (int)( (double) subTick / (double) SUBTICKS_PER_TICK * 100);
     }

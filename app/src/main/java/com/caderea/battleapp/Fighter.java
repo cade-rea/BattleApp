@@ -6,15 +6,15 @@ package com.caderea.battleapp;
 public class Fighter {
     protected String name;
     protected int str;
-    public int health;
+    protected int health;
 
     protected BattleAction[] actions;
 
-    public Fighter(){
+    public Fighter() {
         this("default",1,20);
     }
 
-    public Fighter(String n, int s, int h){
+    public Fighter(String n, int s, int h) {
         name = n;
         str = s;
         health = h;
@@ -25,19 +25,35 @@ public class Fighter {
             actions[i] = new BattleAction(this);
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public int getStr(){
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStr(int str) {
+        this.str = str;
+    }
+
+    public int getStr() {
         return str;
     }
 
-    public int getHealth(){
+    public int getHealth() {
         return health;
     }
 
-    public BattleAction[] getActions(){
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public BattleAction[] getActions() {
         return actions;
+    }
+
+    public void setActions(BattleAction[] actions) {
+        this.actions = actions;
     }
 }

@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class BattleScreen extends Activity {
+public class BattleActivity extends Activity {
     private ArrayList<String> output;
     private TextView battleText;
     private Battle battle;
@@ -53,9 +53,9 @@ public class BattleScreen extends Activity {
         queueLayout.initQueues();
 
         //this handler can be passed to other threads to refer to the UI thread
-        uiHandler = new Handler(){
+        uiHandler = new Handler() {
             //responds to uiHandler.sendMessage()
-            public void handleMessage(Message msg){
+            public void handleMessage(Message msg) {
                 update((String)msg.obj);
             }
         };
@@ -66,23 +66,23 @@ public class BattleScreen extends Activity {
         (new Thread(battle)).start();
     }
 
-    public void update(String msg){
-        while(output.size() > 9){
+    public void update(String msg) {
+        while(output.size() > 9) {
             output.remove(0);
         }
 
         output.add(msg);
 
         String str = "";
-        for(String s:output){
+        for(String s:output) {
             str += s +"\n";
         }
 
         battleText.setText(str);
     }
 
-    public void buttonPushed(View view){
-        switch(view.getId()){
+    public void buttonPushed(View view) {
+        switch(view.getId()) {
             case R.id.button1:
                 battle.updateStatus(0);
                 break;
@@ -104,11 +104,11 @@ public class BattleScreen extends Activity {
         }
     }
 
-    private void stopBattle(){
+    private void stopBattle() {
         battle.stop();
     }
 
-    public void notifyDone(){
+    public void notifyDone() {
         update("Battle Finished");
 
         //change button 4 to return to the main menu
@@ -125,22 +125,22 @@ public class BattleScreen extends Activity {
         });
     }
 
-    public void updateButtons(BattleAction[] btns){
-        for(int i = 0; i < btns.length; ++i){
+    public void updateButtons(BattleAction[] btns) {
+        for (int i = 0; i < btns.length; ++i) {
             battleButtons[i].setText(btns[i].getName());
         }
     }
 
-    public void updateTickProgress(int progress){
+    public void updateTickProgress(int progress) {
         queueLayout.updateTickProgress(progress);
     }
 
-    public void setQueues(BattleQueue q1, BattleQueue q2){
+    public void setQueues(BattleQueue q1, BattleQueue q2) {
         queueLayout.setQueues(q1, q2);
         refreshQueues();
     }
 
-    public void refreshQueues(){
+    public void refreshQueues() {
         queueLayout.refreshQueues();
     }
 
@@ -162,6 +162,4 @@ public class BattleScreen extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-
 }

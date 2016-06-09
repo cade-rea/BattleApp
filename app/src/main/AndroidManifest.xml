@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BattleScreen"
+            android:name=".BattleActivity"
             android:label="@string/title_activity_battle_screen" >
         </activity>
     </application>
