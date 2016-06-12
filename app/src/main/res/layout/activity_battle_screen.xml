@@ -5,102 +5,94 @@
     tools:context=".BattleActivity">
 
     <com.caderea.battleapp.QueueLayout
+        android:id="@+id/queueLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/queueLayout"
         android:orientation="vertical"
         >
 
         <com.caderea.battleapp.QueueDrawer
+            android:id="@+id/player1QDrawer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/player1QDrawer"
             android:lines="1"
             android:text="Queue"
             />
 
         <ProgressBar
+            android:id="@+id/tickProgressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:progress="50"
-            android:id="@+id/tickProgressBar"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
         <com.caderea.battleapp.QueueDrawer
+            android:id="@+id/player2QDrawer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/player2QDrawer"
             android:lines="1"
             android:text="Queue"
             />
-
-        <!--<view
-            class="com.caderea.battleapp.QueueDrawer"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:lines="1"
-            android:id="@+id/playerQueue"
-        /-->
     </com.caderea.battleapp.QueueLayout>
 
     <TextView
+        android:id="@+id/battle_display"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/battle_display"
         android:minLines="25"
         android:layout_below="@id/queueLayout" />
 
     <RelativeLayout
+        android:id="@+id/battle_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/battle_buttons"
         android:layout_below="@id/battle_display">
 
         <Button
+            android:id="@+id/button1"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 1"
-            android:id="@+id/button1"
             android:onClick="buttonPushed"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"/>
 
         <Button
+            android:id="@+id/button2"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 2"
-            android:id="@+id/button2"
             android:onClick="buttonPushed"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_toRightOf="@id/button1" />
 
         <Button
+            android:id="@+id/button3"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 3"
-            android:id="@+id/button3"
             android:onClick="buttonPushed"
             android:layout_below="@id/button1"/>
 
         <Button
+            android:id="@+id/button4"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 4"
-            android:id="@+id/button4"
             android:onClick="buttonPushed"
             android:layout_toRightOf="@+id/button3"
             android:layout_below="@id/button2"/>
     </RelativeLayout>
 
     <Button
+        android:id="@+id/buttonStop"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:text="Stop"
-        android:id="@+id/buttonStop"
         android:onClick="buttonPushed"
         android:layout_alignParentBottom="true"
         android:layout_below="@id/battle_buttons" />
