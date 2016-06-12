@@ -1,9 +1,7 @@
 package com.caderea.battleapp;
 
 import android.content.Context;
-import android.text.Layout;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -39,7 +37,7 @@ public class QueueLayout extends LinearLayout {
     }
 
     public void refreshQueues() {
-        p1q.forceDraw();
-        p2q.forceDraw();
+        p1q.update();
+        p2q.update();
     }
 }

@@ -9,14 +9,23 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 /**
  * Created by Cade on 8/10/2014.
  */
 public class QueueDrawer extends TextView {
-        Rect area;
-        Paint paint;
-        BattleQueue queue;
-        Paint rectPaint;
+    private Rect area;
+    private Paint paint;
+    private BattleQueue queue;
+    private Paint rectPaint;
+
+    private static int[] colors = {Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN};
+    private int currentColorPosition;
+
+    private DrawBlock[] blocksToDraw;
+
+    private static int NUMBER_OF_TICKS_ON_SCREEN = 10;
 
     public QueueDrawer(Context context) {
         super(context);
@@ -32,38 +41,56 @@ public class QueueDrawer extends TextView {
         area = new Rect();
         paint = new Paint();
         rectPaint = new Paint();
-        rectPaint.setColor(Color.YELLOW);
         queue = new BattleQueue(); //setup an empty BattleQueue until Battle sets the queue for each QueueDrawer
+        currentColorPosition = 0;
+        blocksToDraw = new DrawBlock[BattleQueue.getMaxQueueSize() * 2];
     }
 
     protected void onDraw(Canvas canvas) {
-
         int baseline = getLineBounds(0, area);
-        paint.setTextSize(baseline - 5);
 
-        Log.d("DRAWER","Queue size:"+baseline + ", area.left:"+area.left + ", area.right"+area.right +
+        Log.d("DRAWER","Queue size:"+ baseline + ", area.left:"+area.left + ", area.right"+area.right +
                 ", area.top"+area.top + ", area.bottom:"+area.bottom );
-
-        //canvas.drawLine(startX, startY, stopX, stopY, paint);
 
         //horizontal line all the way across the bottom
         canvas.drawLine(area.left, baseline, area.right, baseline, paint);
+        paint.setTextSize(baseline / 2);
 
-        //float len = area.right/queue.getMAX_QUEUE_SIZE(); //length of each queue element
-        float len = area.right / 10; //see 10 ticks into the future
+        //check the main battle queue for items that are not in blocksToDraw
+        for(int i = 0; i < BattleQueue.getMaxQueueSize(); ++i) {
+            QueueAction queueAction = queue.get(i);
+            if (queueAction != null) {
+                boolean added = false;
 
-        BattleAction ba;
+                float lengthOfLabel = area.right / (NUMBER_OF_TICKS_ON_SCREEN * queueAction.getBattleAction().getDuration());
+                float verticalStart = area.left + (i * lengthOfLabel);
 
-        for(int i = 0; i < queue.getMAX_QUEUE_SIZE(); ++i) {
-            float vertical = area.left + len * i;
+                for (DrawBlock drawBlock : blocksToDraw) {
+                    if (drawBlock != null && drawBlock.queueAction == queueAction) {
+                        drawBlock.verticalStart = verticalStart;
+                        blocksToDraw[i] = drawBlock;
+                        added = true;
+                        break;
+                    }
+                }
+                if(!added) {
+                    blocksToDraw[i] = new DrawBlock(queueAction, getNextColor(), verticalStart, lengthOfLabel, canvas, baseline);
+                }
+            } else {
+                //queueAction == null
+                //clear rest of blockstodraw
+                //stop processing
 
-            ba = queue.get(i);
-
-            if(ba != null) {
-                canvas.drawText(ba.toString(), vertical + 5, baseline - 1, paint);
-                canvas.drawLine(vertical, baseline, vertical, area.top, paint);
-                canvas.drawRect(vertical, area.top, vertical + (ba.getDuration()*5), baseline, rectPaint);
+                for(int j = i; j < blocksToDraw.length; j++) {
+                    blocksToDraw[j] = null;
+                }
+                break;
             }
+        }
+
+        for(DrawBlock drawBlock : blocksToDraw) {
+            if (drawBlock != null)
+                drawBlock.drawblock(canvas);
         }
     }
 
@@ -71,7 +98,42 @@ public class QueueDrawer extends TextView {
         queue = q;
     }
 
-    public void forceDraw() {
+    public void update() {
         invalidate();
+
+    }
+
+    private int getNextColor() {
+        if (currentColorPosition == colors.length - 1) {
+            currentColorPosition = -1;
+        }
+
+        return colors[++currentColorPosition];
+    }
+
+    private class DrawBlock {
+        int color;
+        QueueAction queueAction;
+        float verticalStart;
+        float length;
+        Canvas canvas;
+        int baseline;
+
+        public DrawBlock(QueueAction queueAction, int color, float verticalStart, float length, Canvas canvas, int baseline) {
+            this.queueAction = queueAction;
+            this.color = color;
+            this.verticalStart = verticalStart;
+            this.length = length;
+            this.canvas = canvas;
+            this.baseline = baseline;
+        }
+
+        public void drawblock(Canvas canvas) {
+            //canvas.drawLine(startX, startY, stopX, stopY, paint);
+            rectPaint.setColor(color);
+            canvas.drawLine(verticalStart, baseline, verticalStart, area.top, paint);
+            canvas.drawRect(verticalStart, area.top, verticalStart + (queueAction.getBattleAction().getDuration() * length ), baseline, rectPaint);
+            canvas.drawText(queueAction.getBattleAction().getName(), verticalStart + 5, baseline - 1, paint);
+        }
     }
 }

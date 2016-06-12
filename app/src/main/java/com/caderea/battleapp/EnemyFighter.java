@@ -10,6 +10,6 @@ public class EnemyFighter extends Fighter {
     }
 
     public void addAttackToQueue() {
-        queue.add(actions[0]);
+        queue.offer(new QueueAction(actions[0]));
     }
 }

@@ -1,5 +1,6 @@
 package com.caderea.battleapp;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 /**
@@ -17,6 +18,9 @@ public class Battle implements Runnable {
 
     private static final String TAG = "BATTLE";
 
+    private static long MILLISECONDS_PER_TICK = 1000;
+    private static long SUBTICKS_PER_TICK = 4;
+
     public Battle(BattleActivity battleActivity) {
         this.battleActivity = battleActivity;
         status = "";
@@ -31,7 +35,7 @@ public class Battle implements Runnable {
 
         environment = new Environment();
 
-        battleClock = new Clock();
+        battleClock = new Clock(MILLISECONDS_PER_TICK, SUBTICKS_PER_TICK);
 
         going = true;
         gameTick = 0;
@@ -88,7 +92,7 @@ public class Battle implements Runnable {
                 Log.d(TAG,"No tick. Subtick:" + st);
                 battleActivity.updateTickProgress(st);
 
-                //sleep maybe?
+                SystemClock.sleep(MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * 5));
             }
         }
 
@@ -150,7 +154,7 @@ public class Battle implements Runnable {
 
     public void queueAction(int action) {
         Log.d(TAG,"queing action" + action +"::" + fighter1.getActions()[action]);
-        fighter1.getQueue().offer(fighter1.getActions()[action]);
+        fighter1.getQueue().offer(new QueueAction(fighter1.getActions()[action]));
     }
 
     private void refreshQueues() {

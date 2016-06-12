@@ -7,42 +7,43 @@ import android.util.Log;
  * Created by Cade on 7/31/2014.
  */
 public class Clock implements Runnable {
+    private long time;
+    private int tick;
+    private long subTick;
+    private boolean going;
 
-    private static long SUBTICKS_PER_TICK = 4;
-    private static long MILLISECONDS_PER_TICK = 1000;
+    private long millisecondsPerTick;
+    private long subticksPerTick;
 
-    long time;
-    int tick;
-    long subTick;
-    boolean going;
-
-    public Clock() {
+    public Clock(long millisecondsPerTick, long subticksPerTick) {
         time = 0;
         tick = 0;
         subTick = 0;
+        this.millisecondsPerTick = millisecondsPerTick;
+        this.subticksPerTick = subticksPerTick;
     }
 
     @Override
     public void run() {
         going = true;
         tick = 1;
-        time = SystemClock.uptimeMillis() / MILLISECONDS_PER_TICK;
+        time = SystemClock.uptimeMillis() / millisecondsPerTick;
 
         while(going) {
             long rightNow = SystemClock.uptimeMillis();
 
-            long msSinceLastTick = rightNow % MILLISECONDS_PER_TICK;
-            double tickFraction = (double) msSinceLastTick / (double) MILLISECONDS_PER_TICK;
+            long msSinceLastTick = rightNow % millisecondsPerTick;
+            double tickFraction = (double) msSinceLastTick / (double) millisecondsPerTick;
 
-            subTick = (int) (tickFraction * SUBTICKS_PER_TICK);
+            subTick = (int) (tickFraction * subticksPerTick);
 
-            long nowish = rightNow / MILLISECONDS_PER_TICK;
+            long nowish = rightNow / millisecondsPerTick;
 
             if(time < nowish) {
                 time = nowish;
                 ++tick;
             } else {
-                SystemClock.sleep(MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * 5));
+                SystemClock.sleep(millisecondsPerTick / (subticksPerTick * 5));
             }
         }
     }
@@ -56,7 +57,7 @@ public class Clock implements Runnable {
     }
 
     public int getProgress() {
-        Log.d("CLOCK","Progress:" + SystemClock.uptimeMillis() % (double) SUBTICKS_PER_TICK / (double) SUBTICKS_PER_TICK * 100);
-        return (int)( (double) subTick / (double) SUBTICKS_PER_TICK * 100);
+        Log.d("CLOCK","Progress:" + SystemClock.uptimeMillis() % (double) subticksPerTick / (double) subticksPerTick * 100);
+        return (int)( (double) subTick / (double) subticksPerTick * 100);
     }
 }

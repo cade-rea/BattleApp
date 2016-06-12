@@ -7,17 +7,17 @@ import java.util.Queue;
 /**
  * Created by Cade on 8/4/2014.
  */
-public class BattleQueue implements Queue<BattleAction> {
+public class BattleQueue implements Queue<QueueAction> {
 
     private static int MAX_QUEUE_SIZE = 10;
 
-    private BattleAction[] queue;
+    private QueueAction[] queue;
     private int front;
     private int position;
     private boolean full;
 
     public BattleQueue() {
-        queue = new BattleAction[MAX_QUEUE_SIZE];
+        queue = new QueueAction[MAX_QUEUE_SIZE];
         front = 0;
         position = 0;
         full = false;
@@ -32,21 +32,21 @@ public class BattleQueue implements Queue<BattleAction> {
     }
 
     @Override
-    public boolean add(BattleAction battleAction) {
-        return offer(battleAction);
+    public boolean add(QueueAction queueAction) {
+        return offer(queueAction);
     }
 
     @Override
-    public boolean addAll(Collection<? extends BattleAction> battleActions) {
+    public boolean addAll(Collection<? extends QueueAction> queueActions) {
         return false;
     }
 
     @Override
-    public boolean offer(BattleAction battleAction) {
+    public boolean offer(QueueAction queueAction) {
         if(full)
             return false;
 
-        queue[position] = battleAction;
+        queue[position] = queueAction;
 
         if(++position == MAX_QUEUE_SIZE)
             position = 0;
@@ -59,16 +59,16 @@ public class BattleQueue implements Queue<BattleAction> {
     }
 
     @Override
-    public BattleAction remove() {
+    public QueueAction remove() {
         return poll();
     }
 
     @Override
-    public BattleAction poll() {
+    public QueueAction poll() {
         if(isEmpty())
             return null;
 
-        BattleAction toReturn = queue[front];
+        QueueAction toReturn = queue[front];
         queue[front] = null;
 
         if(++front == MAX_QUEUE_SIZE)
@@ -80,12 +80,12 @@ public class BattleQueue implements Queue<BattleAction> {
     }
 
     @Override
-    public BattleAction element() {
+    public QueueAction element() {
         return peek();
     }
 
     @Override
-    public BattleAction peek() {
+    public QueueAction peek() {
         return queue[front];
     }
 
@@ -100,15 +100,15 @@ public class BattleQueue implements Queue<BattleAction> {
     }
 
     @Override
-    public Iterator<BattleAction> iterator() {
-        return new Iterator<BattleAction>() {
+    public Iterator<QueueAction> iterator() {
+        return new Iterator<QueueAction>() {
             @Override
             public boolean hasNext() {
                 return !isEmpty();
             }
 
             @Override
-            public BattleAction next() {
+            public QueueAction next() {
                 return poll();
             }
 
@@ -156,7 +156,7 @@ public class BattleQueue implements Queue<BattleAction> {
 
     @Override
     public void clear() {
-        queue = new BattleAction[MAX_QUEUE_SIZE];
+        queue = new QueueAction[MAX_QUEUE_SIZE];
         front = position = 0;
         full = false;
     }
@@ -191,7 +191,7 @@ public class BattleQueue implements Queue<BattleAction> {
         return "empty";
     }
 
-    public BattleAction get(int index) {
+    public QueueAction get(int index) {
         int target = front + index;
 
         if (target >= MAX_QUEUE_SIZE)
@@ -203,7 +203,7 @@ public class BattleQueue implements Queue<BattleAction> {
         return null;
     }
 
-    public int getMAX_QUEUE_SIZE() {
+    public static int getMaxQueueSize() {
         return MAX_QUEUE_SIZE;
     }
 }

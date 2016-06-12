@@ -71,6 +71,6 @@ public class Fighter {
     }
 
     public String performNextAction() {
-        return queue.poll().performAction(this, target);
+        return queue.poll().getBattleAction().performAction(this, target);
     }
 }
