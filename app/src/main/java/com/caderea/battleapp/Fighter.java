@@ -5,24 +5,29 @@ package com.caderea.battleapp;
  */
 public class Fighter {
     protected String name;
-    protected int str;
+    protected int power;
     protected int health;
+
+    protected Fighter target;
 
     protected BattleAction[] actions;
 
+    protected BattleQueue queue;
+
     public Fighter() {
-        this("default",1,20);
+        this("Default Fighter",1,20);
     }
 
-    public Fighter(String n, int s, int h) {
-        name = n;
-        str = s;
-        health = h;
+    public Fighter(String name, int power, int health) {
+        this.name = name;
+        this.power = power;
+        this.health = health;
 
         actions = new BattleAction[4];
+        queue = new BattleQueue();
 
         for(int i = 0; i < 4; ++i)
-            actions[i] = new BattleAction(this);
+            actions[i] = new Attack();
     }
 
     public String getName() {
@@ -33,12 +38,12 @@ public class Fighter {
         this.name = name;
     }
 
-    public void setStr(int str) {
-        this.str = str;
+    public void setPower(int power) {
+        this.power = power;
     }
 
-    public int getStr() {
-        return str;
+    public int getPower() {
+        return power;
     }
 
     public int getHealth() {
@@ -53,7 +58,19 @@ public class Fighter {
         return actions;
     }
 
-    public void setActions(BattleAction[] actions) {
-        this.actions = actions;
+    public BattleQueue getQueue() {
+        return queue;
+    }
+
+    public Fighter getTarget() {
+        return target;
+    }
+
+    public void setTarget(Fighter target) {
+        this.target = target;
+    }
+
+    public String performNextAction() {
+        return queue.poll().performAction(this, target);
     }
 }

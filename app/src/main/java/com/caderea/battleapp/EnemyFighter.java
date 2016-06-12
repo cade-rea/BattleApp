@@ -5,7 +5,11 @@ package com.caderea.battleapp;
  */
 public class EnemyFighter extends Fighter {
 
-    public void doAction(BattleQueue battleActions) {
-        battleActions.add(this.actions[0]);
+    public EnemyFighter() {
+        super("Enemy", 1, 20);
+    }
+
+    public void addAttackToQueue() {
+        queue.add(actions[0]);
     }
 }

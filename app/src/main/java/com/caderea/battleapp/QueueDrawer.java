@@ -62,7 +62,7 @@ public class QueueDrawer extends TextView {
             if(ba != null) {
                 canvas.drawText(ba.toString(), vertical + 5, baseline - 1, paint);
                 canvas.drawLine(vertical, baseline, vertical, area.top, paint);
-                canvas.drawRect(vertical, area.top, vertical + (ba.getTime()*5), baseline, rectPaint);
+                canvas.drawRect(vertical, area.top, vertical + (ba.getDuration()*5), baseline, rectPaint);
             }
         }
     }

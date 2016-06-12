@@ -11,7 +11,6 @@ public class Battle implements Runnable {
     private Environment environment;
     private Clock battleClock;
     private int gameTick;
-    private BattleQueue p1Actions, p2Actions;
     private BattleActivity battleActivity;
     private String status;
     private boolean going;
@@ -25,10 +24,10 @@ public class Battle implements Runnable {
         fighter1 = loadFighter();
         fighter2 = new EnemyFighter();
 
-        p1Actions = new BattleQueue();
-        p2Actions = new BattleQueue();
+        fighter1.setTarget(fighter2);
+        fighter2.setTarget(fighter1);
 
-        this.battleActivity.setQueues(p1Actions, p2Actions);
+        this.battleActivity.setQueues(fighter1.getQueue(), fighter2.getQueue());
 
         environment = new Environment();
 
@@ -51,8 +50,9 @@ public class Battle implements Runnable {
         Thread clockThread = new Thread(battleClock);
         clockThread.start();
 
-        //main logic loop
+        //main game loop
         Log.d(TAG, "starting loop");
+        mainLoop:
         while (going) {
             refreshQueues();
 
@@ -62,36 +62,26 @@ public class Battle implements Runnable {
                 report("Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " +
                         fighter2.getName() + ":" + fighter2.getHealth());
 
-                if (p1Actions.isNotEmpty()) {
-                    Log.d(TAG, "p1 has action:" + p1Actions.toString());
-                    BattleAction ba = p1Actions.poll();
-                    ba.performAction(fighter2);
-                    report("Player 1 uses " + ba.getName());
-                }
-                if (p2Actions.isNotEmpty()) {
-                    Log.d(TAG, "p2 has action:" + p2Actions.toString());
-                    BattleAction ba = p2Actions.poll();
-                    ba.performAction(fighter1);
-                    report("Player 2 uses " + ba.getName());
-                }
+                Fighter[] fighters = {fighter1, fighter2};
 
-                String s = "";
+                fighterLoop:
+                for (Fighter fighter: fighters) {
+                    if (fighter.getHealth() <= 0) {
+                        report(fighter.getName() + " has died.");
+                        going = false;
+                        break fighterLoop;
+                    }
 
-                if (fighter1.getHealth() <= 0) {
-                    s += fighter1.getName() + " dies. ";
-                    going = false;
+                    if (fighter.getQueue().isNotEmpty()) {
+                        report(fighter.performNextAction());
+                    }
                 }
-                if (fighter2.getHealth() <= 0) {
-                    s += fighter2.getName() + " dies. ";
-                    going = false;
-                }
-
-                report(s);
 
                 //Bot Logic
                 if (gameTick % 2 == 0) {
-                    fighter2.doAction(p2Actions);
+                    fighter2.addAttackToQueue();
                 }
+
             } else {
                 //if a tick has not happened
                 int st = battleClock.getProgress();
@@ -149,10 +139,6 @@ public class Battle implements Runnable {
         });
     }
 
-    public void updateStatus(int a) {
-        queueAction(a);
-    }
-
     private void updateButtons() {
         battleActivity.uiHandler.post(new Runnable() {
             @Override
@@ -162,9 +148,9 @@ public class Battle implements Runnable {
         });
     }
 
-    private void queueAction(int a) {
-        Log.d(TAG,"queing action" + a +"::" + fighter1.getActions()[a]);
-        p1Actions.offer(fighter1.getActions()[a]);
+    public void queueAction(int action) {
+        Log.d(TAG,"queing action" + action +"::" + fighter1.getActions()[action]);
+        fighter1.getQueue().offer(fighter1.getActions()[action]);
     }
 
     private void refreshQueues() {
@@ -174,10 +160,6 @@ public class Battle implements Runnable {
                 battleActivity.refreshQueues();
             }
         });
-    }
-
-    public BattleQueue getQueue() {
-        return p1Actions;
     }
 
     public void stop() {

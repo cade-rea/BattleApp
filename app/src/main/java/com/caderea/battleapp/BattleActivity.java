@@ -84,16 +84,16 @@ public class BattleActivity extends Activity {
     public void buttonPushed(View view) {
         switch(view.getId()) {
             case R.id.button1:
-                battle.updateStatus(0);
+                battle.queueAction(0);
                 break;
             case R.id.button2:
-                battle.updateStatus(1);
+                battle.queueAction(1);
                 break;
             case R.id.button3:
-                battle.updateStatus(2);
+                battle.queueAction(2);
                 break;
             case R.id.button4:
-                battle.updateStatus(3);
+                battle.queueAction(3);
                 break;
             case R.id.buttonStop:
                 stopBattle();
@@ -125,9 +125,9 @@ public class BattleActivity extends Activity {
         });
     }
 
-    public void updateButtons(BattleAction[] btns) {
-        for (int i = 0; i < btns.length; ++i) {
-            battleButtons[i].setText(btns[i].getName());
+    public void updateButtons(BattleAction[] buttons) {
+        for (int i = 0; i < buttons.length; ++i) {
+            battleButtons[i].setText(buttons[i].getName());
         }
     }
 

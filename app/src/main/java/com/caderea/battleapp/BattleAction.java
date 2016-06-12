@@ -1,40 +1,36 @@
 package com.caderea.battleapp;
 
-import android.view.View;
+import java.util.Objects;
 
 /**
  * Created by Cade on 8/4/2014.
  */
-public class BattleAction {
+public abstract class BattleAction {
     protected String name;
-    protected int power;
-    protected Fighter owner;
-    protected int time;
+    protected int duration;
 
-    public BattleAction(Fighter f) {
-        this.name = "Attack";
-        this.power = 1;
-        this.owner = f;
-        this.time = 2;
+    public abstract String performAction(Fighter performer, Fighter target);
+
+    protected BattleAction() {
+        name = "";
+        duration = 0;
+    }
+
+    protected BattleAction(String name, int duration) {
+        this.name = name;
+        this.duration = duration;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getPower() {
-        return power;
-    }
-
-    public void performAction(Fighter p2) {
-        p2.health -= owner.getStr();
+    public int getDuration() {
+        return duration;
     }
 
     public String toString() {
-        return "Action:" + name;
+        return "Action: " + name + ", Duration: " + duration;
     }
 
-    public int getTime() {
-        return time;
-    }
 }
