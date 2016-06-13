@@ -2,6 +2,7 @@ package com.caderea.battleapp.fighter;
 
 import com.caderea.battleapp.action.Attack;
 import com.caderea.battleapp.action.BattleAction;
+import com.caderea.battleapp.action.Heal;
 import com.caderea.battleapp.queue.BattleQueue;
 
 /**
@@ -28,11 +29,13 @@ public class Fighter {
         this.power = power;
         this.health = health;
 
-        actions = new BattleAction[4];
         queue = new BattleQueue();
+        actions = new BattleAction[4];
 
-        for(int i = 0; i < 4; ++i)
-            actions[i] = new Attack();
+        actions[0] = new Attack();
+        actions[1] = new Heal();
+        actions[2] = null;
+        actions[3] = null;
     }
 
     public String getName() {

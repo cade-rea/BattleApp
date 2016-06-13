@@ -159,7 +159,10 @@ public class Battle implements Runnable {
 
     public void queueAction(int action) {
         Log.d(TAG,"queing action" + action +"::" + fighter1.getActions()[action]);
-        fighter1.getQueue().offer(new QueueAction(fighter1.getActions()[action]));
+
+            if (fighter1.getActions()[action] != null) {
+                fighter1.getQueue().offer(new QueueAction(fighter1.getActions()[action]));
+            }
     }
 
     private void refreshQueues() {

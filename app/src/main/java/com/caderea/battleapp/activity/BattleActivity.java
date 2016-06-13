@@ -131,7 +131,11 @@ public class BattleActivity extends Activity {
 
     public void updateButtons(BattleAction[] buttons) {
         for (int i = 0; i < buttons.length; ++i) {
-            battleButtons[i].setText(buttons[i].getName());
+            if (buttons[i] != null) {
+                battleButtons[i].setText(buttons[i].getName());
+            } else {
+                battleButtons[i].setText("");
+            }
         }
     }
 
