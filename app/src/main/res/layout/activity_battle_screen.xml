@@ -2,16 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BattleActivity">
+    tools:context=".activity.BattleActivity">
 
-    <com.caderea.battleapp.QueueLayout
+    <com.caderea.battleapp.queue.QueueLayout
         android:id="@+id/queueLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
 
-        <com.caderea.battleapp.QueueDrawer
+        <com.caderea.battleapp.queue.QueueDrawer
             android:id="@+id/player1QDrawer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -29,14 +29,14 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
-        <com.caderea.battleapp.QueueDrawer
+        <com.caderea.battleapp.queue.QueueDrawer
             android:id="@+id/player2QDrawer"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:lines="1"
             android:text="Queue"
             />
-    </com.caderea.battleapp.QueueLayout>
+    </com.caderea.battleapp.queue.QueueLayout>
 
     <TextView
         android:id="@+id/battle_display"

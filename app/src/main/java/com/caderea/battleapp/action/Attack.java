@@ -1,4 +1,6 @@
-package com.caderea.battleapp;
+package com.caderea.battleapp.action;
+
+import com.caderea.battleapp.fighter.Fighter;
 
 /**
  * Created by cade-home on 6/11/16.
