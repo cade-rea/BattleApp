@@ -9,6 +9,7 @@ import com.caderea.battleapp.queue.BattleQueue;
  */
 public class Fighter {
     protected String name;
+
     protected int power;
     protected int health;
 
@@ -19,7 +20,7 @@ public class Fighter {
     protected BattleQueue queue;
 
     public Fighter() {
-        this("Default Fighter",1,20);
+        this("Default Fighter", 1, 10);
     }
 
     public Fighter(String name, int power, int health) {

@@ -8,7 +8,7 @@ import com.caderea.battleapp.queue.QueueAction;
 public class EnemyFighter extends Fighter {
 
     public EnemyFighter() {
-        super("Enemy", 1, 20);
+        super("Enemy", 1, 10);
     }
 
     public void addAttackToQueue() {
