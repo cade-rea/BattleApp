@@ -41,4 +41,9 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, BattleActivity.class);
         startActivity(intent);
     }
+
+    public void startMap(View view) {
+        Intent intent = new Intent(this, MapActivity.class);
+        startActivity(intent);
+    }
 }

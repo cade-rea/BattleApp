@@ -20,4 +20,14 @@
         android:layout_marginTop="78dp"
         android:onClick="startBattle" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_map"
+        android:id="@+id/button_map"
+        android:layout_below="@+id/battle_display"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp"
+        android:onClick="startMap" />
+
 </RelativeLayout>

@@ -20,6 +20,8 @@
             android:name=".activity.BattleActivity"
             android:label="@string/title_activity_battle_screen" >
         </activity>
+        <activity android:name=".activity.MapActivity"
+                 android:label="@string/title_activity_map_screen" />
     </application>
 
 </manifest>
