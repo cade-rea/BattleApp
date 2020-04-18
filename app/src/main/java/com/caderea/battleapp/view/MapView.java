@@ -1,9 +1,12 @@
 package com.caderea.battleapp.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class MapView extends View {
@@ -11,12 +14,16 @@ public class MapView extends View {
     private float x, y, radius;
     private Paint paint;
 
+    private PointF lastTouch;
+
     public MapView(Context context) {
         super(context);
         x=200;
         y=200;
         radius=100;
         paint = new Paint();
+        lastTouch = new PointF();
+
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -24,12 +31,25 @@ public class MapView extends View {
                 v.invalidate();
             }
         });
+
+        setOnTouchListener(new OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    lastTouch.set(event.getX(), event.getY());
+                }
+
+                return false;
+            }
+        });
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawText("Hello!", x + 100, y + 100, paint);
-        canvas.drawCircle(x,y,radius,paint);
+        canvas.drawCircle(lastTouch.x, lastTouch.y, radius, paint);
     }
 
     @Override
