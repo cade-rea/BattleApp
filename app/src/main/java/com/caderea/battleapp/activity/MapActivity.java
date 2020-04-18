@@ -1,12 +1,13 @@
 package com.caderea.battleapp.activity;
 
+import com.caderea.battleapp.core.Map;
+import com.caderea.battleapp.view.MapView;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import com.caderea.battleapp.core.Map;
-import com.caderea.battleapp.view.MapView;
+import androidx.annotation.Nullable;
 
 public class MapActivity extends Activity {
 
