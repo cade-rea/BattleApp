@@ -1,8 +1,9 @@
 package com.caderea.battleapp.core;
 
+import com.caderea.battleapp.activity.MapActivity;
+
 import android.os.SystemClock;
 import android.util.Log;
-import com.caderea.battleapp.activity.MapActivity;
 
 public class Map implements Runnable {
 
@@ -22,6 +23,17 @@ public class Map implements Runnable {
 
     @Override
     public void run() {
+        initialize();
+        mainLoop();
+        complete();
+    }
+
+    private void complete() {
+        mapClock.stop();
+        notifyDone();
+    }
+
+    private void initialize() {
         Log.d(TAG,"running");
         //set this thread to background priority
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -30,21 +42,27 @@ public class Map implements Runnable {
         gameTick = 1;
         Thread clockThread = new Thread(mapClock);
         clockThread.start();
+    }
 
+    private void mainLoop() {
         //main game loop
         Log.d(TAG, "starting loop");
-        mainLoop:
         while (going) {
             if (gameTick < mapClock.getTick()) {
                 ++gameTick;
-                moveCircle();
+                doTick();
             } else {
-                SystemClock.sleep(500);
+                doNoTick();
             }
         }
+    }
 
-        mapClock.stop();
-        notifyDone();
+    private void doTick() {
+        moveCircle();
+    }
+
+    private void doNoTick() {
+        SystemClock.sleep(500);
     }
 
     private void moveCircle() {
