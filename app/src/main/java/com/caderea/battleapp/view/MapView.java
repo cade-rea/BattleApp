@@ -2,6 +2,7 @@ package com.caderea.battleapp.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 
@@ -16,10 +17,18 @@ public class MapView extends View {
         y=200;
         radius=100;
         paint = new Paint();
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                paint.setColor(Color.parseColor("#ff0000ff"));
+                v.invalidate();
+            }
+        });
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+        canvas.drawText("Hello!", x + 100, y + 100, paint);
         canvas.drawCircle(x,y,radius,paint);
     }
 
