@@ -1,17 +1,19 @@
 package com.caderea.battleapp.core;
 
-import android.os.SystemClock;
-import android.util.Log;
 import com.caderea.battleapp.activity.BattleActivity;
 import com.caderea.battleapp.environment.Environment;
 import com.caderea.battleapp.fighter.EnemyFighter;
 import com.caderea.battleapp.fighter.Fighter;
 import com.caderea.battleapp.queue.QueueAction;
 
+import android.os.SystemClock;
+import android.util.Log;
+
 /**
  * Created by Cade on 7/31/2014.
  */
 public class Battle implements Runnable {
+    private static final int MAGIC_TICK_FACTOR = 5;
     private Fighter fighter1;
     private EnemyFighter fighter2;
     private Environment environment;
@@ -25,6 +27,7 @@ public class Battle implements Runnable {
 
     private static long MILLISECONDS_PER_TICK = 1000;
     private static long SUBTICKS_PER_TICK = 4;
+    private static final long TICK_SLEEP_DURATION = MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * MAGIC_TICK_FACTOR);
 
     public Battle(BattleActivity battleActivity) {
         this.battleActivity = battleActivity;
@@ -47,6 +50,15 @@ public class Battle implements Runnable {
     }
 
     public void run() {
+
+        initialize();
+
+        mainLoop();
+
+        endBattle();
+    }
+
+    private void initialize() {
         Log.d(TAG,"running");
         //set this thread to background priority
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
@@ -58,51 +70,69 @@ public class Battle implements Runnable {
         gameTick = 1;
         Thread clockThread = new Thread(battleClock);
         clockThread.start();
+    }
 
+    private void mainLoop() {
         //main game loop
         Log.d(TAG, "starting loop");
-        mainLoop:
         while (going) {
             refreshQueues();
 
             if (gameTick < battleClock.getTick()) {
                 ++gameTick;
 
-                report("Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " +
-                        fighter2.getName() + ":" + fighter2.getHealth());
-
-                Fighter[] fighters = {fighter1, fighter2};
-
-                fighterLoop:
-                for (Fighter fighter: fighters) {
-                    if (fighter.getHealth() <= 0) {
-                        report(fighter.getName() + " has died.");
-                        going = false;
-                        break fighterLoop;
-                    }
-
-                    if (fighter.getQueue().isNotEmpty()) {
-                        report(fighter.performNextAction());
-                    }
-                }
-
-                //Bot Logic
-                if (gameTick % 2 == 0) {
-                    fighter2.addAttackToQueue();
-                }
+                doBattleTick();
 
             } else {
-                //if a tick has not happened
-                int st = battleClock.getProgress();
-                Log.d(TAG,"No tick. Subtick:" + st);
-                battleActivity.updateTickProgress(st);
-
-                SystemClock.sleep(MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * 5));
+                doNoTick();
             }
         }
+    }
 
+    private void endBattle() {
         battleClock.stop();
         notifyDone();
+    }
+
+    private void doBattleTick() {
+        report("Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " +
+                fighter2.getName() + ":" + fighter2.getHealth());
+
+        doFighterLoop();
+
+        botLogic();
+    }
+
+    private void doFighterLoop() {
+        Fighter[] fighters = {fighter1, fighter2};
+
+        for (Fighter fighter: fighters) {
+            if (fighter.getHealth() <= 0) {
+                report(fighter.getName() + " has died.");
+                going = false;
+                return;
+            }
+
+            if (fighter.getQueue().isNotEmpty()) {
+                report(fighter.performNextAction());
+            }
+        }
+    }
+
+    private void botLogic() {
+        //Bot Logic
+        if (gameTick % 2 == 0) {
+            fighter2.addAttackToQueue();
+        }
+    }
+
+    private void doNoTick() {
+        //if a tick has not happened
+        int st = battleClock.getProgress();
+        Log.d(TAG,"No tick. Subtick:" + st);
+        battleActivity.updateTickProgress(st);
+
+        SystemClock.sleep(TICK_SLEEP_DURATION);
     }
 
     /***
