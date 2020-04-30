@@ -8,11 +8,12 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.TextView;
+import androidx.appcompat.widget.AppCompatTextView;
 
 /**
  * Created by Cade on 8/10/2014.
  */
-public class QueueDrawer extends TextView {
+public class QueueDrawer extends AppCompatTextView {
     private Rect area;
     private Paint paint;
     private BattleQueue queue;
@@ -45,7 +46,7 @@ public class QueueDrawer extends TextView {
     }
 
     protected void onDraw(Canvas canvas) {
-        int baseline = getLineBounds(0, area);
+        int baseline = 200;
 
         Log.d("DRAWER","Queue size:"+ baseline + ", area.left:"+area.left + ", area.right"+area.right +
                 ", area.top"+area.top + ", area.bottom:"+area.bottom );
@@ -90,6 +91,12 @@ public class QueueDrawer extends TextView {
             if (drawBlock != null)
                 drawBlock.drawblock(canvas);
         }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        area.set(left, top, right, bottom);
     }
 
     public void setQueue(BattleQueue q) {

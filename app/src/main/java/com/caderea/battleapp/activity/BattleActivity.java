@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.caderea.battleapp.R;
 import com.caderea.battleapp.action.BattleAction;
 import com.caderea.battleapp.queue.BattleQueue;
 import com.caderea.battleapp.queue.QueueLayout;
+import com.caderea.battleapp.view.NewBattleView;
 
 import java.util.ArrayList;
 
@@ -28,7 +30,8 @@ public class BattleActivity extends Activity {
     private float dpWidth;
 
     private Button[] battleButtons;
-    private QueueLayout queueLayout;
+    private NewBattleView newBattleView;
+//    private QueueLayout queueLayout;
 
     public Handler uiHandler;
 
@@ -44,8 +47,8 @@ public class BattleActivity extends Activity {
 
         //initialize the string to hold output and the textview to show it
         output = new ArrayList<String>(10);
-        battleText = (TextView)findViewById(R.id.battle_display);
-        battleText.setHeight((int)(dpHeight*3/4));
+//        battleText = (TextView)findViewById(R.id.battle_display);
+//        battleText.setHeight((int)(dpHeight*3/4));
 
         battleButtons = new Button[4];
         battleButtons[0] = (Button)findViewById(R.id.button1);
@@ -53,8 +56,8 @@ public class BattleActivity extends Activity {
         battleButtons[2] = (Button)findViewById(R.id.button3);
         battleButtons[3] = (Button)findViewById(R.id.button4);
 
-        queueLayout = (QueueLayout)findViewById(R.id.queueLayout);
-        queueLayout.initQueues();
+        newBattleView = findViewById(R.id.newBattleView);
+        newBattleView.initQueues();
 
         //this handler can be passed to other threads to refer to the UI thread
         uiHandler = new Handler() {
@@ -82,7 +85,8 @@ public class BattleActivity extends Activity {
             str += s +"\n";
         }
 
-        battleText.setText(str);
+        Log.d("BATTLE", "update: " + str);
+//        battleText.setText(str);
     }
 
     public void buttonPushed(View view) {
@@ -140,16 +144,16 @@ public class BattleActivity extends Activity {
     }
 
     public void updateTickProgress(int progress) {
-        queueLayout.updateTickProgress(progress);
+        newBattleView.updateTickProgress(progress);
     }
 
     public void setQueues(BattleQueue q1, BattleQueue q2) {
-        queueLayout.setQueues(q1, q2);
+        newBattleView.setQueues(q1, q2);
         refreshQueues();
     }
 
     public void refreshQueues() {
-        queueLayout.refreshQueues();
+        newBattleView.refreshQueues();
     }
 
     @Override

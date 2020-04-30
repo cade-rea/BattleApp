@@ -1,6 +1,7 @@
 package com.caderea.battleapp.queue;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -21,24 +22,24 @@ public class QueueLayout extends LinearLayout {
         super(context, attributeSet);
     }
 
-    public void initQueues() {
-        p1q = (QueueDrawer)findViewById(R.id.player1QDrawer);
-        p2q = (QueueDrawer)findViewById(R.id.player2QDrawer);
-        tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
-    }
-
-    public void setQueues(BattleQueue q1, BattleQueue q2) {
-        initQueues();
-        p1q.setQueue(q1);
-        p2q.setQueue(q2);
-    }
-
-    public void updateTickProgress(int progress) {
-        tickProgress.setProgress(progress);
-    }
-
-    public void refreshQueues() {
-        p1q.update();
-        p2q.update();
-    }
+//    public void initQueues() {
+//        p1q = (QueueDrawer)findViewById(R.id.player1QDrawer);
+//        p2q = (QueueDrawer)findViewById(R.id.player2QDrawer);
+//        tickProgress = (ProgressBar)findViewById(R.id.tickProgressBar);
+//    }
+//
+//    public void setQueues(BattleQueue q1, BattleQueue q2) {
+//        initQueues();
+//        p1q.setQueue(q1);
+//        p2q.setQueue(q2);
+//    }
+//
+//    public void updateTickProgress(int progress) {
+//        tickProgress.setProgress(progress);
+//    }
+//
+//    public void refreshQueues() {
+//        p1q.update();
+//        p2q.update();
+//    }
 }
