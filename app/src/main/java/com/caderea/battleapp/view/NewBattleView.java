@@ -62,8 +62,21 @@ public class NewBattleView extends ViewGroup {
 //    }
 
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        p1q.layout(l, t, r, b);
-        p2q.layout(l+100, t+200, r, b);
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        int width = right - left;
+        int height = bottom - top;
+
+        // queues 20% of each side
+        int q1Left = 0;
+        int q1Top = 100;
+        int q1Right = q1Left + width / 5;
+        int q1Bottom = height - 100;
+        p1q.layout(q1Left, q1Top, q1Right, q1Bottom);
+
+        int q2Left = right - width / 5;
+        int q2Top = 100;
+        int q2Right = right;
+        int q2Bottom = height - 100;
+        p2q.layout(q2Left, q2Top, q2Right, q2Bottom);
     }
 }
