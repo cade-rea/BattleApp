@@ -1,135 +1,74 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".activity.BattleActivity">
+<?xml version="1.0" encoding="utf-8"?>
 
-<!--    <com.caderea.battleapp.queue.QueueLayout-->
-<!--        android:id="@+id/queueLayout"-->
-<!--        android:layout_width="fill_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical"-->
-<!--        >-->
+<com.caderea.battleapp.view.BattleViewGroup
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/battleView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-<!--        <com.caderea.battleapp.queue.QueueDrawer-->
-<!--            android:id="@+id/player1QDrawer"-->
-<!--            android:layout_width="fill_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:lines="1"-->
-<!--            android:text="Queue"-->
-<!--            />-->
+    <com.caderea.battleapp.queue.QueueDrawer
+            android:id="@+id/player1QDrawer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
 
-<!--        <ProgressBar-->
-<!--            android:id="@+id/tickProgressBar"-->
-<!--            style="?android:attr/progressBarStyleHorizontal"-->
-<!--            android:layout_width="fill_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:progress="50"-->
-<!--            android:layout_alignParentTop="true"-->
-<!--            android:layout_alignParentLeft="true"-->
-<!--            android:layout_alignParentStart="true" />-->
+    <com.caderea.battleapp.queue.QueueDrawer
+            android:id="@+id/player2QDrawer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
 
-<!--        <com.caderea.battleapp.queue.QueueDrawer-->
-<!--            android:id="@+id/player2QDrawer"-->
-<!--            android:layout_width="fill_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:lines="1"-->
-<!--            android:text="Queue"-->
-<!--            />-->
-<!--    </com.caderea.battleapp.queue.QueueLayout>-->
-
-<!--    <TextView-->
-<!--        android:id="@+id/battle_display"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:minLines="25"-->
-<!--        android:layout_below="@id/queueLayout" />-->
-
-    <com.caderea.battleapp.view.NewBattleView
-            android:id="@+id/newBattleView"
+    <ProgressBar
+            android:id="@+id/tickProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:progress="50"/>
 
-        <com.caderea.battleapp.queue.QueueDrawer
-                android:id="@+id/player1QDrawer2"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:text="Queue"
-        />
+    <com.caderea.battleapp.view.BattleDrawArea
+        android:id="@+id/battleDrawArea"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
 
-        <com.caderea.battleapp.queue.QueueDrawer
-                android:id="@+id/player2QDrawer2"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:lines="1"
-                android:text="Queue"
-        />
-
-        <ProgressBar
-                android:id="@+id/tickProgressBar2"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:progress="50"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
-
-    </com.caderea.battleapp.view.NewBattleView>
-
-
-    <RelativeLayout
+    <com.caderea.battleapp.view.BattleInputArea
         android:id="@+id/battle_buttons"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/newBattleView">
+        android:layout_height="wrap_content">
 
         <Button
             android:id="@+id/button1"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 1"
-            android:onClick="buttonPushed"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"/>
+            android:onClick="buttonPushed"/>
 
         <Button
             android:id="@+id/button2"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 2"
-            android:onClick="buttonPushed"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_toRightOf="@id/button1" />
+            android:onClick="buttonPushed"/>
 
         <Button
             android:id="@+id/button3"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 3"
-            android:onClick="buttonPushed"
-            android:layout_below="@id/button1"/>
+            android:onClick="buttonPushed"/>
 
         <Button
             android:id="@+id/button4"
             android:layout_width="120dp"
             android:layout_height="50dp"
             android:text="Button 4"
-            android:onClick="buttonPushed"
-            android:layout_toRightOf="@+id/button3"
-            android:layout_below="@id/button2"/>
-    </RelativeLayout>
+            android:onClick="buttonPushed"/>
 
-    <Button
-        android:id="@+id/buttonStop"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:text="Stop"
-        android:onClick="buttonPushed"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@id/battle_buttons" />
+        <Button
+            android:id="@+id/buttonStop"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="Stop"
+            android:onClick="buttonPushed"/>
 
-</RelativeLayout>
+    </com.caderea.battleapp.view.BattleInputArea>
+
+</com.caderea.battleapp.view.BattleViewGroup>
