@@ -12,19 +12,19 @@ public class BattleQueue implements Queue<QueueAction> {
     private static int MAX_QUEUE_SIZE = 10;
 
     private QueueAction[] queue;
-    private int front;
+    private int head;
     private int position;
     private boolean full;
 
     public BattleQueue() {
         queue = new QueueAction[MAX_QUEUE_SIZE];
-        front = 0;
+        head = 0;
         position = 0;
         full = false;
     }
 
     private int getPlace() {
-        int place = front + position;
+        int place = head + position;
         if(place >= MAX_QUEUE_SIZE)
             place -= MAX_QUEUE_SIZE;
 
@@ -51,7 +51,7 @@ public class BattleQueue implements Queue<QueueAction> {
         if(++position == MAX_QUEUE_SIZE)
             position = 0;
 
-        if(position == front) {
+        if(position == head) {
             full = true;
         }
 
@@ -68,11 +68,11 @@ public class BattleQueue implements Queue<QueueAction> {
         if(isEmpty())
             return null;
 
-        QueueAction toReturn = queue[front];
-        queue[front] = null;
+        QueueAction toReturn = queue[head];
+        queue[head] = null;
 
-        if(++front == MAX_QUEUE_SIZE)
-            front = 0;
+        if(++head == MAX_QUEUE_SIZE)
+            head = 0;
 
         full = false;
 
@@ -86,17 +86,17 @@ public class BattleQueue implements Queue<QueueAction> {
 
     @Override
     public QueueAction peek() {
-        return queue[front];
+        return queue[head];
     }
 
     @Override
     public boolean isEmpty() {
-        return ((front == position) && !full);
+        return ((head == position) && !full);
     }
 
     //possibly more useful than isEmpty for Battle
     public boolean isNotEmpty() {
-        return (full || (front != position));
+        return (full || (head != position));
     }
 
     @Override
@@ -137,7 +137,7 @@ public class BattleQueue implements Queue<QueueAction> {
 
     @Override
     public int size() {
-        int size = position - front;
+        int size = position - head;
         if(size <= 0)
             size += MAX_QUEUE_SIZE;
 
@@ -157,7 +157,7 @@ public class BattleQueue implements Queue<QueueAction> {
     @Override
     public void clear() {
         queue = new QueueAction[MAX_QUEUE_SIZE];
-        front = position = 0;
+        head = position = 0;
         full = false;
     }
 
@@ -180,7 +180,7 @@ public class BattleQueue implements Queue<QueueAction> {
     }
 
     public String getName(int index) {
-        int target = front + index;
+        int target = head + index;
 
         if (target >= MAX_QUEUE_SIZE)
             target -= MAX_QUEUE_SIZE;
@@ -191,8 +191,14 @@ public class BattleQueue implements Queue<QueueAction> {
         return "empty";
     }
 
+    /**
+     * Retrieves the QueueAction at the given queue index.
+     * The index is relative to head, eg, get(0) == head
+     * @param index
+     * @return
+     */
     public QueueAction get(int index) {
-        int target = front + index;
+        int target = head + index;
 
         if (target >= MAX_QUEUE_SIZE)
             target -= MAX_QUEUE_SIZE;
