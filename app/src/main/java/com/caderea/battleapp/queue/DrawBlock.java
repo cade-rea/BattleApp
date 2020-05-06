@@ -13,7 +13,15 @@ class DrawBlock extends View {
     private final Paint textPaint;
     @Getter private final QueueAction queueAction;
     @Setter private float topLine;
-    @Setter private float height;
+//    @Setter private float height;
+
+    private int left;
+    private int top;
+    private int right;
+    private int bottom;
+
+    private boolean measured = false;
+    private boolean layedout = false;
 
     public DrawBlock(Context context, QueueAction queueAction, int backgroundColor) {
         super(context);
@@ -21,7 +29,7 @@ class DrawBlock extends View {
 
         textPaint = new Paint();
         textPaint.setColor(Color.BLACK);
-        textPaint.setTextSize(height / 2);
+        textPaint.setTextSize(getHeight() >> 1);
 
         backgroundPaint = new Paint();
         backgroundPaint.setColor(backgroundColor);
@@ -29,17 +37,31 @@ class DrawBlock extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        float top = topLine;
-        float left = 0;
-        int right = getRight();
-        float bottom = top + height;
+//        float top = topLine;
+//        float left = 0;
+//        int right = getRight();
+//        float bottom = top + getHeight();
         canvas.drawRect(left, top, right, bottom, backgroundPaint);
         canvas.drawText(queueAction.getBattleAction().getName(), left + 5, bottom, textPaint);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        setMeasuredDimension(width, height);
+
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        setMeasuredDimension(width, height);
+        measured = true;
     }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
+        layedout = true;
+    }
+
 }

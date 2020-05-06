@@ -16,22 +16,19 @@ import com.caderea.battleapp.core.Battle;
 import com.caderea.battleapp.R;
 import com.caderea.battleapp.action.BattleAction;
 import com.caderea.battleapp.queue.BattleQueue;
-import com.caderea.battleapp.queue.QueueLayout;
-import com.caderea.battleapp.view.NewBattleView;
+import com.caderea.battleapp.view.BattleViewGroup;
 
 import java.util.ArrayList;
 
 public class BattleActivity extends Activity {
     private ArrayList<String> output;
-    private TextView battleText;
+
     private Battle battle;
+    private Button[] battleButtons;
+    private BattleViewGroup battleViewGroup;
 
     private float dpHeight;
     private float dpWidth;
-
-    private Button[] battleButtons;
-    private NewBattleView newBattleView;
-//    private QueueLayout queueLayout;
 
     public Handler uiHandler;
 
@@ -45,19 +42,15 @@ public class BattleActivity extends Activity {
         dpHeight = displayMetrics.heightPixels / displayMetrics.density;
         dpWidth = displayMetrics.widthPixels / displayMetrics.density;
 
-        //initialize the string to hold output and the textview to show it
-        output = new ArrayList<String>(10);
-//        battleText = (TextView)findViewById(R.id.battle_display);
-//        battleText.setHeight((int)(dpHeight*3/4));
+        output = new ArrayList<>(10);
 
         battleButtons = new Button[4];
-        battleButtons[0] = (Button)findViewById(R.id.button1);
-        battleButtons[1] = (Button)findViewById(R.id.button2);
-        battleButtons[2] = (Button)findViewById(R.id.button3);
-        battleButtons[3] = (Button)findViewById(R.id.button4);
+        battleButtons[0] = findViewById(R.id.button1);
+        battleButtons[1] = findViewById(R.id.button2);
+        battleButtons[2] = findViewById(R.id.button3);
+        battleButtons[3] = findViewById(R.id.button4);
 
-        newBattleView = findViewById(R.id.newBattleView);
-        newBattleView.initQueues();
+        battleViewGroup = findViewById(R.id.battleViewGroup);
 
         //this handler can be passed to other threads to refer to the UI thread
         uiHandler = new Handler() {
@@ -144,16 +137,16 @@ public class BattleActivity extends Activity {
     }
 
     public void updateTickProgress(int progress) {
-        newBattleView.updateTickProgress(progress);
+        battleViewGroup.updateTickProgress(progress);
     }
 
     public void setQueues(BattleQueue q1, BattleQueue q2) {
-        newBattleView.setQueues(q1, q2);
+        battleViewGroup.setQueues(q1, q2);
         refreshQueues();
     }
 
     public void refreshQueues() {
-        newBattleView.refreshQueues();
+        battleViewGroup.refreshQueues();
     }
 
     @Override

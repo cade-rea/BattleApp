@@ -1,13 +1,17 @@
 package com.caderea.battleapp.view;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import androidx.annotation.Nullable;
 import com.caderea.battleapp.R;
 import com.caderea.battleapp.queue.BattleQueue;
 import com.caderea.battleapp.queue.QueueDrawer;
+
+import java.util.List;
 
 public class BattleViewGroup extends ViewGroup {
 
@@ -23,15 +27,18 @@ public class BattleViewGroup extends ViewGroup {
 
     public BattleViewGroup(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
     }
 
-    public void init() {
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+
         p1queue = findViewById(R.id.player1QDrawer);
         p2queue = findViewById(R.id.player2QDrawer);
         tickProgress = findViewById(R.id.tickProgressBar);
         battleDrawArea = findViewById(R.id.battleDrawArea);
         battleInputArea = findViewById(R.id.battle_buttons);
+
     }
 
     public void updateTickProgress(int progress) {
@@ -50,12 +57,23 @@ public class BattleViewGroup extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        p1queue.measure(widthMeasureSpec, heightMeasureSpec);
-        p2queue.measure(widthMeasureSpec, heightMeasureSpec);
-        tickProgress.measure(widthMeasureSpec, heightMeasureSpec);
-        battleDrawArea.measure(widthMeasureSpec, heightMeasureSpec);
-        battleInputArea.measure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+
+        int totalWidth = MeasureSpec.getSize(widthMeasureSpec);
+        int totalHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+        int oneFifthWidth = totalWidth / 5;
+        int topBarHeight = 150;
+        int inputAreaHeight = 300;
+        int queueHeight  = totalHeight - topBarHeight - inputAreaHeight;
+        int battleDrawWidth = totalWidth - (2 * oneFifthWidth);
+
+        p1queue.measure(MeasureSpec.makeMeasureSpec(oneFifthWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(queueHeight, MeasureSpec.EXACTLY));
+        p2queue.measure(MeasureSpec.makeMeasureSpec(oneFifthWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(queueHeight, MeasureSpec.EXACTLY));
+        tickProgress.measure(MeasureSpec.makeMeasureSpec(totalWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(topBarHeight, MeasureSpec.EXACTLY));
+        battleDrawArea.measure(MeasureSpec.makeMeasureSpec(battleDrawWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(queueHeight, MeasureSpec.EXACTLY));
+        battleInputArea.measure(MeasureSpec.makeMeasureSpec(totalWidth, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(inputAreaHeight, MeasureSpec.EXACTLY));
+
+        setMeasuredDimension(totalWidth, totalHeight);
     }
 
     @Override
@@ -65,8 +83,8 @@ public class BattleViewGroup extends ViewGroup {
 
         int tickLeft = 0;
         int tickTop = 0;
-        int tickRight = 0;
-        int tickBottom = 0;
+        int tickRight = width;
+        int tickBottom = 100;
         tickProgress.layout(tickLeft, tickTop, tickRight, tickBottom);
 
         // queues 20% of each side

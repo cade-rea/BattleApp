@@ -22,8 +22,7 @@ public class QueueDrawer extends ViewGroup {
     private BattleQueue queue;
 
     public QueueDrawer(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public QueueDrawer(Context context, AttributeSet attrs) {
@@ -33,7 +32,7 @@ public class QueueDrawer extends ViewGroup {
 
     private void init() {
         colorIterator = new LoopingIterator<>(Arrays.asList(colors));
-        drawBlocks = new DrawBlock[BattleQueue.getMaxQueueSize() * 2];
+        drawBlocks = new DrawBlock[BattleQueue.getMaxQueueSize()];
     }
 
 //    protected void NotonDraw(Canvas canvas) {
@@ -83,30 +82,42 @@ public class QueueDrawer extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        int blockHeight = height / BattleQueue.getMaxQueueSize();
+
+        int blockHeightMeasureSpec = MeasureSpec.makeMeasureSpec(blockHeight, MeasureSpec.EXACTLY);
+        int blockWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+
         for (DrawBlock drawBlock : drawBlocks) {
-            drawBlock.measure(widthMeasureSpec, 200);
+            if (drawBlock != null) {
+                drawBlock.measure(blockWidthMeasureSpec, blockHeightMeasureSpec);
+            }
         }
 
-        setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(width, height);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-
+        int blockHeight = getHeight() / BattleQueue.getMaxQueueSize();
         int blockTop = top;
-        for (QueueAction queueAction : queue) {
-            blockTop += 200;
-            DrawBlock drawBlock = createDrawBlockFromAction(queueAction);
-            drawBlock.layout(left, blockTop, right, bottom);
+        for (DrawBlock drawBlock : drawBlocks) {
+            if (drawBlock != null) {
+                blockTop += blockHeight;
+                drawBlock.layout(left, blockTop, right, bottom);
+            }
         }
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        for (DrawBlock drawBlock : drawBlocks) {
-            drawBlock.draw(canvas);
-        }
-    }
+//    @Override
+//    protected void onDraw(Canvas canvas) {
+//        for (DrawBlock drawBlock : drawBlocks) {
+//            if (drawBlock != null) {
+//                drawBlock.draw(canvas);
+//            }
+//        }
+//    }
 
     private DrawBlock createDrawBlockFromAction(QueueAction queueAction) {
         DrawBlock drawBlock = new DrawBlock(this.getContext(), queueAction, colorIterator.next());
@@ -118,8 +129,21 @@ public class QueueDrawer extends ViewGroup {
     }
 
     public void update() {
-        invalidate();
+        for (int i = 0; i < drawBlocks.length; ++i) {
+            QueueAction queueAction = queue.get(i);
+            if (queueAction != null) {
+                drawBlocks[i] = createDrawBlockFromAction(queueAction);
+                addView(drawBlocks[i]);
+            }
+        }
 
+        for (DrawBlock drawBlock : drawBlocks) {
+            if (drawBlock != null) {
+                drawBlock.invalidate();
+            }
+        }
+
+        invalidate();
     }
 
 }
