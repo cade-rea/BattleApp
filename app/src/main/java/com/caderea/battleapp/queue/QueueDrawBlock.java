@@ -1,23 +1,24 @@
 package com.caderea.battleapp.queue;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
-import lombok.Getter;
 
-class DrawBlock extends View {
+@SuppressLint("ViewConstructor")
+class QueueDrawBlock extends View {
     private final Paint backgroundPaint;
     private final Paint textPaint;
-    @Getter private final QueueAction queueAction;
+    private final QueueAction queueAction;
 
     private int left;
     private int top;
     private int right;
     private int bottom;
 
-    public DrawBlock(Context context, QueueAction queueAction) {
+    public QueueDrawBlock(Context context, QueueAction queueAction) {
         super(context);
         this.queueAction = queueAction;
 

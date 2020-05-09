@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 public class QueueDrawer extends ViewGroup {
 
-    private DrawBlock[] drawBlocks;
+    private QueueDrawBlock[] queueDrawBlocks;
 
     @Setter
     private BattleQueue queue;
@@ -26,7 +26,7 @@ public class QueueDrawer extends ViewGroup {
     }
 
     private void init() {
-        drawBlocks = new DrawBlock[BattleQueue.getMaxQueueSize()];
+        queueDrawBlocks = new QueueDrawBlock[BattleQueue.getMaxQueueSize()];
     }
 
     @Override
@@ -38,9 +38,9 @@ public class QueueDrawer extends ViewGroup {
         int blockHeightMeasureSpec = MeasureSpec.makeMeasureSpec(blockHeight, MeasureSpec.EXACTLY);
         int blockWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
 
-        for (DrawBlock drawBlock : drawBlocks) {
-            if (drawBlock != null) {
-                drawBlock.measure(blockWidthMeasureSpec, blockHeightMeasureSpec);
+        for (QueueDrawBlock queueDrawBlock : queueDrawBlocks) {
+            if (queueDrawBlock != null) {
+                queueDrawBlock.measure(blockWidthMeasureSpec, blockHeightMeasureSpec);
             }
         }
 
@@ -51,10 +51,10 @@ public class QueueDrawer extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         int blockHeight = getHeight() / BattleQueue.getMaxQueueSize();
         int blockTop = top;
-        for (DrawBlock drawBlock : drawBlocks) {
-            if (drawBlock != null) {
+        for (QueueDrawBlock queueDrawBlock : queueDrawBlocks) {
+            if (queueDrawBlock != null) {
                 blockTop += blockHeight;
-                drawBlock.layout(0, blockTop, right, blockTop + blockHeight);
+                queueDrawBlock.layout(0, blockTop, right, blockTop + blockHeight);
             }
         }
     }
@@ -62,21 +62,21 @@ public class QueueDrawer extends ViewGroup {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        for (DrawBlock drawBlock : drawBlocks) {
-            if (drawBlock != null) {
-                drawBlock.draw(canvas);
+        for (QueueDrawBlock queueDrawBlock : queueDrawBlocks) {
+            if (queueDrawBlock != null) {
+                queueDrawBlock.draw(canvas);
             }
         }
 
     }
 
     public void update() {
-        for (int i = 0; i < drawBlocks.length; ++i) {
+        for (int i = 0; i < queueDrawBlocks.length; ++i) {
             QueueAction queueAction = queue.get(i);
             if (queueAction != null) {
-                DrawBlock drawBlock = new DrawBlock(this.getContext(), queueAction);
-                drawBlocks[i] = drawBlock;
-                addView(drawBlocks[i]);
+                QueueDrawBlock queueDrawBlock = new QueueDrawBlock(this.getContext(), queueAction);
+                queueDrawBlocks[i] = queueDrawBlock;
+                addView(queueDrawBlocks[i]);
             }
         }
 
