@@ -35,51 +35,6 @@ public class QueueDrawer extends ViewGroup {
         drawBlocks = new DrawBlock[BattleQueue.getMaxQueueSize()];
     }
 
-//    protected void NotonDraw(Canvas canvas) {
-//        int blockHeight = 200;
-//
-//        Log.d("DRAWER","Queue block height: "+ blockHeight + ", width: "+ dimension.width + ", height: "+ dimension.height);
-//
-////        int row = 0;
-////        while (row < dimension.height) {
-////            canvas.drawLine(0, row, dimension.width, row, paint);
-////            row += 10;
-////        }
-//
-//
-//        //check the main battle queue for items that are not in blocksToDraw
-//        for(int i = 0; i < BattleQueue.getMaxQueueSize(); ++i) {
-//            QueueAction queueAction = queue.get(i);
-//            if (queueAction != null) {
-//                boolean added = false;
-//
-////                float lengthOfLabel = dimension.width / (NUMBER_OF_TICKS_ON_SCREEN * queueAction.getBattleAction().getDuration());
-////                float verticalStart = 0;
-//
-//                for (DrawBlock drawBlock : drawBlocks) {
-//                    if (drawBlock != null && drawBlock.getQueueAction() == queueAction) {
-//                        drawBlocks[i] = drawBlock;
-//                        added = true;
-//                        break;
-//                    }
-//                }
-//                if(!added) {
-//                    drawBlocks[i] = new DrawBlock(this, queueAction, getNextColor(), verticalStart, lengthOfLabel, canvas, blockHeight);
-//                }
-//            } else {
-//                //queueAction == null
-//                //clear rest of blockstodraw
-//                //stop processing
-//
-//                for(int j = i; j < drawBlocks.length; j++) {
-//                    drawBlocks[j] = null;
-//                }
-//                break;
-//            }
-//        }
-//
-//    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
@@ -105,19 +60,21 @@ public class QueueDrawer extends ViewGroup {
         for (DrawBlock drawBlock : drawBlocks) {
             if (drawBlock != null) {
                 blockTop += blockHeight;
-                drawBlock.layout(left, blockTop, right, bottom);
+                drawBlock.layout(0, 0, right, blockHeight);
             }
         }
     }
 
-//    @Override
-//    protected void onDraw(Canvas canvas) {
-//        for (DrawBlock drawBlock : drawBlocks) {
-//            if (drawBlock != null) {
-//                drawBlock.draw(canvas);
-//            }
-//        }
-//    }
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        for (DrawBlock drawBlock : drawBlocks) {
+            if (drawBlock != null) {
+                drawBlock.draw(canvas);
+            }
+        }
+
+    }
 
     private DrawBlock createDrawBlockFromAction(QueueAction queueAction) {
         DrawBlock drawBlock = new DrawBlock(this.getContext(), queueAction, colorIterator.next());
@@ -129,6 +86,7 @@ public class QueueDrawer extends ViewGroup {
     }
 
     public void update() {
+        removeAllViewsInLayout();
         for (int i = 0; i < drawBlocks.length; ++i) {
             QueueAction queueAction = queue.get(i);
             if (queueAction != null) {
@@ -139,10 +97,12 @@ public class QueueDrawer extends ViewGroup {
 
         for (DrawBlock drawBlock : drawBlocks) {
             if (drawBlock != null) {
+                drawBlock.requestLayout();
                 drawBlock.invalidate();
             }
         }
 
+        requestLayout();
         invalidate();
     }
 
