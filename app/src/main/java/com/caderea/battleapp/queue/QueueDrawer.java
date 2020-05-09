@@ -86,7 +86,6 @@ public class QueueDrawer extends ViewGroup {
     }
 
     public void update() {
-        removeAllViewsInLayout();
         for (int i = 0; i < drawBlocks.length; ++i) {
             QueueAction queueAction = queue.get(i);
             if (queueAction != null) {
@@ -95,14 +94,6 @@ public class QueueDrawer extends ViewGroup {
             }
         }
 
-        for (DrawBlock drawBlock : drawBlocks) {
-            if (drawBlock != null) {
-                drawBlock.requestLayout();
-                drawBlock.invalidate();
-            }
-        }
-
-        requestLayout();
         invalidate();
     }
 
