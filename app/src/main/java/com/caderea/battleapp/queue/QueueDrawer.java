@@ -60,7 +60,7 @@ public class QueueDrawer extends ViewGroup {
         for (DrawBlock drawBlock : drawBlocks) {
             if (drawBlock != null) {
                 blockTop += blockHeight;
-                drawBlock.layout(0, 0, right, blockHeight);
+                drawBlock.layout(0, blockTop, right, blockTop + blockHeight);
             }
         }
     }
