@@ -72,15 +72,29 @@ public class QueueDrawer extends ViewGroup {
 
     public void update() {
         for (int i = 0; i < queueDrawBlocks.length; ++i) {
-            QueueAction queueAction = queue.get(i);
-            if (queueAction != null) {
-                QueueDrawBlock queueDrawBlock = new QueueDrawBlock(this.getContext(), queueAction);
-                queueDrawBlocks[i] = queueDrawBlock;
-                addView(queueDrawBlocks[i]);
-            }
+            removeExistingQueueDrawBlock(i);
+
+            addQueueDrawBlock(i);
         }
 
         invalidate();
+    }
+
+    private void removeExistingQueueDrawBlock(int i) {
+        QueueDrawBlock existingQueueDrawBlock = queueDrawBlocks[i];
+        if (existingQueueDrawBlock != null) {
+            removeView(queueDrawBlocks[i]);
+            queueDrawBlocks[i] = null;
+        }
+    }
+
+    private void addQueueDrawBlock(int i) {
+        QueueAction queueAction = queue.get(i);
+        if (queueAction != null) {
+            QueueDrawBlock queueDrawBlock = new QueueDrawBlock(this.getContext(), queueAction);
+            queueDrawBlocks[i] = queueDrawBlock;
+            addView(queueDrawBlocks[i]);
+        }
     }
 
 }
