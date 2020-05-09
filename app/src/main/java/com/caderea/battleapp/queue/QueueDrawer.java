@@ -2,23 +2,18 @@ package com.caderea.battleapp.queue;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewGroup;
-import org.apache.commons.collections4.iterators.LoopingIterator;
-
-import java.util.Arrays;
+import lombok.Setter;
 
 /**
  * Created by Cade on 8/10/2014.
  */
 public class QueueDrawer extends ViewGroup {
-    private static final Integer[] colors = {Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN};
-    private static final int NUMBER_OF_TICKS_ON_SCREEN = 10;
 
-    private LoopingIterator<Integer> colorIterator;
     private DrawBlock[] drawBlocks;
+
+    @Setter
     private BattleQueue queue;
 
     public QueueDrawer(Context context) {
@@ -31,7 +26,6 @@ public class QueueDrawer extends ViewGroup {
     }
 
     private void init() {
-        colorIterator = new LoopingIterator<>(Arrays.asList(colors));
         drawBlocks = new DrawBlock[BattleQueue.getMaxQueueSize()];
     }
 
@@ -76,20 +70,12 @@ public class QueueDrawer extends ViewGroup {
 
     }
 
-    private DrawBlock createDrawBlockFromAction(QueueAction queueAction) {
-        DrawBlock drawBlock = new DrawBlock(this.getContext(), queueAction, colorIterator.next());
-        return drawBlock;
-    }
-
-    public void setQueue(BattleQueue q) {
-        queue = q;
-    }
-
     public void update() {
         for (int i = 0; i < drawBlocks.length; ++i) {
             QueueAction queueAction = queue.get(i);
             if (queueAction != null) {
-                drawBlocks[i] = createDrawBlockFromAction(queueAction);
+                DrawBlock drawBlock = new DrawBlock(this.getContext(), queueAction);
+                drawBlocks[i] = drawBlock;
                 addView(drawBlocks[i]);
             }
         }

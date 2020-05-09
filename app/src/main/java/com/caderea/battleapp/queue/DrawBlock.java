@@ -17,7 +17,7 @@ class DrawBlock extends View {
     private int right;
     private int bottom;
 
-    public DrawBlock(Context context, QueueAction queueAction, int backgroundColor) {
+    public DrawBlock(Context context, QueueAction queueAction) {
         super(context);
         this.queueAction = queueAction;
 
@@ -26,7 +26,7 @@ class DrawBlock extends View {
         textPaint.setTextSize(getHeight() >> 1);
 
         backgroundPaint = new Paint();
-        backgroundPaint.setColor(backgroundColor);
+        backgroundPaint.setColor(queueAction.getColor());
     }
 
     @Override
