@@ -1,17 +1,13 @@
 package com.caderea.battleapp.view;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import androidx.annotation.Nullable;
 import com.caderea.battleapp.R;
 import com.caderea.battleapp.queue.BattleQueue;
 import com.caderea.battleapp.queue.QueueDrawer;
-
-import java.util.List;
 
 public class BattleViewGroup extends ViewGroup {
 
@@ -20,6 +16,9 @@ public class BattleViewGroup extends ViewGroup {
     private ProgressBar tickProgress;
     private BattleDrawArea battleDrawArea;
     private BattleInputArea battleInputArea;
+
+    private int topBarHeight = 150;
+    private int inputAreaHeight = 400;
 
     public BattleViewGroup(Context context) {
         this(context, null);
@@ -62,8 +61,6 @@ public class BattleViewGroup extends ViewGroup {
         int totalHeight = MeasureSpec.getSize(heightMeasureSpec);
 
         int oneFifthWidth = totalWidth / 5;
-        int topBarHeight = 150;
-        int inputAreaHeight = 300;
         int queueHeight  = totalHeight - topBarHeight - inputAreaHeight;
         int battleDrawWidth = totalWidth - (2 * oneFifthWidth);
 
@@ -81,36 +78,38 @@ public class BattleViewGroup extends ViewGroup {
         int width = right - left;
         int height = bottom - top;
 
+        int oneFifthWidth = width / 5;
+
         int tickLeft = 0;
         int tickTop = 0;
         int tickRight = width;
-        int tickBottom = 100;
+        int tickBottom = topBarHeight;
         tickProgress.layout(tickLeft, tickTop, tickRight, tickBottom);
 
-        // queues 20% of each side
-        int q1Left = 0;
-        int q1Top = 100;
-        int q1Right = q1Left + width / 5;
-        int q1Bottom = height - 100;
-        p1queue.layout(q1Left, q1Top, q1Right, q1Bottom);
-
-        int q2Left = right - width / 5;
-        int q2Top = 100;
-        int q2Right = right;
-        int q2Bottom = height - 100;
-        p2queue.layout(q2Left, q2Top, q2Right, q2Bottom);
-
-        int drawAreaLeft = q1Right + 1;
-        int drawAreaTop = 100;
-        int drawAreaRight = q2Left - 1;
-        int drawAreaBottom = height - 100;
-        battleDrawArea.layout(drawAreaLeft, drawAreaTop, drawAreaRight, drawAreaBottom);
-
         int inputAreaLeft = left;
-        int inputAreaTop = height - 99;
+        int inputAreaTop = height - inputAreaHeight;
         int inputAreaRight = right;
         int inputAreaBottom = height;
         battleInputArea.layout(inputAreaLeft, inputAreaTop, inputAreaRight, inputAreaBottom);
+
+        // queues 20% of each side
+        int q1Left = 0;
+        int q1Top = topBarHeight;
+        int q1Right = q1Left + oneFifthWidth;
+        int q1Bottom = inputAreaTop;
+        p1queue.layout(q1Left, q1Top, q1Right, q1Bottom);
+
+        int q2Left = right - oneFifthWidth;
+        int q2Top = topBarHeight;
+        int q2Right = right;
+        int q2Bottom = inputAreaTop;
+        p2queue.layout(q2Left, q2Top, q2Right, q2Bottom);
+
+        int drawAreaLeft = q1Right + 1;
+        int drawAreaTop = topBarHeight;
+        int drawAreaRight = q2Left - 1;
+        int drawAreaBottom = inputAreaTop;
+        battleDrawArea.layout(drawAreaLeft, drawAreaTop, drawAreaRight, drawAreaBottom);
 
     }
 }
