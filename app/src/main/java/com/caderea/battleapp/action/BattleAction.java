@@ -1,10 +1,12 @@
 package com.caderea.battleapp.action;
 
 import com.caderea.battleapp.fighter.Fighter;
+import lombok.Getter;
 
 /**
  * Created by Cade on 8/4/2014.
  */
+@Getter
 public abstract class BattleAction {
     protected String name;
     protected int duration;
@@ -12,21 +14,12 @@ public abstract class BattleAction {
     public abstract String performAction(Fighter performer, Fighter target);
 
     protected BattleAction() {
-        name = "";
-        duration = 0;
+        this("", 0);
     }
 
     protected BattleAction(String name, int duration) {
         this.name = name;
         this.duration = duration;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getDuration() {
-        return duration;
     }
 
     public String toString() {
