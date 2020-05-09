@@ -24,7 +24,6 @@ class QueueDrawBlock extends View {
 
         textPaint = new Paint();
         textPaint.setColor(Color.BLACK);
-        textPaint.setTextSize(getHeight() >> 1);
 
         backgroundPaint = new Paint();
         backgroundPaint.setColor(queueAction.getColor());
@@ -48,6 +47,8 @@ class QueueDrawBlock extends View {
         this.top = top;
         this.right = right;
         this.bottom = bottom;
+
+        textPaint.setTextSize(getHeight() >> 1);
     }
 
 }
