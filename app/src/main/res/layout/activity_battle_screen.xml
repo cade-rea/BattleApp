@@ -3,31 +3,31 @@
 <com.caderea.battleapp.view.BattleViewGroup
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/battleViewGroup"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
     <com.caderea.battleapp.queue.QueueDrawer
             android:id="@+id/player1QDrawer"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
     <com.caderea.battleapp.queue.QueueDrawer
             android:id="@+id/player2QDrawer"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
     <ProgressBar
             android:id="@+id/tickProgressBar"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:progress="50"/>
 
     <com.caderea.battleapp.view.BattleDrawArea
         android:id="@+id/battleDrawArea"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"/>
+        android:layout_width="match_parent"/>
 
     <com.caderea.battleapp.view.BattleInputArea
         android:id="@+id/battle_buttons"
