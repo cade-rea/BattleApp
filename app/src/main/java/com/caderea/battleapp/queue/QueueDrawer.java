@@ -50,11 +50,11 @@ public class QueueDrawer extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         int blockHeight = getHeight() / BattleQueue.getMaxQueueSize();
-        int blockTop = top;
+        int blockTop = 0;
         for (QueueDrawBlock queueDrawBlock : queueDrawBlocks) {
             if (queueDrawBlock != null) {
-                blockTop += blockHeight;
                 queueDrawBlock.layout(0, blockTop, right, blockTop + blockHeight);
+                blockTop += blockHeight;
             }
         }
     }
