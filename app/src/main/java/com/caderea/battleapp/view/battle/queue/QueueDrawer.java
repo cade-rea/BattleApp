@@ -1,4 +1,4 @@
-package com.caderea.battleapp.queue;
+package com.caderea.battleapp.view.battle.queue;
 
 import android.content.Context;
 import android.graphics.Canvas;

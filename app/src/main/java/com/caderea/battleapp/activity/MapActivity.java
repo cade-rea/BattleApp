@@ -1,7 +1,7 @@
 package com.caderea.battleapp.activity;
 
 import com.caderea.battleapp.core.Map;
-import com.caderea.battleapp.view.MapView;
+import com.caderea.battleapp.view.map.MapView;
 
 import android.app.Activity;
 import android.content.Intent;

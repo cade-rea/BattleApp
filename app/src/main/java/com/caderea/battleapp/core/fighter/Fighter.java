@@ -1,9 +1,9 @@
-package com.caderea.battleapp.fighter;
+package com.caderea.battleapp.core.fighter;
 
-import com.caderea.battleapp.action.Attack;
-import com.caderea.battleapp.action.BattleAction;
-import com.caderea.battleapp.action.Heal;
-import com.caderea.battleapp.queue.BattleQueue;
+import com.caderea.battleapp.core.action.Attack;
+import com.caderea.battleapp.core.action.BattleAction;
+import com.caderea.battleapp.core.action.Heal;
+import com.caderea.battleapp.core.BattleQueue;
 
 /**
  * Created by Cade on 7/31/2014.

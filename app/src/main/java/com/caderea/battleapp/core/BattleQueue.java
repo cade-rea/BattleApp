@@ -1,4 +1,6 @@
-package com.caderea.battleapp.queue;
+package com.caderea.battleapp.core;
+
+import com.caderea.battleapp.core.action.BattleAction;
 
 import java.util.Collection;
 import java.util.Iterator;

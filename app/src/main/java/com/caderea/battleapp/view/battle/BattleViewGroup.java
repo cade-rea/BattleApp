@@ -1,4 +1,4 @@
-package com.caderea.battleapp.view;
+package com.caderea.battleapp.view.battle;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import androidx.annotation.Nullable;
 import com.caderea.battleapp.R;
-import com.caderea.battleapp.queue.BattleQueue;
-import com.caderea.battleapp.queue.QueueDrawer;
+import com.caderea.battleapp.core.BattleQueue;
+import com.caderea.battleapp.view.battle.queue.QueueDrawer;
 
 public class BattleViewGroup extends ViewGroup {
 

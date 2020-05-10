@@ -1,6 +1,4 @@
-package com.caderea.battleapp.fighter;
-
-import com.caderea.battleapp.queue.QueueAction;
+package com.caderea.battleapp.core.fighter;
 
 /**
  * Created by cade-home on 6/8/16.

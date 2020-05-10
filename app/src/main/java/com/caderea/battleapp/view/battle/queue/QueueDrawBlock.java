@@ -1,4 +1,4 @@
-package com.caderea.battleapp.queue;
+package com.caderea.battleapp.view.battle.queue;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.caderea.battleapp.view.BattleViewGroup
+<com.caderea.battleapp.view.battle.BattleViewGroup
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/battleViewGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-    <com.caderea.battleapp.queue.QueueDrawer
+    <com.caderea.battleapp.view.battle.queue.QueueDrawer
             android:id="@+id/player1QDrawer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-    <com.caderea.battleapp.queue.QueueDrawer
+    <com.caderea.battleapp.view.battle.queue.QueueDrawer
             android:id="@+id/player2QDrawer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -24,12 +24,12 @@
             android:layout_height="wrap_content"
             android:progress="50"/>
 
-    <com.caderea.battleapp.view.BattleDrawArea
+    <com.caderea.battleapp.view.battle.BattleDrawArea
         android:id="@+id/battleDrawArea"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"/>
 
-    <com.caderea.battleapp.view.BattleInputArea
+    <com.caderea.battleapp.view.battle.BattleInputArea
         android:id="@+id/battle_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -69,6 +69,6 @@
             android:text="Stop"
             android:onClick="buttonPushed"/>
 
-    </com.caderea.battleapp.view.BattleInputArea>
+    </com.caderea.battleapp.view.battle.BattleInputArea>
 
-</com.caderea.battleapp.view.BattleViewGroup>
+</com.caderea.battleapp.view.battle.BattleViewGroup>
