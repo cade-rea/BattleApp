@@ -6,34 +6,41 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
+import com.caderea.battleapp.core.action.BattleAction;
+import org.apache.commons.collections4.iterators.LoopingIterator;
+
+import java.util.Arrays;
 
 @SuppressLint("ViewConstructor")
-class QueueDrawBlock extends View {
+class QueueItemDrawBlock extends View {
+    private static final LoopingIterator<Integer> colorIterator =
+            new LoopingIterator<>(Arrays.asList(Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN));
+
+    private final BattleAction battleAction;
     private final Paint backgroundPaint;
     private final Paint textPaint;
-    private final QueueAction queueAction;
 
     private int left;
     private int top;
     private int right;
     private int bottom;
 
-    public QueueDrawBlock(Context context, QueueAction queueAction) {
+    public QueueItemDrawBlock(Context context, BattleAction battleAction) {
         super(context);
-        this.queueAction = queueAction;
+        this.battleAction = battleAction;
 
         textPaint = new Paint();
         textPaint.setColor(Color.BLACK);
 
         backgroundPaint = new Paint();
-        backgroundPaint.setColor(queueAction.getColor());
+        backgroundPaint.setColor(colorIterator.next());
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
 
         canvas.drawRect(left, top, right, bottom, backgroundPaint);
-        canvas.drawText(queueAction.getBattleAction().getName(), left + 5, bottom, textPaint);
+        canvas.drawText(battleAction.getName(), left + 5, bottom, textPaint);
     }
 
     @Override

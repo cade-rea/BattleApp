@@ -189,7 +189,7 @@ public class Battle implements Runnable {
         Log.d(TAG,"queing action" + action +"::" + fighter1.getActions()[action]);
 
             if (fighter1.getActions()[action] != null) {
-                fighter1.getQueue().offer(new QueueAction(fighter1.getActions()[action]));
+                fighter1.getQueue().offer(fighter1.getActions()[action]);
             }
     }
 
