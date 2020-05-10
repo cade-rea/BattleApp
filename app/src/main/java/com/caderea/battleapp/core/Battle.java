@@ -1,13 +1,12 @@
 package com.caderea.battleapp.core;
 
-import com.caderea.battleapp.activity.BattleActivity;
-import com.caderea.battleapp.environment.Environment;
-import com.caderea.battleapp.fighter.EnemyFighter;
-import com.caderea.battleapp.fighter.Fighter;
-import com.caderea.battleapp.queue.QueueAction;
-
 import android.os.SystemClock;
 import android.util.Log;
+import com.caderea.battleapp.activity.BattleActivity;
+import com.caderea.battleapp.core.environment.Environment;
+import com.caderea.battleapp.core.fighter.EnemyFighter;
+import com.caderea.battleapp.core.fighter.Fighter;
+import com.caderea.battleapp.view.battle.queue.QueueAction;
 
 /**
  * Created by Cade on 7/31/2014.

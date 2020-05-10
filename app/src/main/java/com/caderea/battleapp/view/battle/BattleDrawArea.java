@@ -1,4 +1,4 @@
-package com.caderea.battleapp.view;
+package com.caderea.battleapp.view.battle;
 
 import android.content.Context;
 import android.util.AttributeSet;

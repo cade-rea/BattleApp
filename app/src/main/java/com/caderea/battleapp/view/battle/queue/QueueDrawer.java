@@ -1,9 +1,10 @@
-package com.caderea.battleapp.queue;
+package com.caderea.battleapp.view.battle.queue;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
+import com.caderea.battleapp.core.BattleQueue;
 import lombok.Setter;
 
 /**

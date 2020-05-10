@@ -1,4 +1,4 @@
-package com.caderea.battleapp.view;
+package com.caderea.battleapp.view.map;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

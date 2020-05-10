@@ -12,10 +12,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import com.caderea.battleapp.R;
-import com.caderea.battleapp.action.BattleAction;
+import com.caderea.battleapp.core.action.BattleAction;
 import com.caderea.battleapp.core.Battle;
-import com.caderea.battleapp.queue.BattleQueue;
-import com.caderea.battleapp.view.BattleViewGroup;
+import com.caderea.battleapp.core.BattleQueue;
+import com.caderea.battleapp.view.battle.BattleViewGroup;
 
 import java.util.ArrayList;
 

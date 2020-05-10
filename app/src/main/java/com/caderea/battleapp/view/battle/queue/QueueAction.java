@@ -1,7 +1,7 @@
-package com.caderea.battleapp.queue;
+package com.caderea.battleapp.view.battle.queue;
 
 import android.graphics.Color;
-import com.caderea.battleapp.action.BattleAction;
+import com.caderea.battleapp.core.action.BattleAction;
 import lombok.Getter;
 import org.apache.commons.collections4.iterators.LoopingIterator;
 

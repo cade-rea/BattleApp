@@ -1,6 +1,6 @@
-package com.caderea.battleapp.fighter;
+package com.caderea.battleapp.core.fighter;
 
-import com.caderea.battleapp.queue.QueueAction;
+import com.caderea.battleapp.view.battle.queue.QueueAction;
 
 /**
  * Created by cade-home on 6/8/16.
@@ -12,8 +12,6 @@ public class EnemyFighter extends Fighter {
     }
 
     public void addAttackToQueue() {
-        queue.offer(new QueueAction(actions[0]));
-        queue.offer(new QueueAction(actions[0]));
         queue.offer(new QueueAction(actions[0]));
     }
 }

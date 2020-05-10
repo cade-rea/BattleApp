@@ -1,11 +1,9 @@
-package com.caderea.battleapp.queue;
+package com.caderea.battleapp.view.battle.queue;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import com.caderea.battleapp.R;
 
 /**
  * Created by Cade on 8/16/2014.

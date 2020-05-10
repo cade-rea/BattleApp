@@ -1,6 +1,6 @@
-package com.caderea.battleapp.action;
+package com.caderea.battleapp.core.action;
 
-import com.caderea.battleapp.fighter.Fighter;
+import com.caderea.battleapp.core.fighter.Fighter;
 import lombok.Getter;
 
 /**
