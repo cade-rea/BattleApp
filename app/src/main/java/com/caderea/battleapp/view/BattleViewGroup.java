@@ -18,7 +18,7 @@ public class BattleViewGroup extends ViewGroup {
     private BattleInputArea battleInputArea;
 
     private int topBarHeight = 150;
-    private int inputAreaHeight = 400;
+    private int inputAreaHeight = 550;
 
     public BattleViewGroup(Context context) {
         this(context, null);

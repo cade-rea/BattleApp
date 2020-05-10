@@ -10,6 +10,7 @@ import com.caderea.battleapp.R;
 public class BattleInputArea extends ViewGroup {
 
     private Button[] battleButtons = new Button[5];
+    private int bottomRowHeight = 100;
 
     public BattleInputArea(Context context) {
         super(context);
@@ -24,12 +25,23 @@ public class BattleInputArea extends ViewGroup {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
+        int buttonAreaHeight = height - bottomRowHeight;
+
         int quadrantWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width / 2, MeasureSpec.EXACTLY);
-        int quadrantHeightMeasureSpec = MeasureSpec.makeMeasureSpec(height / 2, MeasureSpec.EXACTLY);
+        int quadrantHeightMeasureSpec = MeasureSpec.makeMeasureSpec(buttonAreaHeight / 2, MeasureSpec.EXACTLY);
+
+        int bottomRowHeightMeasureSpec = MeasureSpec.makeMeasureSpec(bottomRowHeight, MeasureSpec.EXACTLY);
+        int bottomRowWidthMeasureSpec = MeasureSpec.makeMeasureSpec(width / 4, MeasureSpec.EXACTLY);
 
         int childCount = getChildCount();
         for (int i = 0; i < childCount; ++i) {
-            getChildAt(i).measure(quadrantWidthMeasureSpec, quadrantHeightMeasureSpec);
+            View child = getChildAt(i);
+
+            if (child.getId() == R.id.buttonStop) {
+                child.measure(bottomRowWidthMeasureSpec, bottomRowHeightMeasureSpec);
+            } else {
+                child.measure(quadrantWidthMeasureSpec, quadrantHeightMeasureSpec);
+            }
         }
 
         setMeasuredDimension(width, height);
@@ -42,8 +54,10 @@ public class BattleInputArea extends ViewGroup {
         int width = r - l;
         int height = b - t;
 
+        int buttonAreaBottom = height - bottomRowHeight;
+
         int halfWidth = width / 2;
-        int halfHeight = height / 2;
+        int halfHeight = buttonAreaBottom / 2;
 
         for (int i = 0; i < childCount; ++i) {
             View child = getChildAt(i);
@@ -66,19 +80,18 @@ public class BattleInputArea extends ViewGroup {
                 case R.id.button3:
                     buttonTop = halfHeight;
                     buttonRight = halfWidth;
-                    buttonBottom = b;
+                    buttonBottom = buttonAreaBottom;
                     break;
                 case R.id.button4:
                     buttonLeft = halfWidth;
                     buttonTop = halfHeight;
                     buttonRight = r;
-                    buttonBottom = b;
+                    buttonBottom = buttonAreaBottom;
                     break;
                 case R.id.buttonStop:
-                    buttonLeft = halfWidth / 2;
-                    buttonTop = halfHeight / 2;
-                    buttonRight = halfWidth + buttonLeft;
-                    buttonBottom = halfHeight + buttonTop;
+                    buttonTop = buttonAreaBottom;
+                    buttonRight = width / 4;
+                    buttonBottom = b;
                     break;
             }
 

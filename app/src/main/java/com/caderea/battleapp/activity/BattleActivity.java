@@ -11,10 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import com.caderea.battleapp.core.Battle;
 import com.caderea.battleapp.R;
 import com.caderea.battleapp.action.BattleAction;
+import com.caderea.battleapp.core.Battle;
 import com.caderea.battleapp.queue.BattleQueue;
 import com.caderea.battleapp.view.BattleViewGroup;
 
@@ -114,7 +113,7 @@ public class BattleActivity extends Activity {
 
         //change button 4 to return to the main menu
         Button btn = (Button)findViewById(R.id.buttonStop);
-        btn.setText("Return to Menu");
+        btn.setText("Return");
 
         final Activity thisBattleScreen = this;
 
