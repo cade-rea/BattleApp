@@ -1,0 +1,49 @@
+Index: app/src/main/java/com/caderea/battleapp/view/MapView.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.caderea.battleapp.view;\r\n\r\nimport android.content.Context;\r\nimport android.graphics.Canvas;\r\nimport android.graphics.Paint;\r\nimport android.view.View;\r\n\r\npublic class MapView extends View {\r\n\r\n    private float x, y, radius;\r\n    private Paint paint;\r\n\r\n    public MapView(Context context) {\r\n        super(context);\r\n        x=200;\r\n        y=200;\r\n        radius=100;\r\n        paint = new Paint();\r\n    }\r\n\r\n    @Override\r\n    protected void onDraw(Canvas canvas) {\r\n        canvas.drawCircle(x,y,radius,paint);\r\n    }\r\n\r\n    @Override\r\n    public float getX() {\r\n        return x;\r\n    }\r\n\r\n    @Override\r\n    public void setX(float x) {\r\n        this.x = x;\r\n        invalidate();\r\n    }\r\n\r\n    @Override\r\n    public float getY() {\r\n        return y;\r\n    }\r\n\r\n    @Override\r\n    public void setY(float y) {\r\n        this.y = y;\r\n    }\r\n\r\n    public float getRadius() {\r\n        return radius;\r\n    }\r\n\r\n    public void setRadius(float radius) {\r\n        this.radius = radius;\r\n    }\r\n\r\n    public Paint getPaint() {\r\n        return paint;\r\n    }\r\n\r\n    public void setPaint(Paint paint) {\r\n        this.paint = paint;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/caderea/battleapp/view/MapView.java	(revision 01a6257eb3596f0c61a7e2334b57bea5e8231929)
++++ app/src/main/java/com/caderea/battleapp/view/MapView.java	(date 1537421887830)
+@@ -12,9 +12,9 @@
+ 
+     public MapView(Context context) {
+         super(context);
+-        x=200;
+-        y=200;
+-        radius=100;
++        x=500;
++        y=500;
++        radius=10;
+         paint = new Paint();
+     }
+ 
+@@ -50,6 +50,7 @@
+ 
+     public void setRadius(float radius) {
+         this.radius = radius;
++        invalidate();
+     }
+ 
+     public Paint getPaint() {
+Index: app/src/main/java/com/caderea/battleapp/activity/MapActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.caderea.battleapp.activity;\r\n\r\nimport android.app.Activity;\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.os.Handler;\r\nimport android.support.annotation.Nullable;\r\nimport com.caderea.battleapp.core.Map;\r\nimport com.caderea.battleapp.view.MapView;\r\n\r\npublic class MapActivity extends Activity {\r\n\r\n    public Handler uiHandler;\r\n    private MapView mapView;\r\n    private Map map;\r\n\r\n    @Override\r\n    protected void onCreate(@Nullable Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        mapView = new MapView(this);\r\n        setContentView(mapView);\r\n\r\n        //this handler can be passed to other threads to refer to the UI thread\r\n        uiHandler = new Handler();\r\n\r\n        map = new Map(this);\r\n        (new Thread(map)).start();\r\n    }\r\n\r\n    public void moveCircle() {\r\n        mapView.setX(mapView.getX() + 50);\r\n    }\r\n\r\n    public void notifyDone() {\r\n        startActivity(new Intent(this, MainActivity.class));\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/caderea/battleapp/activity/MapActivity.java	(revision 01a6257eb3596f0c61a7e2334b57bea5e8231929)
++++ app/src/main/java/com/caderea/battleapp/activity/MapActivity.java	(date 1537421832902)
+@@ -28,7 +28,8 @@
+     }
+ 
+     public void moveCircle() {
+-        mapView.setX(mapView.getX() + 50);
++//        mapView.setX(mapView.getX() + 50);
++        mapView.setRadius(mapView.getRadius() + 10);
+     }
+ 
+     public void notifyDone() {
