@@ -4,13 +4,11 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import com.caderea.battleapp.R;
 
 public class BattleInputArea extends ViewGroup {
 
-    private Button[] battleButtons = new Button[5];
-    private int bottomRowHeight = 100;
+    private final int bottomRowHeight = 100;
 
     public BattleInputArea(Context context) {
         super(context);

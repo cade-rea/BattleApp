@@ -11,12 +11,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import androidx.annotation.NonNull;
 import com.caderea.battleapp.R;
-import com.caderea.battleapp.core.action.BattleAction;
 import com.caderea.battleapp.core.Battle;
 import com.caderea.battleapp.core.BattleQueue;
+import com.caderea.battleapp.core.action.BattleAction;
+import com.caderea.battleapp.core.fighter.FighterService;
 import com.caderea.battleapp.view.battle.BattleViewGroup;
+import lombok.Getter;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class BattleActivity extends Activity {
@@ -29,7 +33,25 @@ public class BattleActivity extends Activity {
     private float dpHeight;
     private float dpWidth;
 
-    public Handler uiHandler;
+    @Getter
+    private final UIHandler uiHandler = new UIHandler(this);
+
+    //this handler can be passed to other threads to refer to the UI thread
+    public static class UIHandler extends Handler {
+
+        private final WeakReference<BattleActivity> battleActivityRef;
+
+        public UIHandler(BattleActivity battleActivity) {
+            this.battleActivityRef = new WeakReference<>(battleActivity);
+        }
+
+        //responds to uiHandler.sendMessage()
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            BattleActivity battleActivity = this.battleActivityRef.get();
+            battleActivity.log((String)msg.obj);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,21 +73,13 @@ public class BattleActivity extends Activity {
 
         battleViewGroup = findViewById(R.id.battleViewGroup);
 
-        //this handler can be passed to other threads to refer to the UI thread
-        uiHandler = new Handler() {
-            //responds to uiHandler.sendMessage()
-            public void handleMessage(Message msg) {
-                update((String)msg.obj);
-            }
-        };
-
         //create a new Battle and pass this activity
-        battle = new Battle(this);
+        battle = new Battle(new FighterService(), this);
         //start the battle
         (new Thread(battle)).start();
     }
 
-    public void update(String msg) {
+    public void log(String msg) {
         while(output.size() > 9) {
             output.remove(0);
         }
@@ -99,7 +113,7 @@ public class BattleActivity extends Activity {
                 stopBattle();
                 break;
             default:
-                update("default");
+                log("default");
                 break;
         }
     }
@@ -109,20 +123,12 @@ public class BattleActivity extends Activity {
     }
 
     public void notifyDone() {
-        update("Battle Finished");
+        log("Battle Finished");
 
-        //change button 4 to return to the main menu
-        Button btn = (Button)findViewById(R.id.buttonStop);
+        //change button to return to the main menu
+        Button btn = findViewById(R.id.buttonStop);
         btn.setText("Return");
-
-        final Activity thisBattleScreen = this;
-
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(thisBattleScreen, MainActivity.class));
-            }
-        });
+        btn.setOnClickListener(view -> startActivity(new Intent(this, MainActivity.class)));
     }
 
     public void updateButtons(BattleAction[] buttons) {

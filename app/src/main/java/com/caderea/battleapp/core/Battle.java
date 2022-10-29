@@ -6,13 +6,21 @@ import com.caderea.battleapp.activity.BattleActivity;
 import com.caderea.battleapp.core.environment.Environment;
 import com.caderea.battleapp.core.fighter.EnemyFighter;
 import com.caderea.battleapp.core.fighter.Fighter;
-import com.caderea.battleapp.view.battle.queue.QueueAction;
+import com.caderea.battleapp.core.fighter.FighterService;
 
 /**
  * Created by Cade on 7/31/2014.
  */
 public class Battle implements Runnable {
+
     private static final int MAGIC_TICK_FACTOR = 5;
+    private static final long MILLISECONDS_PER_TICK = 1000;
+    private static final long SUBTICKS_PER_TICK = 4;
+    private static final long TICK_SLEEP_DURATION = MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * MAGIC_TICK_FACTOR);
+
+    private final FighterService fighterService;
+    private final
+
     private Fighter fighter1;
     private EnemyFighter fighter2;
     private Environment environment;
@@ -22,13 +30,8 @@ public class Battle implements Runnable {
     private String status;
     private boolean going;
 
-    private static final String TAG = "BATTLE";
-
-    private static long MILLISECONDS_PER_TICK = 1000;
-    private static long SUBTICKS_PER_TICK = 4;
-    private static final long TICK_SLEEP_DURATION = MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * MAGIC_TICK_FACTOR);
-
-    public Battle(BattleActivity battleActivity) {
+    public Battle(FighterService fighterService, BattleActivity battleActivity) {
+        this.fighterService = fighterService;
         this.battleActivity = battleActivity;
         status = "";
 
@@ -58,7 +61,7 @@ public class Battle implements Runnable {
     }
 
     private void initialize() {
-        Log.d(TAG,"running");
+        Log.d(BattleConstants.TAG_BATTLE,"running");
         //set this thread to background priority
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -73,7 +76,7 @@ public class Battle implements Runnable {
 
     private void mainLoop() {
         //main game loop
-        Log.d(TAG, "starting loop");
+        Log.d(BattleConstants.TAG_BATTLE, "starting loop");
         while (going) {
             refreshQueues();
 
@@ -94,7 +97,7 @@ public class Battle implements Runnable {
     }
 
     private void doBattleTick() {
-        report("Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " +
+        log("Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " +
                 fighter2.getName() + ":" + fighter2.getHealth());
 
         doFighterLoop();
@@ -107,13 +110,13 @@ public class Battle implements Runnable {
 
         for (Fighter fighter: fighters) {
             if (fighter.getHealth() <= 0) {
-                report(fighter.getName() + " has died.");
+                log(fighter.getName() + " has died.");
                 going = false;
                 return;
             }
 
             if (fighter.getQueue().isNotEmpty()) {
-                report(fighter.performNextAction());
+                log(fighter.performNextAction());
             }
         }
     }
@@ -128,7 +131,7 @@ public class Battle implements Runnable {
     private void doNoTick() {
         //if a tick has not happened
         int st = battleClock.getProgress();
-        Log.d(TAG,"No tick. Subtick:" + st);
+        Log.d(BattleConstants.TAG_BATTLE,"No tick. Subtick:" + st);
         battleActivity.updateTickProgress(st);
 
         SystemClock.sleep(TICK_SLEEP_DURATION);
@@ -141,7 +144,7 @@ public class Battle implements Runnable {
      battleActivity.uiHandler.post(new Runnable() {
         @Override
         public void run() {
-            battleActivity.METHOD_TO_CALL(r);
+            battleActivity.METHOD_TO_CALL();
         }
         });
 
@@ -150,57 +153,28 @@ public class Battle implements Runnable {
      */
 
 
-    private void report(final String r) {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.update(r);
-            }
-        });
+    private void log(final String r) {
+        battleActivity.getUiHandler().post(() -> battleActivity.log(r));
     }
 
     private void notifyDone() {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.notifyDone();
-            }
-        });
+        battleActivity.getUiHandler().post(() -> battleActivity.notifyDone());
     }
 
     private void updateTickProgress(final int progress) {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.updateTickProgress(progress);
-            }
-        });
+        battleActivity.getUiHandler().post(() -> battleActivity.updateTickProgress(progress));
     }
 
     private void updateButtons() {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.updateButtons(fighter1.getActions());
-            }
-        });
+        battleActivity.getUiHandler().post(() -> battleActivity.updateButtons(fighter1.getActions()));
     }
 
     public void queueAction(int action) {
-        Log.d(TAG,"queing action" + action +"::" + fighter1.getActions()[action]);
-
-            if (fighter1.getActions()[action] != null) {
-                fighter1.getQueue().offer(new QueueAction(fighter1.getActions()[action]));
-            }
+        fighterService.queueAction(fighter1, action);
     }
 
     private void refreshQueues() {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.refreshQueues();
-            }
-        });
+        battleActivity.getUiHandler().post(() -> battleActivity.refreshQueues());
     }
 
     public void stop() {
