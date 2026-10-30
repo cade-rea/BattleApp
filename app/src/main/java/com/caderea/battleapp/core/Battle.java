@@ -2,7 +2,7 @@ package com.caderea.battleapp.core;
 
 import android.os.SystemClock;
 import android.util.Log;
-import com.caderea.battleapp.activity.BattleActivity;
+import com.caderea.battleapp.core.action.BattleAction;
 import com.caderea.battleapp.core.environment.Environment;
 import com.caderea.battleapp.core.fighter.EnemyFighter;
 import com.caderea.battleapp.core.fighter.Fighter;
@@ -12,25 +12,30 @@ import com.caderea.battleapp.view.battle.queue.QueueAction;
  * Created by Cade on 7/31/2014.
  */
 public class Battle implements Runnable {
-    private static final int MAGIC_TICK_FACTOR = 5;
-    private Fighter fighter1;
-    private EnemyFighter fighter2;
-    private Environment environment;
-    private Clock battleClock;
-    private int gameTick;
-    private BattleActivity battleActivity;
-    private String status;
-    private boolean going;
+    public static final long DEFAULT_MILLISECONDS_PER_TICK = 1000;
+
+    private static final long SUBTICKS_PER_TICK = 4;
+    // how many times per subtick the loop checks the clock
+    private static final long CHECKS_PER_SUBTICK = 5;
 
     private static final String TAG = "BATTLE";
 
-    private static long MILLISECONDS_PER_TICK = 1000;
-    private static long SUBTICKS_PER_TICK = 4;
-    private static final long TICK_SLEEP_DURATION = MILLISECONDS_PER_TICK / (SUBTICKS_PER_TICK * MAGIC_TICK_FACTOR);
+    private final Fighter fighter1;
+    private final EnemyFighter fighter2;
+    private final Environment environment;
+    private final Clock battleClock;
+    private final BattleListener listener;
+    private final long tickSleepDuration;
 
-    public Battle(BattleActivity battleActivity) {
-        this.battleActivity = battleActivity;
-        status = "";
+    private int gameTick;
+    private volatile boolean going;
+
+    public Battle(BattleListener listener) {
+        this(listener, DEFAULT_MILLISECONDS_PER_TICK);
+    }
+
+    public Battle(BattleListener listener, long millisecondsPerTick) {
+        this.listener = listener;
 
         fighter1 = loadFighter();
         fighter2 = new EnemyFighter();
@@ -38,11 +43,12 @@ public class Battle implements Runnable {
         fighter1.setTarget(fighter2);
         fighter2.setTarget(fighter1);
 
-        this.battleActivity.setQueues(fighter1.getQueue(), fighter2.getQueue());
+        this.listener.setQueues(fighter1.getQueue(), fighter2.getQueue());
 
         environment = new Environment();
 
-        battleClock = new Clock(MILLISECONDS_PER_TICK, SUBTICKS_PER_TICK);
+        battleClock = new Clock(millisecondsPerTick, SUBTICKS_PER_TICK);
+        tickSleepDuration = Math.max(1, millisecondsPerTick / (SUBTICKS_PER_TICK * CHECKS_PER_SUBTICK));
 
         going = true;
         gameTick = 0;
@@ -63,7 +69,7 @@ public class Battle implements Runnable {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
         //setup user actions
-        updateButtons();
+        listener.updateButtons(fighter1.getActions());
 
         //start clock
         gameTick = 1;
@@ -75,13 +81,10 @@ public class Battle implements Runnable {
         //main game loop
         Log.d(TAG, "starting loop");
         while (going) {
-            refreshQueues();
+            listener.refreshQueues();
 
             if (gameTick < battleClock.getTick()) {
-                ++gameTick;
-
-                doBattleTick();
-
+                tick();
             } else {
                 doNoTick();
             }
@@ -90,30 +93,42 @@ public class Battle implements Runnable {
 
     private void endBattle() {
         battleClock.stop();
-        notifyDone();
+        listener.notifyDone();
     }
 
-    private void doBattleTick() {
+    /**
+     * Advances the battle by one tick. The main loop calls this whenever the clock ticks.
+     */
+    void tick() {
+        ++gameTick;
+
         report("Tick:"+ gameTick + " " + fighter1.getName() + ":" + fighter1.getHealth() + " :: " +
                 fighter2.getName() + ":" + fighter2.getHealth());
 
         doFighterLoop();
 
-        botLogic();
+        if (going) {
+            botLogic();
+        }
     }
 
     private void doFighterLoop() {
         Fighter[] fighters = {fighter1, fighter2};
 
         for (Fighter fighter: fighters) {
-            if (fighter.getHealth() <= 0) {
-                report(fighter.getName() + " has died.");
-                going = false;
-                return;
+            if (fighter.getQueue().isNotEmpty()) {
+                String result = fighter.performNextAction();
+                if (result != null) {
+                    report(result);
+                }
             }
 
-            if (fighter.getQueue().isNotEmpty()) {
-                report(fighter.performNextAction());
+            // check right after each action so a fighter that just died doesn't get to act
+            Fighter target = fighter.getTarget();
+            if (target.getHealth() <= 0) {
+                report(target.getName() + " has died.");
+                going = false;
+                return;
             }
         }
     }
@@ -127,84 +142,37 @@ public class Battle implements Runnable {
 
     private void doNoTick() {
         //if a tick has not happened
-        int st = battleClock.getProgress();
-        Log.d(TAG,"No tick. Subtick:" + st);
-        battleActivity.updateTickProgress(st);
+        listener.updateTickProgress(battleClock.getProgress());
 
-        SystemClock.sleep(TICK_SLEEP_DURATION);
+        SystemClock.sleep(tickSleepDuration);
     }
 
-    /***
-    Screen Reporting
-     To call methods in BattleActivity, use:
-
-     battleActivity.uiHandler.post(new Runnable() {
-        @Override
-        public void run() {
-            battleActivity.METHOD_TO_CALL(r);
-        }
-        });
-
-
-     These methods update the screen by calling corresponding methods in BattleActivity
-     */
-
-
-    private void report(final String r) {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.update(r);
-            }
-        });
-    }
-
-    private void notifyDone() {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.notifyDone();
-            }
-        });
-    }
-
-    private void updateTickProgress(final int progress) {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.updateTickProgress(progress);
-            }
-        });
-    }
-
-    private void updateButtons() {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.updateButtons(fighter1.getActions());
-            }
-        });
+    private void report(String message) {
+        listener.update(message);
     }
 
     public void queueAction(int action) {
-        Log.d(TAG,"queing action" + action +"::" + fighter1.getActions()[action]);
+        BattleAction[] actions = fighter1.getActions();
 
-            if (fighter1.getActions()[action] != null) {
-                fighter1.getQueue().offer(new QueueAction(fighter1.getActions()[action]));
-            }
-    }
-
-    private void refreshQueues() {
-        battleActivity.uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                battleActivity.refreshQueues();
-            }
-        });
+        if (action >= 0 && action < actions.length && actions[action] != null) {
+            fighter1.getQueue().offer(new QueueAction(actions[action]));
+        }
     }
 
     public void stop() {
         going = false;
+    }
+
+    public boolean isOver() {
+        return !going;
+    }
+
+    public Fighter getPlayer() {
+        return fighter1;
+    }
+
+    public EnemyFighter getEnemy() {
+        return fighter2;
     }
 
     private Fighter loadFighter() {

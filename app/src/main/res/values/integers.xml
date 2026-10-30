@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Length of one battle tick in milliseconds. Try 1000, 1500 and 2000 when playtesting. -->
+    <integer name="tick_length_ms">1000</integer>
+
+</resources>

@@ -3,16 +3,22 @@ package com.caderea.battleapp.core;
 
 import com.caderea.battleapp.view.battle.queue.QueueAction;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 
 /**
  * Created by Cade on 8/4/2014.
+ *
+ * Fixed-size ring buffer of queued actions. The UI thread adds and reads actions while the
+ * battle thread removes them, so every method that touches the buffer is synchronized.
  */
 public class BattleQueue implements Queue<QueueAction> {
 
-    private static int MAX_QUEUE_SIZE = 10;
+    private static final int MAX_QUEUE_SIZE = 10;
 
     private QueueAction[] queue;
     private int head;
@@ -26,14 +32,6 @@ public class BattleQueue implements Queue<QueueAction> {
         full = false;
     }
 
-    private int getPlace() {
-        int place = head + position;
-        if(place >= MAX_QUEUE_SIZE)
-            place -= MAX_QUEUE_SIZE;
-
-        return place;
-    }
-
     @Override
     public boolean add(QueueAction queueAction) {
         return offer(queueAction);
@@ -45,7 +43,7 @@ public class BattleQueue implements Queue<QueueAction> {
     }
 
     @Override
-    public boolean offer(QueueAction queueAction) {
+    public synchronized boolean offer(QueueAction queueAction) {
         if(full)
             return false;
 
@@ -67,7 +65,7 @@ public class BattleQueue implements Queue<QueueAction> {
     }
 
     @Override
-    public QueueAction poll() {
+    public synchronized QueueAction poll() {
         if(isEmpty())
             return null;
 
@@ -88,37 +86,39 @@ public class BattleQueue implements Queue<QueueAction> {
     }
 
     @Override
-    public QueueAction peek() {
+    public synchronized QueueAction peek() {
         return queue[head];
     }
 
     @Override
-    public boolean isEmpty() {
+    public synchronized boolean isEmpty() {
         return ((head == position) && !full);
     }
 
     //possibly more useful than isEmpty for Battle
-    public boolean isNotEmpty() {
+    public synchronized boolean isNotEmpty() {
         return (full || (head != position));
     }
 
+    /**
+     * Iterates from head to tail without removing anything.
+     */
     @Override
     public Iterator<QueueAction> iterator() {
         return new Iterator<QueueAction>() {
+            private int index = 0;
+
             @Override
             public boolean hasNext() {
-                return !isEmpty();
+                return index < size();
             }
 
             @Override
             public QueueAction next() {
-                return poll();
-            }
+                if (!hasNext())
+                    throw new NoSuchElementException();
 
-            @Override
-            public void remove() {
-                //this method doesn't do anything
-                return;
+                return get(index++);
             }
         };
     }
@@ -139,26 +139,37 @@ public class BattleQueue implements Queue<QueueAction> {
     }
 
     @Override
-    public int size() {
+    public synchronized int size() {
+        if(full)
+            return MAX_QUEUE_SIZE;
+
         int size = position - head;
-        if(size <= 0)
+        if(size < 0)
             size += MAX_QUEUE_SIZE;
 
         return size;
     }
 
     @Override
-    public Object[] toArray() {
-        return queue;
+    public synchronized Object[] toArray() {
+        return toList().toArray();
     }
 
     @Override
-    public <T> T[] toArray(T[] ts) {
-        return null;
+    public synchronized <T> T[] toArray(T[] ts) {
+        return toList().toArray(ts);
+    }
+
+    private List<QueueAction> toList() {
+        List<QueueAction> list = new ArrayList<>(size());
+        for (int i = 0; i < size(); ++i) {
+            list.add(get(i));
+        }
+        return list;
     }
 
     @Override
-    public void clear() {
+    public synchronized void clear() {
         queue = new QueueAction[MAX_QUEUE_SIZE];
         head = position = 0;
         full = false;
@@ -174,7 +185,7 @@ public class BattleQueue implements Queue<QueueAction> {
         return false;
     }
 
-    public String toString() {
+    public synchronized String toString() {
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < MAX_QUEUE_SIZE; ++i) {
             sb.append("[" + i + "] " + queue[i]);
@@ -182,14 +193,11 @@ public class BattleQueue implements Queue<QueueAction> {
         return sb.toString();
     }
 
-    public String getName(int index) {
-        int target = head + index;
+    public synchronized String getName(int index) {
+        QueueAction queueAction = get(index);
 
-        if (target >= MAX_QUEUE_SIZE)
-            target -= MAX_QUEUE_SIZE;
-
-        if (queue[target] != null)
-            return queue[target].toString();
+        if (queueAction != null)
+            return queueAction.toString();
 
         return "empty";
     }
@@ -198,18 +206,18 @@ public class BattleQueue implements Queue<QueueAction> {
      * Retrieves the QueueAction at the given queue index.
      * The index is relative to head, eg, get(0) == head
      * @param index
-     * @return
+     * @return the action, or null if index is outside the queued actions
      */
-    public QueueAction get(int index) {
+    public synchronized QueueAction get(int index) {
+        if (index < 0 || index >= size())
+            return null;
+
         int target = head + index;
 
         if (target >= MAX_QUEUE_SIZE)
             target -= MAX_QUEUE_SIZE;
 
-        if (queue[target] != null)
-            return queue[target];
-
-        return null;
+        return queue[target];
     }
 
     public static int getMaxQueueSize() {

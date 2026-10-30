@@ -27,7 +27,17 @@
     <com.caderea.battleapp.view.battle.BattleDrawArea
         android:id="@+id/battleDrawArea"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"/>
+        android:layout_width="match_parent">
+
+        <TextView
+            android:id="@+id/battleLog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            android:padding="8dp"
+            android:textSize="12sp"/>
+
+    </com.caderea.battleapp.view.battle.BattleDrawArea>
 
     <com.caderea.battleapp.view.battle.BattleInputArea
         android:id="@+id/battle_buttons"
