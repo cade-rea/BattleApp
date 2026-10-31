@@ -4,6 +4,7 @@ import com.caderea.battleapp.core.color.Affinity
 import com.caderea.battleapp.core.color.RgbColor
 import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.fighter.Fighter
+import com.caderea.battleapp.core.technique.TechniqueRolls
 import kotlin.math.roundToInt
 
 /**
@@ -11,15 +12,21 @@ import kotlin.math.roundToInt
  * and blocks part of every attack that shares its color. A guard in the wrong color blocks
  * nothing, so guarding is a read of the opponent's telegraph.
  */
-class Guard(name: String = "Guard", color: RgbColor) : BattleAction(name, color) {
+class Guard(
+    name: String = "Guard",
+    color: RgbColor,
+    rolls: TechniqueRolls = TechniqueRolls.NEUTRAL,
+) : BattleAction(name, color, rolls) {
 
     /**
      * The share of a matching attack this guard blocks when [performer] raises it: its
-     * support trait (green guards best), the performer's aura affinity and the light.
+     * support trait (green guards best), the technique's potency roll, the performer's aura
+     * affinity and the light.
      */
     fun strength(performer: Fighter, environment: Environment): Double =
         BASE_BLOCK *
             traits.support *
+            rolls.potency *
             Affinity.multiplier(color, performer.color) *
             environment.lightMultiplier(color)
 

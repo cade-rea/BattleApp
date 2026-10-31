@@ -32,6 +32,21 @@ class Battle(
     var landed: List<Landing> = emptyList()
         private set
 
+    /** Every action that has landed so far, oldest first. Progression counts XP from it. */
+    val history: List<Landing>
+        get() = _history
+
+    private val _history = mutableListOf<Landing>()
+
+    /** The fighter left standing, or null while the battle is on or if it was stopped. */
+    val winner: Fighter?
+        get() = when {
+            !isOver -> null
+            enemy.health <= 0 -> player
+            player.health <= 0 -> enemy
+            else -> null
+        }
+
     private val fighters = listOf(player, enemy)
 
     init {
@@ -65,6 +80,7 @@ class Battle(
         for ((fighter, action) in landing) {
             log += action.performAction(fighter, fighter.target, environment)
             landedNow += Landing(fighter, action)
+            _history += Landing(fighter, action)
 
             // check right after each action so a fighter that just died doesn't get to act
             val target = fighter.target
@@ -92,6 +108,10 @@ class Battle(
      * @return false if the queue was empty or the battle is over
      */
     fun cancelLast(): Boolean = !isOver && player.cancelLast()
+
+    /** The actions [fighter] has landed so far, oldest first. */
+    fun used(fighter: Fighter): List<BattleAction> =
+        _history.filter { it.performer === fighter }.map { it.action }
 
     fun stop() {
         isOver = true

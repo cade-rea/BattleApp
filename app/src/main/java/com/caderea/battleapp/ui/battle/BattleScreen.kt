@@ -48,10 +48,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caderea.battleapp.R
+import com.caderea.battleapp.ui.fighter.AuraGlow
+import com.caderea.battleapp.ui.fighter.LevelBar
+import com.caderea.battleapp.ui.technique.TechniqueCard
 import com.caderea.battleapp.ui.theme.BattleColors
 import com.caderea.battleapp.viewmodel.BattleUiState
 import com.caderea.battleapp.viewmodel.BattleViewModel
 import com.caderea.battleapp.viewmodel.Outcome
+import com.caderea.battleapp.viewmodel.RewardsState
 
 /**
  * The battle screen, drawn from [state] alone: the enemy on top, the shared timeline, the
@@ -139,7 +143,7 @@ fun BattleScreen(
         )
 
         AnimatedVisibility(state.outcome != null, enter = fadeIn(), exit = fadeOut()) {
-            state.outcome?.let { OutcomeOverlay(it, state.tick, onRematch, onExit) }
+            state.outcome?.let { OutcomeOverlay(it, state.tick, state.rewards, onRematch, onExit) }
         }
     }
 }
@@ -200,7 +204,13 @@ private fun TopBar(state: BattleUiState, tickFraction: Float, onTogglePause: () 
 }
 
 @Composable
-private fun OutcomeOverlay(outcome: Outcome, ticks: Int, onRematch: () -> Unit, onExit: () -> Unit) {
+private fun OutcomeOverlay(
+    outcome: Outcome,
+    ticks: Int,
+    rewards: RewardsState?,
+    onRematch: () -> Unit,
+    onExit: () -> Unit,
+) {
     Box(
         Modifier
             .fillMaxSize()
@@ -230,11 +240,55 @@ private fun OutcomeOverlay(outcome: Outcome, ticks: Int, onRematch: () -> Unit, 
             )
             Spacer(Modifier.height(4.dp))
             Text(stringResource(R.string.outcome_ticks, ticks), color = BattleColors.textMuted)
+            rewards?.let {
+                Spacer(Modifier.height(20.dp))
+                Rewards(it)
+            }
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onExit) { Text(stringResource(R.string.button_menu)) }
                 Button(onRematch, Modifier.testTag("rematch")) { Text(stringResource(R.string.button_rematch)) }
             }
+        }
+    }
+}
+
+/**
+ * What the battle earned: XP, the aura before and after (it shifts toward the colors used),
+ * the level, and any new technique.
+ */
+@Composable
+private fun Rewards(rewards: RewardsState) {
+    Column(Modifier.testTag("rewards"), horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AuraGlow(rewards.auraBefore, size = 28.dp)
+            Text("→", Modifier.padding(horizontal = 4.dp), color = BattleColors.textMuted)
+            AuraGlow(rewards.auraAfter, size = 36.dp)
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(
+                    stringResource(R.string.rewards_xp, rewards.xp),
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    if (rewards.levelsGained > 0) {
+                        stringResource(R.string.rewards_level_up) + " " + stringResource(R.string.rewards_level, rewards.level)
+                    } else {
+                        stringResource(R.string.rewards_level, rewards.level)
+                    },
+                    color = if (rewards.levelsGained > 0) BattleColors.text else BattleColors.textMuted,
+                    fontSize = 13.sp,
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        LevelBar(rewards.levelProgress, rewards.auraAfter, Modifier.width(200.dp))
+        rewards.newTechnique?.let { technique ->
+            Spacer(Modifier.height(16.dp))
+            Text(stringResource(R.string.rewards_new_technique), color = BattleColors.textMuted, fontSize = 12.sp)
+            Spacer(Modifier.height(6.dp))
+            TechniqueCard(technique, Modifier.fillMaxWidth())
         }
     }
 }

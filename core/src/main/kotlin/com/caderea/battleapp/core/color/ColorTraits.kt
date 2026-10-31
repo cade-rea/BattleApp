@@ -10,8 +10,8 @@ import kotlin.math.roundToInt
  * - blue is strong but slow
  * - green is efficient: cheaper, with stronger heals and guards
  *
- * All the swings are starting values to playtest. Random spread on top of these comes with
- * technique generation.
+ * All the swings are starting values to playtest. Each rolled technique adds its own random
+ * spread on top of these (see TechniqueRolls).
  */
 data class ColorTraits(
     /** Multiplies the base wind-up: below 1 is faster. */
@@ -24,12 +24,18 @@ data class ColorTraits(
     val support: Double,
 ) {
 
-    /** Ticks spent winding up before the technique lands, at least 1. */
+    /** Ticks spent winding up before the technique lands, from 1 to [MAX_WIND_UP_TICKS]. */
     val windUpTicks: Int
-        get() = (BASE_WIND_UP_TICKS * windUpFactor).roundToInt().coerceAtLeast(1)
+        get() = windUpTicks(roll = 1.0)
+
+    /** Wind-up ticks for a technique whose own roll stretches (above 1) or shortens its wind-up. */
+    fun windUpTicks(roll: Double): Int =
+        (BASE_WIND_UP_TICKS * windUpFactor * roll).roundToInt().coerceIn(1, MAX_WIND_UP_TICKS)
 
     companion object {
         const val BASE_WIND_UP_TICKS = 2
+        /** The slowest anything winds up, so the timeline always has room to show it. */
+        const val MAX_WIND_UP_TICKS = 3
         const val SPEED_SWING = 0.3
         const val STRENGTH_SWING = 0.2
         const val COST_SWING = 0.3

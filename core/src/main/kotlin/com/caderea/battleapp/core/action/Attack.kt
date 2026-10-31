@@ -5,18 +5,24 @@ import com.caderea.battleapp.core.color.RgbColor
 import com.caderea.battleapp.core.color.TypeWheel
 import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.fighter.Fighter
+import com.caderea.battleapp.core.technique.TechniqueRolls
 import kotlin.math.roundToInt
 
-class Attack(name: String = "Attack", color: RgbColor) : BattleAction(name, color) {
+class Attack(
+    name: String = "Attack",
+    color: RgbColor,
+    rolls: TechniqueRolls = TechniqueRolls.NEUTRAL,
+) : BattleAction(name, color, rolls) {
 
     /**
      * Damage against [target] before guards: the color's power after type matchups against
-     * the target's aura, times the color's strength trait, the performer's aura affinity and
-     * the light.
+     * the target's aura, times the color's strength trait, the technique's potency roll, the
+     * performer's aura affinity and the light.
      */
     fun damage(performer: Fighter, target: Fighter, environment: Environment): Int =
         (TypeWheel.typedPower(color, target.color) *
             traits.strength *
+            rolls.potency *
             Affinity.multiplier(color, performer.color) *
             environment.lightMultiplier(color)).roundToInt()
 

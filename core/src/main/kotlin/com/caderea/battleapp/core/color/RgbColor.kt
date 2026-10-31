@@ -1,5 +1,6 @@
 package com.caderea.battleapp.core.color
 
+import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -7,6 +8,7 @@ import kotlin.math.min
  * A color as a stat block: each channel (0-255) is power in that type, the sum of the
  * channels is total power, and the mix of the channels is the type.
  */
+@Serializable
 data class RgbColor(val red: Int, val green: Int, val blue: Int) {
 
     init {
@@ -84,8 +86,8 @@ data class RgbColor(val red: Int, val green: Int, val blue: Int) {
         private val CHANNEL_RANGE = 0..255
 
         /**
-         * The most total power a technique can have at the start. It will grow with the
-         * fighter's level once progression exists, and arenas with a level cap will lower it.
+         * The most total power a technique can have at level 1. It grows with the fighter's
+         * level (see Levels), and arenas with a level cap lower it again.
          */
         const val STARTING_POWER_BUDGET = 255
 

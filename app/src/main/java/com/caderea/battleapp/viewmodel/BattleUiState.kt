@@ -28,6 +28,8 @@ data class BattleUiState(
     val landed: List<LandedAction> = emptyList(),
     // null while the battle is on
     val outcome: Outcome? = null,
+    // what the player earned, once the battle is over; null when nothing is tracked
+    val rewards: RewardsState? = null,
 ) {
     val isOver: Boolean
         get() = outcome != null

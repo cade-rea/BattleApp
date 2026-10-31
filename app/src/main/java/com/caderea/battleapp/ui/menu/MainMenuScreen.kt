@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -32,13 +33,23 @@ import androidx.compose.ui.unit.sp
 import com.caderea.battleapp.R
 import com.caderea.battleapp.core.color.Channel
 import com.caderea.battleapp.ui.battle.TypeCycleLegend
+import com.caderea.battleapp.ui.fighter.FighterSummaryCard
 import com.caderea.battleapp.ui.battle.color
 import com.caderea.battleapp.ui.theme.BattleColors
 import com.caderea.battleapp.ui.theme.compose
 import com.caderea.battleapp.ui.theme.readable
+import com.caderea.battleapp.viewmodel.FighterSummary
 
+/**
+ * The title, the player's fighter, and the ways in: a battle, the loadout, or the map.
+ */
 @Composable
-fun MainMenuScreen(onBattle: () -> Unit, onMap: () -> Unit) {
+fun MainMenuScreen(
+    fighter: FighterSummary,
+    onBattle: () -> Unit,
+    onLoadout: () -> Unit,
+    onMap: () -> Unit,
+) {
     Column(
         Modifier
             .fillMaxSize()
@@ -55,10 +66,16 @@ fun MainMenuScreen(onBattle: () -> Unit, onMap: () -> Unit) {
         Text(stringResource(R.string.menu_tagline), color = BattleColors.textMuted, fontSize = 14.sp)
         Spacer(Modifier.height(12.dp))
         TypeCycleLegend()
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(36.dp))
+        FighterSummaryCard(fighter, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(16.dp))
 
         Button(onBattle, Modifier.fillMaxWidth().height(52.dp)) {
             Text(stringResource(R.string.button_battle), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        }
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(onLoadout, Modifier.fillMaxWidth().height(52.dp).testTag("loadout")) {
+            Text(stringResource(R.string.button_loadout))
         }
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onMap, Modifier.fillMaxWidth().height(52.dp)) {

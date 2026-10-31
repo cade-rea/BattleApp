@@ -9,6 +9,18 @@
     <string name="menu_tagline">Color is power. Brighter hits harder.</string>
     <string name="button_battle">Fight the computer</string>
     <string name="button_map">Map (prototype)</string>
+    <string name="button_loadout">Techniques</string>
+
+    <!-- fighter -->
+    <string name="fighter_level">Lv %1$d</string>
+    <string name="fighter_record">%1$dW · %2$dL</string>
+
+    <!-- loadout screen -->
+    <string name="loadout_title">Techniques</string>
+    <string name="loadout_hint">Bringing %1$d of %2$d. Tap to add or remove. Empty slots fill from the rest of your catalog.</string>
+    <!-- a technique's own potency roll, such as "+6%" or "-3%" -->
+    <string name="technique_potency">%1$+d%%</string>
+    <string name="button_back">Back</string>
 
     <!-- battle screen -->
     <string name="tick_count">Tick %1$d</string>
@@ -41,5 +53,9 @@
     <string name="outcome_ticks">after %1$d ticks</string>
     <string name="button_rematch">Rematch</string>
     <string name="button_menu">Menu</string>
+    <string name="rewards_xp">+%1$d XP</string>
+    <string name="rewards_level">Level %1$d</string>
+    <string name="rewards_level_up">Level up!</string>
+    <string name="rewards_new_technique">New technique</string>
 
 </resources>

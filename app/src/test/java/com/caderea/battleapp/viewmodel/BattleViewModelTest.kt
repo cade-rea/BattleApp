@@ -1,5 +1,6 @@
 package com.caderea.battleapp.viewmodel
 
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.caderea.battleapp.core.Battle
 import com.caderea.battleapp.core.color.RgbColor
 import com.caderea.battleapp.core.fighter.Fighter
@@ -12,12 +13,18 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import com.caderea.battleapp.core.progression.BattleRewards
+import com.caderea.battleapp.core.progression.Progression
+import com.caderea.battleapp.core.technique.TechniqueRoller
+import com.caderea.battleapp.data.ProfileRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.File
+import kotlin.random.Random
 
 /**
  * Runs the ViewModel's tick loop on virtual time, so a whole battle takes no real time.
@@ -161,7 +168,7 @@ class BattleViewModelTest {
     @Test
     fun logKeepsOnlyTheLatestLines() = runTest(dispatcher) {
         // a sturdy player makes the fight last long enough to fill the log
-        val viewModel = BattleViewModel(TICK_MS) { Battle(player = Fighter(maxHealth = 100_000)) }
+        val viewModel = BattleViewModel(TICK_MS, newBattle = { Battle(player = Fighter(maxHealth = 100_000)) })
 
         advanceUntilIdle()
 
@@ -202,6 +209,62 @@ class BattleViewModelTest {
         advanceTimeBy(TICK_MS + 1)
         assertEquals(1, viewModel.uiState.value.tick)
         viewModel.stop()
+    }
+
+    @Test
+    fun theEndOfABattleHandsOutRewardsOnce() = runTest(dispatcher) {
+        val profiles = ProfileRepository(File.createTempFile("fighter", ".json").apply { delete() })
+        val before = profiles.profile.value
+        val viewModel = BattleViewModel.factory(TICK_MS, profiles, Random(2))
+            .create(BattleViewModel::class.java, MutableCreationExtras())
+
+        viewModel.queueAction(0)
+        advanceUntilIdle()
+        viewModel.stop()
+
+        val rewards = viewModel.uiState.value.rewards!!
+        val after = profiles.profile.value
+        assertEquals(Outcome.LOST, viewModel.uiState.value.outcome)
+        // the red strike landed at least once, and a loss rolls nothing new
+        assertTrue(rewards.xp >= Progression.XP_PER_TECHNIQUE)
+        assertNull(rewards.newTechnique)
+        assertEquals(before.aura.totalXp + rewards.xp, after.aura.totalXp)
+        assertEquals(1, after.losses)
+
+        // a rematch starts with no rewards, and uses the grown fighter
+        viewModel.rematch()
+        assertNull(viewModel.uiState.value.rewards)
+        assertEquals(after.aura.color, viewModel.uiState.value.player.color)
+        viewModel.stop()
+        assertEquals(2, profiles.profile.value.losses)
+    }
+
+    @Test
+    fun winningRollsANewTechnique() = runTest(dispatcher) {
+        val profiles = ProfileRepository(File.createTempFile("fighter", ".json").apply { delete() })
+        var given: BattleRewards? = null
+        val viewModel = BattleViewModel(
+            TICK_MS,
+            newBattle = {
+                val weak = Fighter(name = "Dummy", color = RgbColor.GREEN, maxHealth = 1, actions = emptyList())
+                Battle(profiles.profile.value.toFighter(), weak, opponent = null)
+            },
+            onBattleOver = { battle ->
+                Progression.afterBattle(profiles.profile.value, battle, TechniqueRoller(Random(4)))
+                    .also { (profile, rewards) -> profiles.update { profile }; given = rewards }
+                    .second
+            },
+        )
+
+        viewModel.queueAction(0)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(Outcome.WON, state.outcome)
+        val technique = state.rewards?.newTechnique!!
+        assertEquals(given?.newTechnique?.id, technique.id)
+        assertEquals(1, state.rewards?.levelsGained)
+        assertTrue(profiles.profile.value.catalog.any { it.id == technique.id })
     }
 
     private companion object {

@@ -4,17 +4,24 @@ import com.caderea.battleapp.core.color.Affinity
 import com.caderea.battleapp.core.color.RgbColor
 import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.fighter.Fighter
+import com.caderea.battleapp.core.technique.TechniqueRolls
 import kotlin.math.roundToInt
 
-class Heal(name: String = "Heal", color: RgbColor) : BattleAction(name, color) {
+class Heal(
+    name: String = "Heal",
+    color: RgbColor,
+    rolls: TechniqueRolls = TechniqueRolls.NEUTRAL,
+) : BattleAction(name, color, rolls) {
 
     /**
      * Health restored: a share of the color's power, times its support trait, the
-     * performer's aura affinity and the light. Heals have no type matchup.
+     * technique's potency roll, the performer's aura affinity and the light. Heals have no
+     * type matchup.
      */
     fun amount(performer: Fighter, environment: Environment): Int =
         (color.power * POWER_TO_HEALTH *
             traits.support *
+            rolls.potency *
             Affinity.multiplier(color, performer.color) *
             environment.lightMultiplier(color)).roundToInt()
 
