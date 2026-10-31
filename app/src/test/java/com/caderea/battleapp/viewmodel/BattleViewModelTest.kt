@@ -119,6 +119,9 @@ class BattleViewModelTest {
         assertEquals(1, viewModel.uiState.value.playerQueue.single().ticksLeft)
 
         advanceTimeBy(TICK_MS)
+        val landed = viewModel.uiState.value
+        assertEquals(listOf(LandedAction(Side.PLAYER, ActionKind.ATTACK, RgbColor.GREEN)), landed.landed)
+        assertEquals(-414, landed.enemy.healthChange)
         val log = viewModel.uiState.value.log
         assertTrue(
             log.contains(LogEntry(2, "Default Fighter attacks Enemy with Green Strike for 414 damage.", Side.PLAYER))

@@ -47,6 +47,20 @@ class BattleTest {
     }
 
     @Test
+    fun landedListsWhatLandedOnTheLastTick() {
+        battle.queueAction(GREEN_STRIKE)
+        tick()
+        assertTrue(battle.landed.isEmpty())
+
+        tick()
+        assertEquals(listOf("Green Strike"), battle.landed.map { it.action.name })
+        assertEquals(player, battle.landed.single().performer)
+
+        tick()
+        assertTrue(battle.landed.isEmpty())
+    }
+
+    @Test
     fun redLandsOnTheNextTickAndBlueTakesThree() {
         battle.queueAction(RED_STRIKE)
         tick()

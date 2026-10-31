@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
@@ -51,9 +54,9 @@ import com.caderea.battleapp.viewmodel.BattleViewModel
 import com.caderea.battleapp.viewmodel.Outcome
 
 /**
- * The battle screen, drawn from [state] alone. The enemy is on top and the player at the
- * bottom, with the shared timeline between them, so the eye moves from what's coming to
- * what to answer it with.
+ * The battle screen, drawn from [state] alone: the enemy on top, the shared timeline, the
+ * type triangle, then the player and their techniques, so the eye moves from what's coming
+ * to what to answer it with. Whatever lands on a tick plays out over the top of it all.
  *
  * @param tickLengthMs how long a tick lasts, so the tick bar and timeline glide in step
  */
@@ -69,6 +72,7 @@ fun BattleScreen(
     onExit: () -> Unit,
 ) {
     val tickFraction = rememberTickFraction(state, tickLengthMs)
+    val anchors = remember { EffectAnchors() }
 
     Box(
         Modifier
@@ -83,7 +87,7 @@ fun BattleScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             TopBar(state, tickFraction, onTogglePause, onGiveUp)
-            FighterPanel(state.enemy, Modifier.fillMaxWidth())
+            FighterPanel(state.enemy, Modifier.fillMaxWidth(), onOrbPositioned = { anchors.enemyOrb = it })
             Timeline(
                 state.enemy,
                 state.enemyQueue,
@@ -91,16 +95,30 @@ fun BattleScreen(
                 state.playerQueue,
                 tickFraction,
                 Modifier.fillMaxWidth(),
+                onLaneAnchors = { enemy, player ->
+                    anchors.enemyLane = enemy
+                    anchors.playerLane = player
+                },
             )
-            BattleLog(
-                state.log,
-                state.player.color,
-                state.enemy.color,
+            // the type triangle fills whatever room is left between the queues and the player
+            Box(
                 Modifier
                     .fillMaxWidth()
                     .weight(1f),
-            )
-            FighterPanel(state.player, Modifier.fillMaxWidth())
+                contentAlignment = Alignment.Center,
+            ) {
+                ColorTriangle(
+                    state.player.color,
+                    state.enemy.color,
+                    youLabel = stringResource(R.string.triangle_you),
+                    foeLabel = stringResource(R.string.triangle_foe),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .heightIn(max = 170.dp)
+                        .aspectRatio(1.2f),
+                )
+            }
+            FighterPanel(state.player, Modifier.fillMaxWidth(), onOrbPositioned = { anchors.playerOrb = it })
             ActionGrid(state.actions, onAction, Modifier.fillMaxWidth())
             OutlinedButton(
                 onClick = onCancel,
@@ -112,6 +130,13 @@ fun BattleScreen(
                 Text(stringResource(R.string.button_cancel))
             }
         }
+
+        ResolveEffects(
+            state,
+            anchors,
+            durationMs = (tickLengthMs * 0.85).toInt(),
+            modifier = Modifier.fillMaxSize(),
+        )
 
         AnimatedVisibility(state.outcome != null, enter = fadeIn(), exit = fadeOut()) {
             state.outcome?.let { OutcomeOverlay(it, state.tick, onRematch, onExit) }

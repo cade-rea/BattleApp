@@ -24,6 +24,8 @@ data class BattleUiState(
     val isPaused: Boolean = false,
     // oldest first
     val log: List<LogEntry> = emptyList(),
+    // what landed on the last tick, in order, so the screen can play it out
+    val landed: List<LandedAction> = emptyList(),
     // null while the battle is on
     val outcome: Outcome? = null,
 ) {
@@ -71,6 +73,8 @@ data class FighterState(
     val maxEnergy: Int = 0,
     // the guard that's up, or null
     val guard: GuardState? = null,
+    // how much health changed on the last tick: negative for damage, positive for healing
+    val healthChange: Int = 0,
 )
 
 data class GuardState(
@@ -81,6 +85,9 @@ data class GuardState(
 )
 
 enum class Side { PLAYER, ENEMY }
+
+/** An action that landed. [side] is who did it. */
+data class LandedAction(val side: Side, val kind: ActionKind, val color: RgbColor)
 
 /**
  * One line of the battle log. [side] is who it's about, or null for lines about the

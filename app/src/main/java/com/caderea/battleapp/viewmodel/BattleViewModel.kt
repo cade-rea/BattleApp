@@ -36,6 +36,9 @@ class BattleViewModel(
     private var battle = newBattle()
     private val log = ArrayDeque<LogEntry>(MAX_LOG_LINES)
     private val paused = MutableStateFlow(false)
+    // health changes on the last tick
+    private var playerHealthChange = 0
+    private var enemyHealthChange = 0
 
     private val _uiState = MutableStateFlow(buildState(tickProgress = 0))
     val uiState: StateFlow<BattleUiState> = _uiState.asStateFlow()
@@ -53,7 +56,11 @@ class BattleViewModel(
                 delay(subtickLength)
             }
 
+            val playerHealth = battle.player.health
+            val enemyHealth = battle.enemy.health
             battle.tick().forEach { addLogLine(it) }
+            playerHealthChange = battle.player.health - playerHealth
+            enemyHealthChange = battle.enemy.health - enemyHealth
             publish(tickProgress = 0)
         }
 
@@ -93,6 +100,8 @@ class BattleViewModel(
         ticker.cancel()
         battle = newBattle()
         log.clear()
+        playerHealthChange = 0
+        enemyHealthChange = 0
         paused.value = false
         publish(tickProgress = 0)
         ticker = startTicker()
@@ -124,14 +133,18 @@ class BattleViewModel(
         actions = battle.player.actions.mapIndexed { slot, action ->
             action?.toButton(enabled = !battle.isOver && battle.player.canQueue(slot)) ?: ActionButtonState()
         },
-        player = battle.player.toState(),
-        enemy = battle.enemy.toState(),
+        player = battle.player.toState(playerHealthChange),
+        enemy = battle.enemy.toState(enemyHealthChange),
         playerQueue = battle.player.queue.toList(),
         enemyQueue = battle.enemy.queue.toList(),
         tick = battle.tickCount,
         tickProgress = tickProgress,
         isPaused = paused.value,
         log = log.toList(),
+        landed = battle.landed.map { landing ->
+            val side = if (landing.performer === battle.player) Side.PLAYER else Side.ENEMY
+            LandedAction(side, landing.action.kind, landing.action.color)
+        },
         outcome = when {
             !battle.isOver -> null
             battle.enemy.health <= 0 -> Outcome.WON
@@ -164,7 +177,7 @@ class BattleViewModel(
         }
     }
 
-    private fun Fighter.toState() = FighterState(
+    private fun Fighter.toState(healthChange: Int) = FighterState(
         name = name,
         color = color,
         health = health,
@@ -172,6 +185,7 @@ class BattleViewModel(
         energy = energy,
         maxEnergy = Fighter.MAX_ENERGY,
         guard = activeGuard?.let { GuardState(it.guard.name, it.guard.color, it.ticksLeft) },
+        healthChange = healthChange,
     )
 
     companion object {

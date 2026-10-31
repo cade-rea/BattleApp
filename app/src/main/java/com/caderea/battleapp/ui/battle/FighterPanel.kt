@@ -27,6 +27,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -43,9 +45,16 @@ import com.caderea.battleapp.viewmodel.FighterState
 
 /**
  * One fighter at a glance: their aura, health, energy and any guard that's up.
+ *
+ * @param onOrbPositioned where the aura orb's center is, in root coordinates, so effects
+ * drawn over the whole screen can aim at the fighter
  */
 @Composable
-fun FighterPanel(fighter: FighterState, modifier: Modifier = Modifier) {
+fun FighterPanel(
+    fighter: FighterState,
+    modifier: Modifier = Modifier,
+    onOrbPositioned: (Offset) -> Unit = {},
+) {
     Row(
         modifier
             .clip(RoundedCornerShape(16.dp))
@@ -53,7 +62,12 @@ fun FighterPanel(fighter: FighterState, modifier: Modifier = Modifier) {
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AuraOrb(fighter, Modifier.size(52.dp))
+        AuraOrb(
+            fighter,
+            Modifier
+                .size(52.dp)
+                .onGloballyPositioned { onOrbPositioned(it.boundsInRoot().center) },
+        )
         Spacer(Modifier.width(12.dp))
 
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {

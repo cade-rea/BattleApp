@@ -17,6 +17,9 @@
     <string name="button_give_up">Give up</string>
     <string name="button_cancel">Cancel last action</string>
     <string name="timeline_title">INCOMING · ticks until it lands</string>
+    <string name="triangle_you">YOU</string>
+    <string name="triangle_foe">FOE</string>
+    <string name="type_cycle_description">Red beats green, green beats blue, blue beats red</string>
     <string name="health_value">%1$d/%2$d</string>
     <string name="energy_value">%1$d/%2$d en</string>
     <string name="guard_up">%1$s · %2$d</string>

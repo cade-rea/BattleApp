@@ -22,6 +22,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextMeasurer
@@ -48,6 +51,10 @@ import com.caderea.battleapp.ui.theme.readable
 import com.caderea.battleapp.viewmodel.FighterState
 import com.caderea.battleapp.viewmodel.kind
 
+private val GUTTER = 18.dp
+private val LANE_HEIGHT = 44.dp
+private val AXIS_HEIGHT = 22.dp
+
 /** Ticks the timeline shows: long enough for a full queue of the slowest color. */
 private val SPAN_TICKS = BattleQueue.MAX_SIZE * ColorTraits.of(RgbColor.BLUE).windUpTicks
 
@@ -58,6 +65,8 @@ private val SPAN_TICKS = BattleQueue.MAX_SIZE * ColorTraits.of(RgbColor.BLUE).wi
  * attack is a matter of seeing whether the two overlap.
  *
  * @param tickFraction how far through the current tick we are, 0 to 1
+ * @param onLaneAnchors where each lane meets "now", in root coordinates, for effects drawn
+ * over the whole screen
  */
 @Composable
 fun Timeline(
@@ -67,8 +76,10 @@ fun Timeline(
     playerQueue: List<QueuedAction>,
     tickFraction: Float,
     modifier: Modifier = Modifier,
+    onLaneAnchors: (enemy: Offset, player: Offset) -> Unit = { _, _ -> },
 ) {
     val textMeasurer = rememberTextMeasurer()
+    val density = LocalDensity.current
 
     Column(
         modifier
@@ -83,19 +94,23 @@ fun Timeline(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
             )
-            Spacer(Modifier.weight(1f))
-            TypeCycleLegend()
         }
         Spacer(Modifier.height(8.dp))
 
         Canvas(
             Modifier
                 .fillMaxWidth()
-                .height(104.dp)
+                .height(LANE_HEIGHT * 2 + AXIS_HEIGHT)
+                .onGloballyPositioned { coordinates ->
+                    with(density) {
+                        val origin = coordinates.positionInRoot() + Offset(GUTTER.toPx(), LANE_HEIGHT.toPx() / 2)
+                        onLaneAnchors(origin, origin + Offset(0f, (LANE_HEIGHT + AXIS_HEIGHT).toPx()))
+                    }
+                }
         ) {
-            val gutter = 18.dp.toPx()
-            val laneHeight = 38.dp.toPx()
-            val axisHeight = 22.dp.toPx()
+            val gutter = GUTTER.toPx()
+            val laneHeight = LANE_HEIGHT.toPx()
+            val axisHeight = AXIS_HEIGHT.toPx()
             val tickWidth = (size.width - gutter) / SPAN_TICKS
             val enemyLane = 0f
             val playerLane = laneHeight + axisHeight

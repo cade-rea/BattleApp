@@ -28,6 +28,10 @@ class Battle(
     var isOver = false
         private set
 
+    /** The actions that landed on the last tick, in the order they landed. */
+    var landed: List<Landing> = emptyList()
+        private set
+
     private val fighters = listOf(player, enemy)
 
     init {
@@ -50,6 +54,8 @@ class Battle(
 
         ++tickCount
         val log = mutableListOf<String>()
+        val landedNow = mutableListOf<Landing>()
+        landed = landedNow
 
         val landing: List<Pair<Fighter, BattleAction>> = fighters
             .mapNotNull { fighter -> fighter.windUp()?.let { fighter to it } }
@@ -58,6 +64,7 @@ class Battle(
 
         for ((fighter, action) in landing) {
             log += action.performAction(fighter, fighter.target, environment)
+            landedNow += Landing(fighter, action)
 
             // check right after each action so a fighter that just died doesn't get to act
             val target = fighter.target
@@ -90,3 +97,6 @@ class Battle(
         isOver = true
     }
 }
+
+/** An action that landed: [performer] did [action], at their target or to themselves. */
+data class Landing(val performer: Fighter, val action: BattleAction)

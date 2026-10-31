@@ -83,6 +83,16 @@ class BattleScreenTest {
     }
 
     @Test
+    fun landedActionsPlayOut() {
+        composeRule.mainClock.autoAdvance = false
+        // the tick the green strike landed on, caught mid-effect
+        show(stateAfterGreenStrikeLands())
+        composeRule.mainClock.advanceTimeBy(380)
+
+        screenshot("battle-resolve")
+    }
+
+    @Test
     fun pausedBattleOffersResume() {
         show(midBattle().copy(isPaused = true))
 
@@ -123,6 +133,16 @@ class BattleScreenTest {
         viewModel.queueAction(GREEN_STRIKE)
         scope.advanceTimeBy(TICK_MS + TICK_MS / 2 + 1)
         viewModel.queueAction(BLUE_GUARD)
+
+        return viewModel.uiState.value.also { viewModel.stop() }
+    }
+
+    private fun stateAfterGreenStrikeLands(): BattleUiState {
+        val viewModel = BattleViewModel(TICK_MS)
+        val scope = TestScope(dispatcher)
+
+        viewModel.queueAction(GREEN_STRIKE)
+        scope.advanceTimeBy(TICK_MS * 2 + 1)
 
         return viewModel.uiState.value.also { viewModel.stop() }
     }
