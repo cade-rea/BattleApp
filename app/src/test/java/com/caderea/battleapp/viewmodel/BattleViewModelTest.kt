@@ -16,7 +16,7 @@ import org.junit.After
 import com.caderea.battleapp.core.progression.BattleRewards
 import com.caderea.battleapp.core.progression.Progression
 import com.caderea.battleapp.core.technique.TechniqueRoller
-import com.caderea.battleapp.data.ProfileRepository
+import com.caderea.battleapp.data.repositoryWith
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -213,8 +213,8 @@ class BattleViewModelTest {
 
     @Test
     fun theEndOfABattleHandsOutRewardsOnce() = runTest(dispatcher) {
-        val profiles = ProfileRepository(File.createTempFile("fighter", ".json").apply { delete() })
-        val before = profiles.profile.value
+        val profiles = repositoryWith()
+        val before = profiles.requireActive()
         val viewModel = BattleViewModel.factory(TICK_MS, profiles, Random(2))
             .create(BattleViewModel::class.java, MutableCreationExtras())
 
@@ -223,7 +223,7 @@ class BattleViewModelTest {
         viewModel.stop()
 
         val rewards = viewModel.uiState.value.rewards!!
-        val after = profiles.profile.value
+        val after = profiles.requireActive()
         assertEquals(Outcome.LOST, viewModel.uiState.value.outcome)
         // the red strike landed at least once, and a loss rolls nothing new
         assertTrue(rewards.xp >= Progression.XP_PER_TECHNIQUE)
@@ -236,21 +236,21 @@ class BattleViewModelTest {
         assertNull(viewModel.uiState.value.rewards)
         assertEquals(after.aura.color, viewModel.uiState.value.player.color)
         viewModel.stop()
-        assertEquals(2, profiles.profile.value.losses)
+        assertEquals(2, profiles.requireActive().losses)
     }
 
     @Test
     fun winningRollsANewTechnique() = runTest(dispatcher) {
-        val profiles = ProfileRepository(File.createTempFile("fighter", ".json").apply { delete() })
+        val profiles = repositoryWith()
         var given: BattleRewards? = null
         val viewModel = BattleViewModel(
             TICK_MS,
             newBattle = {
                 val weak = Fighter(name = "Dummy", color = RgbColor.GREEN, maxHealth = 1, actions = emptyList())
-                Battle(profiles.profile.value.toFighter(), weak, opponent = null)
+                Battle(profiles.requireActive().toFighter(), weak, opponent = null)
             },
             onBattleOver = { battle ->
-                Progression.afterBattle(profiles.profile.value, battle, TechniqueRoller(Random(4)))
+                Progression.afterBattle(profiles.requireActive(), battle, TechniqueRoller(Random(4)))
                     .also { (profile, rewards) -> profiles.update { profile }; given = rewards }
                     .second
             },
@@ -264,7 +264,7 @@ class BattleViewModelTest {
         val technique = state.rewards?.newTechnique!!
         assertEquals(given?.newTechnique?.id, technique.id)
         assertEquals(1, state.rewards?.levelsGained)
-        assertTrue(profiles.profile.value.catalog.any { it.id == technique.id })
+        assertTrue(profiles.requireActive().catalog.any { it.id == technique.id })
     }
 
     private companion object {

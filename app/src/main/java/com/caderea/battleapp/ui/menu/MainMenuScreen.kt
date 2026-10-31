@@ -17,6 +17,11 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,14 +46,18 @@ import com.caderea.battleapp.ui.theme.readable
 import com.caderea.battleapp.viewmodel.FighterSummary
 
 /**
- * The title, the player's fighter, and the ways in: a battle, the loadout, or the map.
+ * The title, the loaded character, and the ways in: a battle, the loadout, or the map.
+ * Tapping the character opens the character list to switch. With no character yet, the
+ * only way in is making one.
  */
 @Composable
 fun MainMenuScreen(
-    fighter: FighterSummary,
+    fighter: FighterSummary?,
     onBattle: () -> Unit,
     onLoadout: () -> Unit,
     onMap: () -> Unit,
+    onCharacters: () -> Unit,
+    onCreate: () -> Unit,
 ) {
     Column(
         Modifier
@@ -67,8 +76,33 @@ fun MainMenuScreen(
         Spacer(Modifier.height(12.dp))
         TypeCycleLegend()
         Spacer(Modifier.height(36.dp))
-        FighterSummaryCard(fighter, Modifier.fillMaxWidth())
-        Spacer(Modifier.height(16.dp))
+        if (fighter == null) {
+            Text(
+                stringResource(R.string.menu_no_character),
+                color = BattleColors.textMuted,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(16.dp))
+            Button(onCreate, Modifier.fillMaxWidth().height(52.dp).testTag("create")) {
+                Text(stringResource(R.string.button_create_first), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            }
+            return@Column
+        }
+
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .clickable(onClick = onCharacters)
+                .testTag("characters")
+        ) {
+            FighterSummaryCard(fighter, Modifier.fillMaxWidth())
+        }
+        TextButton(onCharacters) {
+            Text(stringResource(R.string.button_switch_character), color = BattleColors.textMuted, fontSize = 13.sp)
+        }
+        Spacer(Modifier.height(4.dp))
 
         Button(onBattle, Modifier.fillMaxWidth().height(52.dp)) {
             Text(stringResource(R.string.button_battle), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)

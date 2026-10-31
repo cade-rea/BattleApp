@@ -16,7 +16,8 @@ import kotlinx.serialization.Serializable
  * a single battle; [toFighter] makes it.
  *
  * Plain, immutable data, so it can be saved as JSON on the phone now and kept on the PvP
- * server later. Character creation will make one with [create].
+ * server later. Character creation makes one with [CharacterDraft.toProfile]; computer
+ * opponents use [create].
  *
  * @param loadout technique ids in button order, up to [Environment.MAX_LOADOUT]. An arena
  * with fewer slots takes the first ones.

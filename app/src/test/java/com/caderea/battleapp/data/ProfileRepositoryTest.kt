@@ -2,39 +2,94 @@ package com.caderea.battleapp.data
 
 import com.caderea.battleapp.core.color.Channel
 import com.caderea.battleapp.core.fighter.FighterProfile
+import com.caderea.battleapp.core.fighter.ProfileJson
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.io.File
+import java.nio.file.Files
 
 class ProfileRepositoryTest {
 
-    private val file = File.createTempFile("fighter", ".json").apply { delete() }
+    private val root = Files.createTempDirectory("files").toFile()
+    private val directory = File(root, "characters")
+
+    private fun repository() = ProfileRepository(directory, legacyFile = File(root, "fighter.json"))
 
     @Test
-    fun aFirstLaunchMakesAndSavesADefaultFighter() {
-        val profile = ProfileRepository(file).profile.value
+    fun aFirstLaunchHasNoCharacters() {
+        val profiles = repository()
 
-        assertEquals(ProfileRepository.DEFAULT_NAME, profile.name)
-        assertEquals(Channel.RED, profile.aura.base)
-        assertTrue(file.exists())
+        assertEquals(emptyList<SavedProfile>(), profiles.roster.value)
+        assertNull(profiles.active.value)
     }
 
     @Test
-    fun updatesSurviveARestart() {
-        ProfileRepository(file).update { it.copy(wins = 7).withLoadout(listOf(2, 1)) }
+    fun addingACharacterLoadsIt() {
+        val profiles = repository()
+        profiles.add(FighterProfile.create("Ada", Channel.RED))
+        val id = profiles.add(FighterProfile.create("Bo", Channel.BLUE))
 
-        val reloaded = ProfileRepository(file).profile.value
-        assertEquals(7, reloaded.wins)
-        assertEquals(listOf(2, 1), reloaded.loadout)
+        assertEquals(listOf("Ada", "Bo"), profiles.roster.value.map { it.profile.name })
+        assertEquals(id, profiles.activeId.value)
+        assertEquals("Bo", profiles.active.value?.name)
     }
 
     @Test
-    fun aDamagedFileStartsOver() {
-        file.writeText("{ not json")
+    fun charactersTheLoadedOneAndChangesSurviveARestart() {
+        val first = repository()
+        val ada = first.add(FighterProfile.create("Ada", Channel.RED))
+        first.add(FighterProfile.create("Bo", Channel.BLUE))
+        first.add(FighterProfile.create("Cy", Channel.GREEN))
+        first.select(ada)
+        first.update { it.copy(wins = 7).withLoadout(listOf(2, 1)) }
 
-        val profile = ProfileRepository(file) { FighterProfile.create("Fresh", Channel.BLUE) }.profile.value
+        val reloaded = repository()
+        assertEquals(listOf("Ada", "Bo", "Cy"), reloaded.roster.value.map { it.profile.name })
+        assertEquals("Ada", reloaded.active.value?.name)
+        assertEquals(7, reloaded.requireActive().wins)
+        assertEquals(listOf(2, 1), reloaded.requireActive().loadout)
+        assertEquals(0, reloaded.roster.value.first { it.profile.name == "Bo" }.profile.wins)
+    }
 
-        assertEquals("Fresh", profile.name)
+    @Test
+    fun deletingTheLoadedCharacterLoadsTheOldestLeft() {
+        val profiles = repository()
+        val ada = profiles.add(FighterProfile.create("Ada", Channel.RED))
+        val bo = profiles.add(FighterProfile.create("Bo", Channel.BLUE))
+
+        profiles.delete(bo)
+        assertEquals("Ada", profiles.active.value?.name)
+
+        profiles.delete(ada)
+        assertNull(profiles.active.value)
+        assertEquals(emptyList<SavedProfile>(), repository().roster.value)
+    }
+
+    @Test
+    fun theOldSingleFighterMovesInAsTheFirstCharacter() {
+        val legacy = File(root, "fighter.json")
+        legacy.writeText(ProfileJson.encode(FighterProfile.create("Veteran", Channel.GREEN).copy(wins = 12)))
+
+        val profiles = repository()
+
+        assertEquals("Veteran", profiles.active.value?.name)
+        assertEquals(12, profiles.requireActive().wins)
+        assertFalse(legacy.exists())
+        assertEquals("Veteran", repository().active.value?.name)
+    }
+
+    @Test
+    fun aDamagedFileOnlyLosesThatCharacter() {
+        val first = repository()
+        first.add(FighterProfile.create("Ada", Channel.RED))
+        val bo = first.add(FighterProfile.create("Bo", Channel.BLUE))
+        File(directory, "$bo.json").writeText("{ not json")
+
+        val reloaded = repository()
+
+        assertEquals(listOf("Ada"), reloaded.roster.value.map { it.profile.name })
+        assertEquals("Ada", reloaded.active.value?.name)
     }
 }

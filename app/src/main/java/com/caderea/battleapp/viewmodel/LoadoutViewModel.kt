@@ -9,6 +9,7 @@ import com.caderea.battleapp.core.fighter.FighterProfile
 import com.caderea.battleapp.data.ProfileRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -33,9 +34,10 @@ class LoadoutViewModel(
     private val slots: Int = Environment().loadoutSize,
 ) : ViewModel() {
 
-    val uiState: StateFlow<LoadoutUiState> = profiles.profile
+    val uiState: StateFlow<LoadoutUiState> = profiles.active
+        .filterNotNull()
         .map { it.toLoadoutState() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, profiles.profile.value.toLoadoutState())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, profiles.requireActive().toLoadoutState())
 
     /**
      * Adds the technique to the end of the loadout, or takes it out if it's already in. A
