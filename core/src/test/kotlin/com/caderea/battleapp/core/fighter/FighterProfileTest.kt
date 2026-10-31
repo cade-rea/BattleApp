@@ -3,6 +3,7 @@ package com.caderea.battleapp.core.fighter
 import com.caderea.battleapp.core.action.Attack
 import com.caderea.battleapp.core.color.Channel
 import com.caderea.battleapp.core.color.RgbColor
+import com.caderea.battleapp.core.environment.Arenas
 import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.progression.Aura
 import com.caderea.battleapp.core.progression.Levels
@@ -121,5 +122,12 @@ class FighterProfileTest {
             assertEquals(Environment.MAX_LOADOUT, enemy.loadout.size)
             assertTrue(enemy.toFighter().actions.all { it != null })
         }
+    }
+
+    @Test
+    fun opponentsRespectAnArenasLevelCap() {
+        assertEquals(1, Opponents.forArena(5, Arenas.EVEN, Random(1)).level)
+        assertEquals(5, Opponents.forArena(5, Arenas.OPEN, Random(1)).level)
+        assertEquals(3, Opponents.forArena(3, Environment(levelCap = 10), Random(1)).level)
     }
 }

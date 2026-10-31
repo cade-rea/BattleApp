@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.caderea.battleapp.R
+import com.caderea.battleapp.core.environment.Arenas
 import com.caderea.battleapp.data.ProfileRepository
 import com.caderea.battleapp.ui.battle.BattleScreen
 import com.caderea.battleapp.ui.theme.BattleTheme
@@ -22,7 +23,11 @@ class BattleActivity : ComponentActivity() {
     private val tickLengthMs: Long
         get() = resources.getInteger(R.integer.tick_length_ms).toLong()
 
-    private val viewModel: BattleViewModel by viewModels { BattleViewModel.factory(tickLengthMs, ProfileRepository.get(this)) }
+    private val viewModel: BattleViewModel by viewModels { BattleViewModel.factory(
+            tickLengthMs,
+            ProfileRepository.get(this),
+            ArenasActivity.arenaOf(intent) ?: Arenas.DEFAULT,
+        ) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()

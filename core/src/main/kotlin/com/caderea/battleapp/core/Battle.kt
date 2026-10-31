@@ -49,11 +49,18 @@ class Battle(
 
     private val fighters = listOf(player, enemy)
 
+    /**
+     * The environment as it stands for the next tick to resolve, with the light fixed at
+     * that tick's. What the screen previews and the opponent plans with.
+     */
+    val conditions: Environment
+        get() = environment.at(tickCount + 1)
+
     init {
         player.target = enemy
         enemy.target = player
         // the opponent opens before the first tick, so its first move is telegraphed in full
-        opponent?.plan(enemy, player, environment)
+        opponent?.plan(enemy, player, environment, tickCount + 1)
     }
 
     /**
@@ -68,6 +75,8 @@ class Battle(
         opponent?.react(enemy, player)
 
         ++tickCount
+        // actions see the light of the tick they land on
+        val now = environment.at(tickCount)
         val log = mutableListOf<String>()
         val landedNow = mutableListOf<Landing>()
         landed = landedNow
@@ -78,7 +87,7 @@ class Battle(
             .sortedBy { (_, action) -> action !is Guard }
 
         for ((fighter, action) in landing) {
-            log += action.performAction(fighter, fighter.target, environment)
+            log += action.performAction(fighter, fighter.target, now)
             landedNow += Landing(fighter, action)
             _history += Landing(fighter, action)
 
@@ -92,7 +101,7 @@ class Battle(
         }
 
         fighters.forEach(Fighter::endTick)
-        opponent?.plan(enemy, player, environment)
+        opponent?.plan(enemy, player, environment, tickCount + 1)
         return log
     }
 

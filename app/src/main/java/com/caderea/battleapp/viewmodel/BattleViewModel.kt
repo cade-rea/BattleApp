@@ -10,7 +10,8 @@ import com.caderea.battleapp.core.action.BattleAction
 import com.caderea.battleapp.core.action.Guard
 import com.caderea.battleapp.core.action.Heal
 import com.caderea.battleapp.core.color.TypeWheel
-import com.caderea.battleapp.core.environment.Environment
+import com.caderea.battleapp.core.environment.Arena
+import com.caderea.battleapp.core.environment.Arenas
 import com.caderea.battleapp.core.fighter.Opponents
 import com.caderea.battleapp.core.progression.BattleRewards
 import com.caderea.battleapp.core.progression.Progression
@@ -170,11 +171,13 @@ class BattleViewModel(
             else -> Outcome.STOPPED
         },
         rewards = rewards,
+        arena = (battle.environment as? Arena)?.toHud(battle.tickCount + 1),
     )
 
     private fun BattleAction.toButton(enabled: Boolean): ActionButtonState {
         val player = battle.player
-        val environment = battle.environment
+        // previews use the light of the next tick, which is when a red technique would land
+        val environment = battle.conditions
         val button = ActionButtonState(
             name = name,
             cost = cost,
@@ -212,20 +215,24 @@ class BattleViewModel(
         const val MAX_LOG_LINES = 40
 
         /**
-         * A battle for the saved fighter against a computer opponent of their level, with
-         * XP and new techniques saved when it ends.
+         * A battle in [arena] for the saved fighter against a computer opponent of their
+         * level (or the arena's cap), with XP and new techniques saved when it ends.
          */
-        fun factory(tickLengthMs: Long, profiles: ProfileRepository, random: Random = Random.Default) = viewModelFactory {
+        fun factory(
+            tickLengthMs: Long,
+            profiles: ProfileRepository,
+            arena: Arena = Arenas.DEFAULT,
+            random: Random = Random.Default,
+        ) = viewModelFactory {
             initializer {
                 BattleViewModel(
                     tickLengthMs,
                     newBattle = {
                         val profile = profiles.requireActive()
-                        val environment = Environment()
                         Battle(
-                            player = profile.toFighter(environment),
-                            enemy = Opponents.atLevel(profile.level, random).toFighter(environment),
-                            environment = environment,
+                            player = profile.toFighter(arena),
+                            enemy = Opponents.forArena(profile.level, arena, random).toFighter(arena),
+                            environment = arena,
                         )
                     },
                     onBattleOver = { battle ->

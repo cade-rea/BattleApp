@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caderea.battleapp.R
+import com.caderea.battleapp.ui.arena.ArenaCard
 import com.caderea.battleapp.ui.fighter.FighterSummaryCard
 import com.caderea.battleapp.ui.technique.TechniqueCard
 import com.caderea.battleapp.ui.theme.BattleColors
@@ -35,7 +36,9 @@ import com.caderea.battleapp.viewmodel.LoadoutUiState
 
 /**
  * The fighter's catalog, with the techniques they'll bring marked by their button number.
- * Tapping a technique adds it to the loadout or takes it out.
+ * Tapping a technique adds it to the loadout or takes it out. Before a fight it shows the
+ * arena, and the techniques as they'd work in its light; otherwise its button goes on to
+ * choose an arena.
  */
 @Composable
 fun LoadoutScreen(state: LoadoutUiState, onToggle: (id: Int) -> Unit, onBattle: () -> Unit, onBack: () -> Unit) {
@@ -57,8 +60,13 @@ fun LoadoutScreen(state: LoadoutUiState, onToggle: (id: Int) -> Unit, onBattle: 
             TextButton(onBack) { Text(stringResource(R.string.button_back), color = BattleColors.textMuted) }
         }
         FighterSummaryCard(state.fighter, Modifier.fillMaxWidth())
+        state.arena?.let { ArenaCard(it, Modifier.fillMaxWidth().testTag("arena")) }
         Text(
-            stringResource(R.string.loadout_hint, state.chosen, state.slots),
+            if (state.arena != null) {
+                stringResource(R.string.loadout_hint, state.chosen, state.slots)
+            } else {
+                stringResource(R.string.loadout_hint_any, state.slots)
+            },
             color = BattleColors.textMuted,
             fontSize = 13.sp,
         )
@@ -80,8 +88,12 @@ fun LoadoutScreen(state: LoadoutUiState, onToggle: (id: Int) -> Unit, onBattle: 
             }
         }
         Spacer(Modifier.height(4.dp))
-        Button(onBattle, Modifier.fillMaxWidth().height(52.dp)) {
-            Text(stringResource(R.string.button_battle), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Button(onBattle, Modifier.fillMaxWidth().height(52.dp).testTag("battle")) {
+            Text(
+                stringResource(if (state.arena != null) R.string.button_battle else R.string.button_choose_arena),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }

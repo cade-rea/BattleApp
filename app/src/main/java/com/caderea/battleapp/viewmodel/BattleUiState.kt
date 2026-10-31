@@ -30,6 +30,8 @@ data class BattleUiState(
     val outcome: Outcome? = null,
     // what the player earned, once the battle is over; null when nothing is tracked
     val rewards: RewardsState? = null,
+    // where the battle is and its light; null outside a named arena
+    val arena: ArenaHudState? = null,
 ) {
     val isOver: Boolean
         get() = outcome != null

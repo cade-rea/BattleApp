@@ -3,12 +3,11 @@
 
     <string name="app_name">Battle</string>
     <string name="title_activity_battle_screen">Battle</string>
-    <string name="title_activity_map_screen">Map</string>
+    <string name="arenas_title">Arenas</string>
 
     <!-- main menu -->
     <string name="menu_tagline">Color is power. Brighter hits harder.</string>
     <string name="button_battle">Fight the computer</string>
-    <string name="button_map">Map (prototype)</string>
     <string name="button_loadout">Techniques</string>
 
     <string name="menu_no_character">No characters yet. Make one to start fighting.</string>
@@ -62,7 +61,20 @@
     <string name="loadout_hint">Bringing %1$d of %2$d. Tap to add or remove. Empty slots fill from the rest of your catalog.</string>
     <!-- a technique's own potency roll, such as "+6%" or "-3%" -->
     <string name="technique_potency">%1$+d%%</string>
+    <string name="loadout_hint_any">Your order of %1$d. Arenas with fewer slots take the first ones. Tap to add or remove.</string>
+    <string name="button_choose_arena">Choose an arena</string>
     <string name="button_back">Back</string>
+
+    <!-- arenas -->
+    <string name="arenas_hint">An arena\'s light makes some colors hit harder, and it sets how many techniques you bring. You pick them next.</string>
+    <string name="arena_slots">%1$d slots</string>
+    <string name="arena_level_cap">Lv cap %1$d</string>
+    <string name="light_plain">Plain light</string>
+    <string name="light_all">All colors %1$d%%</string>
+    <string name="light_boost">%1$s +%2$d%%</string>
+    <string name="light_cut">%1$s %2$d%%</string>
+    <!-- a turning light: what it turns to and in how many ticks, such as "Green in 3" -->
+    <string name="light_next">%1$s in %2$d</string>
 
     <!-- battle screen -->
     <string name="tick_count">Tick %1$d</string>

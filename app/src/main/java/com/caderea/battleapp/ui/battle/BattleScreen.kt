@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,10 +49,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caderea.battleapp.R
+import com.caderea.battleapp.ui.arena.LightBars
+import com.caderea.battleapp.ui.arena.lightLabel
+import com.caderea.battleapp.ui.arena.lightTextColor
+import com.caderea.battleapp.ui.arena.lightWash
 import com.caderea.battleapp.ui.fighter.AuraGlow
 import com.caderea.battleapp.ui.fighter.LevelBar
 import com.caderea.battleapp.ui.technique.TechniqueCard
 import com.caderea.battleapp.ui.theme.BattleColors
+import com.caderea.battleapp.viewmodel.ArenaHudState
 import com.caderea.battleapp.viewmodel.BattleUiState
 import com.caderea.battleapp.viewmodel.BattleViewModel
 import com.caderea.battleapp.viewmodel.Outcome
@@ -78,10 +84,12 @@ fun BattleScreen(
     val tickFraction = rememberTickFraction(state, tickLengthMs)
     val anchors = remember { EffectAnchors() }
 
+    val wash = state.arena?.let { lightWash(it.light) }
     Box(
         Modifier
             .fillMaxSize()
             .background(BattleColors.background)
+            .let { if (wash != null) it.background(wash) else it }
     ) {
         Column(
             Modifier
@@ -91,6 +99,7 @@ fun BattleScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             TopBar(state, tickFraction, onTogglePause, onGiveUp)
+            state.arena?.let { ArenaStrip(it, Modifier.fillMaxWidth()) }
             FighterPanel(state.enemy, Modifier.fillMaxWidth(), onOrbPositioned = { anchors.enemyOrb = it })
             Timeline(
                 state.enemy,
@@ -169,6 +178,41 @@ private fun rememberTickFraction(state: BattleUiState, tickLengthMs: Long): Floa
         )
     }
     return fraction.value
+}
+
+/**
+ * The arena and its light right now, and for a turning light, what comes next and when,
+ * so a big hit can be timed for it.
+ */
+@Composable
+private fun ArenaStrip(arena: ArenaHudState, modifier: Modifier = Modifier) {
+    Row(modifier.testTag("arena"), verticalAlignment = Alignment.CenterVertically) {
+        LightBars(arena.light, Modifier.size(width = 16.dp, height = 18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(arena.name, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.width(8.dp))
+        Text(lightLabel(arena.light), color = lightTextColor(arena.light), fontSize = 12.sp)
+        Spacer(Modifier.weight(1f))
+        val next = arena.nextLight
+        val ticks = arena.ticksLeftInLight
+        if (next != null && ticks != null) {
+            Text(
+                stringResource(R.string.light_next, lightLabel(next), ticks),
+                color = lightTextColor(next),
+                fontFamily = FontFamily.Monospace,
+                fontSize = 12.sp,
+            )
+        } else {
+            arena.levelCap?.let { cap ->
+                Text(
+                    stringResource(R.string.arena_level_cap, cap),
+                    color = BattleColors.textMuted,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                )
+            }
+        }
+    }
 }
 
 @Composable

@@ -2,6 +2,7 @@ package com.caderea.battleapp.viewmodel
 
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.caderea.battleapp.core.Battle
+import com.caderea.battleapp.core.environment.Arenas
 import com.caderea.battleapp.core.color.RgbColor
 import com.caderea.battleapp.core.fighter.Fighter
 import kotlinx.coroutines.Dispatchers
@@ -215,7 +216,7 @@ class BattleViewModelTest {
     fun theEndOfABattleHandsOutRewardsOnce() = runTest(dispatcher) {
         val profiles = repositoryWith()
         val before = profiles.requireActive()
-        val viewModel = BattleViewModel.factory(TICK_MS, profiles, Random(2))
+        val viewModel = BattleViewModel.factory(TICK_MS, profiles, random = Random(2))
             .create(BattleViewModel::class.java, MutableCreationExtras())
 
         viewModel.queueAction(0)
@@ -237,6 +238,41 @@ class BattleViewModelTest {
         assertEquals(after.aura.color, viewModel.uiState.value.player.color)
         viewModel.stop()
         assertEquals(2, profiles.requireActive().losses)
+    }
+
+    @Test
+    fun anArenaShowsItsLightAndCountsDownToTheNext() = runTest(dispatcher) {
+        val viewModel = BattleViewModel.factory(TICK_MS, repositoryWith(), Arenas.TURNING, Random(2))
+            .create(BattleViewModel::class.java, MutableCreationExtras())
+
+        val start = viewModel.uiState.value.arena!!
+        assertEquals("Turning Light", start.name)
+        assertEquals(Arenas.TURNING.lights[0], start.light)
+        assertEquals(Arenas.TURN_TICKS, start.ticksLeftInLight)
+        assertEquals(Arenas.TURNING.lights[1], start.nextLight)
+        // six slots, so the player brings their whole loadout and more
+        assertEquals(6, viewModel.uiState.value.actions.size)
+
+        advanceTimeBy(TICK_MS * Arenas.TURN_TICKS + 1)
+        val turned = viewModel.uiState.value.arena!!
+        assertEquals(Arenas.TURNING.lights[1], turned.light)
+        assertEquals(Arenas.TURN_TICKS, turned.ticksLeftInLight)
+        viewModel.stop()
+    }
+
+    @Test
+    fun buttonsPreviewTheLightTheyWillLandIn() = runTest(dispatcher) {
+        val plain = BattleViewModel(TICK_MS, newBattle = { Battle(opponent = null) })
+        val glow = BattleViewModel(TICK_MS, newBattle = { Battle(environment = Arenas.RED_GLOW, opponent = null) })
+
+        // slot 0 is the red strike, which red light helps
+        assertTrue(glow.uiState.value.actions[0].effect > plain.uiState.value.actions[0].effect)
+        // the green strike is untouched
+        assertEquals(plain.uiState.value.actions[2].effect, glow.uiState.value.actions[2].effect)
+        // a battle outside a named arena has no arena to show
+        assertNull(plain.uiState.value.arena)
+        plain.stop()
+        glow.stop()
     }
 
     @Test

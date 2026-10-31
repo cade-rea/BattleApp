@@ -14,15 +14,18 @@ import androidx.compose.ui.test.assertIsDisplayed
 import com.caderea.battleapp.core.Battle
 import com.caderea.battleapp.core.color.Channel
 import com.caderea.battleapp.core.color.RgbColor
+import com.caderea.battleapp.core.environment.Arenas
 import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.fighter.EnemyFighter
 import com.caderea.battleapp.core.fighter.FighterProfile
 import com.caderea.battleapp.core.progression.Progression
 import com.caderea.battleapp.core.technique.TechniqueRoller
 import com.caderea.battleapp.data.repositoryWith
+import com.caderea.battleapp.ui.arena.ArenasScreen
 import com.caderea.battleapp.ui.battle.BattleScreen
 import com.caderea.battleapp.ui.loadout.LoadoutScreen
 import com.caderea.battleapp.viewmodel.LoadoutViewModel
+import com.caderea.battleapp.viewmodel.toCard
 import com.caderea.battleapp.viewmodel.toState
 import com.caderea.battleapp.viewmodel.toSummary
 import com.caderea.battleapp.ui.menu.MainMenuScreen
@@ -157,11 +160,42 @@ class BattleScreenTest {
     }
 
     @Test
+    fun arenaListShowsEveryArena() {
+        val fighter = FighterProfile.create("Player", Channel.RED).toSummary()
+        val picked = mutableListOf<String>()
+        composeRule.setContent {
+            BattleTheme {
+                ArenasScreen(fighter, Arenas.ALL.map { it.toCard() }, onPick = { picked += it }, onBack = {})
+            }
+        }
+
+        composeRule.onNodeWithText("Turning Light").assertExists()
+        screenshot("arenas")
+        composeRule.onNodeWithTag("arena_red_glow").performClick()
+        assertEquals(listOf("red_glow"), picked)
+    }
+
+    @Test
+    fun aTurningArenaShowsItsLightAndWhatComesNext() {
+        val viewModel = BattleViewModel(TICK_MS, newBattle = { Battle(environment = Arenas.TURNING) })
+        val scope = TestScope(dispatcher)
+        viewModel.queueAction(GREEN_STRIKE)
+        scope.advanceTimeBy(TICK_MS * 2 + 1)
+        val state = viewModel.uiState.value.also { viewModel.stop() }.copy(outcome = null)
+        show(state)
+
+        composeRule.onNodeWithText("Turning Light").assertExists()
+        composeRule.onNodeWithText("Red +20%").assertExists()
+        composeRule.onNodeWithText("Green +20% in 2").assertExists()
+        screenshot("battle-turning-light")
+    }
+
+    @Test
     fun menu() {
         val fighter = FighterProfile.create("Player", Channel.RED).toSummary()
         var loadouts = 0
         composeRule.setContent {
-            BattleTheme { MainMenuScreen(fighter, onBattle = {}, onLoadout = { loadouts++ }, onMap = {}, onCharacters = {}, onCreate = {}) }
+            BattleTheme { MainMenuScreen(fighter, onBattle = {}, onLoadout = { loadouts++ }, onCharacters = {}, onCreate = {}) }
         }
 
         composeRule.onNodeWithText("Fight the computer").assertIsEnabled()
@@ -178,7 +212,7 @@ class BattleScreenTest {
             // as if a few battles in, so the aura has a tint
             start.copy(aura = start.aura.gain(listOf(200 to RgbColor.BLUE)))
         })
-        val viewModel = LoadoutViewModel(profiles)
+        val viewModel = LoadoutViewModel(profiles, Arenas.RED_GLOW)
         val toggled = mutableListOf<Int>()
         composeRule.setContent {
             BattleTheme {
@@ -186,7 +220,8 @@ class BattleScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("Bringing 4 of 4", substring = true).assertExists()
+        composeRule.onNodeWithText("Bringing 4 of 5", substring = true).assertExists()
+        composeRule.onNodeWithText("Red Glow").assertExists()
         screenshot("loadout")
         composeRule.onNodeWithTag("technique5").performClick()
         assertEquals(listOf(5), toggled)
