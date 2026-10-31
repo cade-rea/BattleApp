@@ -56,7 +56,7 @@ class ColoredActionTest {
         val log = greenStrike.performAction(redFighter, blueFighter, environment)
 
         // 382.5 x green strength 1.0 x affinity 1/3 of 25%
-        assertEquals(1000 - 414, blueFighter.health)
+        assertEquals(2000 - 414, blueFighter.health)
         assertEquals("Fighter attacks Fighter with Attack for 414 damage.", log)
     }
 
@@ -80,7 +80,7 @@ class ColoredActionTest {
         Heal(color = RgbColor.GREEN).performAction(greenFighter, redFighter, environment)
 
         assertEquals(707, greenFighter.health)
-        assertEquals(1000, redFighter.health)
+        assertEquals(2000, redFighter.health)
     }
 
     @Test

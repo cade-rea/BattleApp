@@ -8,7 +8,7 @@ import kotlin.math.roundToInt
  *
  * - red is fast but weaker
  * - blue is strong but slow
- * - green is efficient: cheaper, with stronger heals (and later guards)
+ * - green is efficient: cheaper, with stronger heals and guards
  *
  * All the swings are starting values to playtest. Random spread on top of these comes with
  * technique generation.
@@ -20,7 +20,7 @@ data class ColorTraits(
     val strength: Double,
     /** Multiplies energy cost: below 1 is cheaper. */
     val costFactor: Double,
-    /** Multiplies healing (and later guarding). */
+    /** Multiplies healing and guarding. */
     val support: Double,
 ) {
 

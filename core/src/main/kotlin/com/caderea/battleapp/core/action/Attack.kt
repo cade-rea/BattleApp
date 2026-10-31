@@ -10,8 +10,9 @@ import kotlin.math.roundToInt
 class Attack(name: String = "Attack", color: RgbColor) : BattleAction(name, color) {
 
     /**
-     * Damage against [target]: the color's power after type matchups against the target's
-     * aura, times the color's strength trait, the performer's aura affinity and the light.
+     * Damage against [target] before guards: the color's power after type matchups against
+     * the target's aura, times the color's strength trait, the performer's aura affinity and
+     * the light.
      */
     fun damage(performer: Fighter, target: Fighter, environment: Environment): Int =
         (TypeWheel.typedPower(color, target.color) *
@@ -21,8 +22,11 @@ class Attack(name: String = "Attack", color: RgbColor) : BattleAction(name, colo
 
     override fun performAction(performer: Fighter, target: Fighter, environment: Environment): String {
         val damage = damage(performer, target, environment)
-        target.health -= damage
+        val guard = target.activeGuard
+        val blocked = guard?.blocked(damage, color) ?: 0
+        target.health -= damage - blocked
 
-        return "${performer.name} attacks ${target.name} with $name for $damage damage."
+        val hit = "${performer.name} attacks ${target.name} with $name for ${damage - blocked} damage"
+        return if (guard != null && blocked > 0) "$hit ($blocked blocked by ${guard.guard.name})." else "$hit."
     }
 }

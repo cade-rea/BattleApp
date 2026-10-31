@@ -52,6 +52,13 @@ data class RgbColor(val red: Int, val green: Int, val blue: Int) {
         }
 
     /**
+     * How much two colors share their mix, from 0 (no channel in common) to 1 (the same
+     * mix): the sum over channels of the smaller share. Brightness doesn't matter.
+     */
+    fun overlap(other: RgbColor): Double =
+        Channel.entries.sumOf { minOf(share(it), other.share(it)) }
+
+    /**
      * This color with its channels scaled down so their sum fits in [budget]. The mix stays
      * the same; a color already within the budget is returned as it is.
      */
