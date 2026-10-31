@@ -1,47 +1,47 @@
 package com.caderea.battleapp.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.util.DisplayMetrics;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import com.caderea.battleapp.R;
-import com.caderea.battleapp.core.action.BattleAction;
 import com.caderea.battleapp.core.Battle;
+import com.caderea.battleapp.core.BattleListener;
 import com.caderea.battleapp.core.BattleQueue;
+import com.caderea.battleapp.core.action.BattleAction;
 import com.caderea.battleapp.view.battle.BattleViewGroup;
 
 import java.util.ArrayList;
 
-public class BattleActivity extends Activity {
+/**
+ * Battle screen. The Battle runs on its own thread and reports back through the
+ * BattleListener methods, which hand each update to the UI thread.
+ */
+public class BattleActivity extends Activity implements BattleListener {
+    private static final int MAX_LOG_LINES = 10;
+
     private ArrayList<String> output;
 
     private Battle battle;
     private Button[] battleButtons;
     private BattleViewGroup battleViewGroup;
+    private TextView battleLog;
 
-    private float dpHeight;
-    private float dpWidth;
-
-    public Handler uiHandler;
+    //refers to the UI thread, so other threads can post work to it
+    private Handler uiHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_battle_screen);
 
-        //get screen resolution in dp
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        dpHeight = displayMetrics.heightPixels / displayMetrics.density;
-        dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-
-        output = new ArrayList<>(10);
+        output = new ArrayList<>(MAX_LOG_LINES);
 
         battleButtons = new Button[4];
         battleButtons[0] = findViewById(R.id.button1);
@@ -50,35 +50,97 @@ public class BattleActivity extends Activity {
         battleButtons[3] = findViewById(R.id.button4);
 
         battleViewGroup = findViewById(R.id.battleViewGroup);
+        battleLog = findViewById(R.id.battleLog);
 
-        //this handler can be passed to other threads to refer to the UI thread
-        uiHandler = new Handler() {
-            //responds to uiHandler.sendMessage()
-            public void handleMessage(Message msg) {
-                update((String)msg.obj);
-            }
-        };
+        uiHandler = new Handler(Looper.getMainLooper());
 
         //create a new Battle and pass this activity
-        battle = new Battle(this);
+        long millisecondsPerTick = getResources().getInteger(R.integer.tick_length_ms);
+        battle = new Battle(this, millisecondsPerTick);
         //start the battle
         (new Thread(battle)).start();
     }
 
-    public void update(String msg) {
-        while(output.size() > 9) {
+    @Override
+    protected void onDestroy() {
+        //otherwise the battle thread keeps running after the screen is gone
+        battle.stop();
+        super.onDestroy();
+    }
+
+    /*
+     * BattleListener: called from the battle thread
+     */
+
+    @Override
+    public void update(final String msg) {
+        uiHandler.post(() -> addLogLine(msg));
+    }
+
+    @Override
+    public void notifyDone() {
+        uiHandler.post(this::showDone);
+    }
+
+    @Override
+    public void updateButtons(final BattleAction[] actions) {
+        uiHandler.post(() -> showButtons(actions));
+    }
+
+    @Override
+    public void updateTickProgress(final int progress) {
+        uiHandler.post(() -> battleViewGroup.updateTickProgress(progress));
+    }
+
+    @Override
+    public void refreshQueues() {
+        uiHandler.post(() -> battleViewGroup.refreshQueues());
+    }
+
+    //called from the Battle constructor, which runs on the UI thread in onCreate
+    @Override
+    public void setQueues(BattleQueue q1, BattleQueue q2) {
+        battleViewGroup.setQueues(q1, q2);
+        battleViewGroup.refreshQueues();
+    }
+
+    /*
+     * UI thread
+     */
+
+    private void addLogLine(String msg) {
+        while(output.size() >= MAX_LOG_LINES) {
             output.remove(0);
         }
 
         output.add(msg);
 
-        String str = "";
+        StringBuilder sb = new StringBuilder();
         for(String s:output) {
-            str += s +"\n";
+            sb.append(s).append("\n");
         }
 
-        Log.d("BATTLE", "update: " + str);
-//        battleText.setText(str);
+        Log.d("BATTLE", "update: " + msg);
+        battleLog.setText(sb.toString());
+    }
+
+    private void showDone() {
+        addLogLine("Battle Finished");
+
+        //change the stop button to return to the main menu
+        Button btn = findViewById(R.id.buttonStop);
+        btn.setText("Return");
+        btn.setOnClickListener(view -> finish());
+    }
+
+    private void showButtons(BattleAction[] actions) {
+        for (int i = 0; i < actions.length; ++i) {
+            if (actions[i] != null) {
+                battleButtons[i].setText(actions[i].getName());
+            } else {
+                battleButtons[i].setText("");
+            }
+        }
     }
 
     public void buttonPushed(View view) {
@@ -99,53 +161,13 @@ public class BattleActivity extends Activity {
                 stopBattle();
                 break;
             default:
-                update("default");
+                addLogLine("default");
                 break;
         }
     }
 
     private void stopBattle() {
         battle.stop();
-    }
-
-    public void notifyDone() {
-        update("Battle Finished");
-
-        //change button 4 to return to the main menu
-        Button btn = (Button)findViewById(R.id.buttonStop);
-        btn.setText("Return");
-
-        final Activity thisBattleScreen = this;
-
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(thisBattleScreen, MainActivity.class));
-            }
-        });
-    }
-
-    public void updateButtons(BattleAction[] buttons) {
-        for (int i = 0; i < buttons.length; ++i) {
-            if (buttons[i] != null) {
-                battleButtons[i].setText(buttons[i].getName());
-            } else {
-                battleButtons[i].setText("");
-            }
-        }
-    }
-
-    public void updateTickProgress(int progress) {
-        battleViewGroup.updateTickProgress(progress);
-    }
-
-    public void setQueues(BattleQueue q1, BattleQueue q2) {
-        battleViewGroup.setQueues(q1, q2);
-        refreshQueues();
-    }
-
-    public void refreshQueues() {
-        battleViewGroup.refreshQueues();
     }
 
     @Override

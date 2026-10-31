@@ -9,7 +9,7 @@ public class Map implements Runnable {
 
     private int gameTick;
     private Clock mapClock;
-    private boolean going;
+    private volatile boolean going;
 
     private MapActivity mapActivity;
 
@@ -63,6 +63,10 @@ public class Map implements Runnable {
 
     private void doNoTick() {
         SystemClock.sleep(500);
+    }
+
+    public void stop() {
+        going = false;
     }
 
     private void moveCircle() {

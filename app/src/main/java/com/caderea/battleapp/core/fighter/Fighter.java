@@ -4,6 +4,7 @@ import com.caderea.battleapp.core.action.Attack;
 import com.caderea.battleapp.core.action.BattleAction;
 import com.caderea.battleapp.core.action.Heal;
 import com.caderea.battleapp.core.BattleQueue;
+import com.caderea.battleapp.view.battle.queue.QueueAction;
 
 /**
  * Created by Cade on 7/31/2014.
@@ -13,6 +14,7 @@ public class Fighter {
 
     protected int power;
     protected int health;
+    protected int maxHealth;
 
     protected Fighter target;
 
@@ -28,6 +30,7 @@ public class Fighter {
         this.name = name;
         this.power = power;
         this.health = health;
+        this.maxHealth = health;
 
         queue = new BattleQueue();
         actions = new BattleAction[4];
@@ -58,8 +61,13 @@ public class Fighter {
         return health;
     }
 
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    // health stays between 0 and maxHealth, so healing can't overflow
     public void setHealth(int health) {
-        this.health = health;
+        this.health = Math.max(0, Math.min(health, maxHealth));
     }
 
     public BattleAction[] getActions() {
@@ -78,7 +86,16 @@ public class Fighter {
         this.target = target;
     }
 
+    /**
+     * Performs the next queued action.
+     * @return a description of what happened, or null if the queue was empty
+     */
     public String performNextAction() {
-        return queue.poll().getBattleAction().performAction(this, target);
+        QueueAction next = queue.poll();
+        if (next == null) {
+            return null;
+        }
+
+        return next.getBattleAction().performAction(this, target);
     }
 }

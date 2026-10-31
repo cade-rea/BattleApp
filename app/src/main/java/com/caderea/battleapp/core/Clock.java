@@ -1,16 +1,17 @@
 package com.caderea.battleapp.core;
 
 import android.os.SystemClock;
-import android.util.Log;
 
 /**
  * Created by Cade on 7/31/2014.
+ *
+ * Runs on its own thread; other threads read tick and progress, so the shared fields are volatile.
  */
 public class Clock implements Runnable {
     private long time;
-    private int tick;
-    private long subTick;
-    private boolean going;
+    private volatile int tick;
+    private volatile long subTick;
+    private volatile boolean going;
 
     private long millisecondsPerTick;
     private long subticksPerTick;
@@ -19,13 +20,13 @@ public class Clock implements Runnable {
         time = 0;
         tick = 0;
         subTick = 0;
+        going = true;
         this.millisecondsPerTick = millisecondsPerTick;
         this.subticksPerTick = subticksPerTick;
     }
 
     @Override
     public void run() {
-        going = true;
         tick = 1;
         time = SystemClock.uptimeMillis() / millisecondsPerTick;
 
@@ -43,7 +44,7 @@ public class Clock implements Runnable {
                 time = nowish;
                 ++tick;
             } else {
-                SystemClock.sleep(millisecondsPerTick / (subticksPerTick * 5));
+                SystemClock.sleep(Math.max(1, millisecondsPerTick / (subticksPerTick * 5)));
             }
         }
     }
@@ -57,7 +58,6 @@ public class Clock implements Runnable {
     }
 
     public int getProgress() {
-        Log.d("CLOCK","Progress:" + SystemClock.uptimeMillis() % (double) subticksPerTick / (double) subticksPerTick * 100);
         return (int)( (double) subTick / (double) subticksPerTick * 100);
     }
 }
