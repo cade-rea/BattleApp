@@ -1,13 +1,33 @@
 package com.caderea.battleapp.core.action
 
+import com.caderea.battleapp.core.color.Affinity
+import com.caderea.battleapp.core.color.RgbColor
+import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.fighter.Fighter
+import kotlin.math.roundToInt
 
-class Heal(val power: Int = 1) : BattleAction("Heal", 1) {
+class Heal(name: String = "Heal", color: RgbColor) : BattleAction(name, color) {
 
-    override fun performAction(performer: Fighter, target: Fighter): String {
-        val heal = power * performer.power
+    /**
+     * Health restored: a share of the color's power, times its support trait, the
+     * performer's aura affinity and the light. Heals have no type matchup.
+     */
+    fun amount(performer: Fighter, environment: Environment): Int =
+        (color.power * POWER_TO_HEALTH *
+            traits.support *
+            Affinity.multiplier(color, performer.color) *
+            environment.lightMultiplier(color)).roundToInt()
+
+    override fun performAction(performer: Fighter, target: Fighter, environment: Environment): String {
+        val heal = amount(performer, environment)
         performer.health += heal
 
-        return "${performer.name} heals for $heal health."
+        return "${performer.name} heals with $name for $heal health."
+    }
+
+    companion object {
+        // heals restore less than an attack of the same power takes, so they can't stall a
+        // fight forever; a starting value to playtest
+        const val POWER_TO_HEALTH = 0.5
     }
 }

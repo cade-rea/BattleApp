@@ -39,7 +39,7 @@ class Battle(
         )
 
         for (fighter in listOf(player, enemy)) {
-            fighter.performNextAction()?.let(log::add)
+            fighter.performNextAction(environment)?.let(log::add)
 
             // check right after each action so a fighter that just died doesn't get to act
             val target = fighter.target
