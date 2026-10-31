@@ -7,51 +7,68 @@ import com.caderea.battleapp.core.technique.TechniqueKind
 import com.caderea.battleapp.core.technique.TechniqueRoller
 
 /**
- * A character being created: a name, a base primary, and the techniques picked so far.
+ * A character being created: a name, a base primary, and the techniques chosen so far.
  *
- * Creation is a draft of [ROUNDS] rounds. Each round offers [CHOICES] freshly rolled
- * techniques and the player keeps one. The last round is the signature round: every offer
- * is the pure base primary and especially strong, fast or cheap. Once every round is picked
- * the draft [isComplete] and [toProfile] makes the fighter.
+ * Creation is a draft in two steps:
  *
- * Every offer holds at least one attack, and if the first rounds were all heals and guards
- * the signature round offers only attacks, so no fighter starts unable to hurt anyone.
+ * 1. **Signature.** [SIGNATURE_CHOICES] signature techniques are offered, each the pure base
+ *    primary and especially strong, fast or cheap. The player keeps one, so they know what
+ *    they're building around before anything else.
+ * 2. **Techniques.** [TECHNIQUE_CHOICES] normal rolls are offered and the player keeps
+ *    [TECHNIQUE_PICKS] of them.
+ *
+ * Then the draft [isComplete] and [toProfile] makes a fighter with the signature and the
+ * picks, [STARTING_TECHNIQUES] techniques in all.
+ *
+ * Every offer of normal rolls holds at least one attack, and a set of picks that leaves the
+ * fighter with no attack at all isn't allowed (see [canKeep]), so no fighter starts unable to
+ * hurt anyone.
  *
  * Plain immutable data; [CharacterCreator] rolls the offers.
  */
 data class CharacterDraft(
     val name: String,
     val base: Channel,
+    val signature: Technique? = null,
     val picks: List<Technique> = emptyList(),
     val offer: List<Technique> = emptyList(),
 ) {
 
-    init {
-        require(picks.size <= ROUNDS) { "a draft has only $ROUNDS rounds" }
-    }
-
-    /** The round being picked, from 1, or [ROUNDS] + 1 once done. */
-    val round: Int
-        get() = picks.size + 1
-
-    val isSignatureRound: Boolean
-        get() = picks.size == ROUNDS - 1
+    val isSignatureStep: Boolean
+        get() = signature == null
 
     val isComplete: Boolean
-        get() = picks.size == ROUNDS
+        get() = signature != null && picks.size == TECHNIQUE_PICKS
 
     val aura: Aura
         get() = Aura.start(base)
 
-    /** The new level 1 fighter: the picked techniques, all of them in the loadout. */
+    /** Every technique kept so far, signature first. */
+    val kept: List<Technique>
+        get() = listOfNotNull(signature) + picks
+
+    /**
+     * Whether keeping offers [indices] in the technique step would finish the draft: exactly
+     * [TECHNIQUE_PICKS] different offers, and an attack somewhere among them and the signature.
+     */
+    fun canKeep(indices: Collection<Int>): Boolean {
+        val chosen = indices.toSet()
+        if (isSignatureStep || isComplete) return false
+        if (chosen.size != TECHNIQUE_PICKS || chosen.any { it !in offer.indices }) return false
+        return (chosen.map { offer[it] } + listOfNotNull(signature)).any { it.kind == TechniqueKind.ATTACK }
+    }
+
+    /** The new level 1 fighter: the signature and the picks, all of them in the loadout. */
     fun toProfile(): FighterProfile {
-        check(isComplete) { "the draft isn't finished: ${picks.size} of $ROUNDS picked" }
-        return FighterProfile(name, aura, picks, loadout = picks.map { it.id })
+        check(isComplete) { "the draft isn't finished" }
+        return FighterProfile(name, aura, kept, loadout = kept.map { it.id })
     }
 
     companion object {
-        const val ROUNDS = 4
-        const val CHOICES = 3
+        const val SIGNATURE_CHOICES = 3
+        const val TECHNIQUE_CHOICES = 6
+        const val TECHNIQUE_PICKS = 2
+        const val STARTING_TECHNIQUES = 1 + TECHNIQUE_PICKS
         const val MAX_NAME_LENGTH = 16
 
         /** The name with stray spaces trimmed, or null if nothing usable is left. */
@@ -63,40 +80,51 @@ data class CharacterDraft(
 /** Rolls the offers for a [CharacterDraft]. Pass a seeded roller for repeatable drafts. */
 class CharacterCreator(private val roller: TechniqueRoller = TechniqueRoller()) {
 
-    /** A new draft with its first offer rolled. [name] must be usable (see [CharacterDraft.cleanName]). */
+    /** A new draft with its signature offer rolled. [name] must be usable (see [CharacterDraft.cleanName]). */
     fun start(name: String, base: Channel): CharacterDraft {
         val clean = requireNotNull(CharacterDraft.cleanName(name)) { "a character needs a name" }
         val draft = CharacterDraft(clean, base)
-        return draft.copy(offer = offerFor(draft))
+        return draft.copy(offer = signatureOffer(draft))
     }
 
-    /** Keeps offer [choice] and rolls the next round's offer, if any round is left. */
-    fun pick(draft: CharacterDraft, choice: Int): CharacterDraft {
-        check(!draft.isComplete) { "the draft is already finished" }
+    /** Keeps signature offer [choice] and rolls the normal techniques to pick from. */
+    fun chooseSignature(draft: CharacterDraft, choice: Int): CharacterDraft {
+        check(draft.isSignatureStep) { "the signature is already chosen" }
         require(choice in draft.offer.indices) { "no offer $choice" }
-        val picked = draft.copy(picks = draft.picks + draft.offer[choice], offer = emptyList())
-        return if (picked.isComplete) picked else picked.copy(offer = offerFor(picked))
+        val signature = draft.offer[choice].copy(id = SIGNATURE_ID)
+        val aura = draft.aura
+        val offer = kinds(CharacterDraft.TECHNIQUE_CHOICES).mapIndexed { index, kind ->
+            roller.roll(aura, id = SIGNATURE_ID + 1 + index, kind = kind)
+        }
+        return draft.copy(signature = signature, offer = offer)
     }
 
-    private fun offerFor(draft: CharacterDraft): List<Technique> {
-        val id = draft.picks.size + 1
-        val aura = draft.aura
-        return if (draft.isSignatureRound) {
-            val needsAttack = draft.picks.none { it.kind == TechniqueKind.ATTACK }
-            val kinds = if (needsAttack) List(CharacterDraft.CHOICES) { TechniqueKind.ATTACK } else kinds()
-            val standouts = TechniqueRoller.usefulStandouts(draft.base).shuffled(roller.random)
-            kinds.mapIndexed { index, kind ->
-                roller.rollSignature(aura, id, kind, standouts[index % standouts.size])
-            }
-        } else {
-            kinds().map { roller.roll(aura, id, it) }
+    /** Keeps technique offers [indices], which finishes the draft. See [CharacterDraft.canKeep]. */
+    fun keep(draft: CharacterDraft, indices: Collection<Int>): CharacterDraft {
+        require(draft.canKeep(indices)) { "can't keep offers $indices" }
+        // numbered after the signature, in the order they were offered
+        val picks = indices.toSortedSet().mapIndexed { index, offer ->
+            draft.offer[offer].copy(id = SIGNATURE_ID + 1 + index)
+        }
+        return draft.copy(picks = picks, offer = emptyList())
+    }
+
+    /** One signature per useful standout, so the choice is between strong, fast and cheap. */
+    private fun signatureOffer(draft: CharacterDraft): List<Technique> {
+        val standouts = TechniqueRoller.usefulStandouts(draft.base).shuffled(roller.random)
+        return kinds(CharacterDraft.SIGNATURE_CHOICES).mapIndexed { index, kind ->
+            roller.rollSignature(draft.aura, SIGNATURE_ID, kind, standouts[index % standouts.size])
         }
     }
 
-    /** [CharacterDraft.CHOICES] rolled kinds with at least one attack among them. */
-    private fun kinds(): List<TechniqueKind> {
-        val kinds = MutableList(CharacterDraft.CHOICES) { roller.rollKind() }
+    /** [count] rolled kinds with at least one attack among them. */
+    private fun kinds(count: Int): List<TechniqueKind> {
+        val kinds = MutableList(count) { roller.rollKind() }
         if (TechniqueKind.ATTACK !in kinds) kinds[roller.random.nextInt(kinds.size)] = TechniqueKind.ATTACK
         return kinds
+    }
+
+    private companion object {
+        const val SIGNATURE_ID = 1
     }
 }

@@ -51,39 +51,83 @@ class CharacterCreationViewModelTest {
 
         viewModel.setName("Nova")
         viewModel.startDraft()
-        assertEquals(CreationStep.DRAFT, viewModel.uiState.value.step)
+        assertEquals(CreationStep.SIGNATURE, viewModel.uiState.value.step)
         assertEquals(3, viewModel.uiState.value.offer.size)
     }
 
     @Test
-    fun fourPicksMakeAndLoadTheCharacter() {
+    fun aSignatureThenTwoOfSixMakeAndLoadTheCharacter() {
         val profiles = repositoryWith(FighterProfile.create("Old", Channel.RED))
         val viewModel = viewModel(profiles)
         viewModel.setName("Nova")
         viewModel.setBase(Channel.BLUE)
         viewModel.startDraft()
 
-        val kept = mutableListOf<String>()
-        repeat(4) { round ->
-            val state = viewModel.uiState.value
-            assertEquals(round + 1, state.round)
-            assertEquals(round == 3, state.signatureRound)
-            assertEquals(round == 3, state.offer.all { it.signature })
-            assertEquals(round, state.picks.size)
-            kept += state.offer[round % 3].name
-            assertEquals(1, profiles.roster.value.size)
-            viewModel.pick(round % 3)
-        }
+        var state = viewModel.uiState.value
+        assertEquals(CreationStep.SIGNATURE, state.step)
+        assertEquals(3, state.offer.size)
+        assertTrue(state.offer.all { it.signature })
+        val signature = state.offer[1].name
+        viewModel.chooseSignature(1)
 
-        val state = viewModel.uiState.value
+        state = viewModel.uiState.value
+        assertEquals(CreationStep.TECHNIQUES, state.step)
+        assertEquals(listOf(signature), state.kept.map { it.name })
+        assertEquals(6, state.offer.size)
+        assertFalse(state.canKeep)
+
+        val pair = keepablePair(state)
+        val offered = state.offer.map { it.name }
+        viewModel.toggle(pair[0])
+        assertFalse(viewModel.uiState.value.canKeep)
+        viewModel.toggle(pair[1])
+        assertTrue(viewModel.uiState.value.canKeep)
+        assertEquals(1, profiles.roster.value.size)
+        viewModel.keep()
+
+        state = viewModel.uiState.value
+        val expected = listOf(signature) + pair.map { offered[it] }
         assertEquals(CreationStep.READY, state.step)
-        assertEquals(kept, state.picks.map { it.name })
+        assertEquals(expected, state.kept.map { it.name })
         assertEquals(2, profiles.roster.value.size)
         val nova = profiles.requireActive()
         assertEquals("Nova", nova.name)
         assertEquals(Channel.BLUE, nova.aura.base)
-        assertEquals(kept, nova.catalog.map { it.name })
-        assertTrue(nova.catalog.last().signature)
+        assertEquals(expected, nova.catalog.map { it.name })
+        assertTrue(nova.catalog.first().signature)
+    }
+
+    @Test
+    fun onlyTwoCanBeMarkedAndAFighterNeedsAnAttack() {
+        // try seeds until the signature offer has a non-attack and the six have two non-attacks
+        for (seed in 1..80) {
+            val viewModel = CharacterCreationViewModel(emptyRepository(), CharacterCreator(TechniqueRoller(Random(seed))))
+            viewModel.setName("Nova")
+            viewModel.setBase(Channel.GREEN)
+            viewModel.startDraft()
+            val support = viewModel.uiState.value.offer.indexOfFirst { it.kind != ActionKind.ATTACK }
+            if (support < 0) continue
+            viewModel.chooseSignature(support)
+            val nonAttacks = viewModel.uiState.value.offer.indices.filter { viewModel.uiState.value.offer[it].kind != ActionKind.ATTACK }
+            if (nonAttacks.size < 3) continue
+
+            nonAttacks.take(3).forEach(viewModel::toggle)
+            val state = viewModel.uiState.value
+            assertEquals(nonAttacks.take(2).toSet(), state.selected)
+            assertFalse(state.canKeep)
+            assertTrue(state.needsAttack)
+            viewModel.keep()
+            assertEquals(CreationStep.TECHNIQUES, viewModel.uiState.value.step)
+            return
+        }
+        error("no seed gave a draft without attacks to try")
+    }
+
+    private fun keepablePair(state: CharacterCreationUiState): List<Int> {
+        val hasAttack = state.kept.any { it.kind == ActionKind.ATTACK }
+        val attack = state.offer.indexOfFirst { it.kind == ActionKind.ATTACK }
+        val first = if (hasAttack) 0 else attack
+        return listOf(first, state.offer.indices.first { it != first }).sorted()
     }
 
     @Test
@@ -93,7 +137,7 @@ class CharacterCreationViewModelTest {
         viewModel.setName("Nova")
         viewModel.setBase(Channel.GREEN)
         viewModel.startDraft()
-        viewModel.pick(0)
+        viewModel.chooseSignature(0)
 
         viewModel.startOver()
 
@@ -101,7 +145,7 @@ class CharacterCreationViewModelTest {
         assertEquals(CreationStep.IDENTITY, state.step)
         assertEquals("Nova", state.name)
         assertEquals(Channel.GREEN, state.base)
-        assertTrue(state.picks.isEmpty())
+        assertTrue(state.kept.isEmpty())
         assertNull(profiles.active.value)
     }
 }

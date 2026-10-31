@@ -17,62 +17,90 @@ class CharacterDraftTest {
 
     private fun creator(seed: Int = 11) = CharacterCreator(TechniqueRoller(Random(seed)))
 
-    private fun draftAll(creator: CharacterCreator, base: Channel, choose: (CharacterDraft) -> Int = { 0 }): CharacterDraft {
-        var draft = creator.start("Iris", base)
-        while (!draft.isComplete) draft = creator.pick(draft, choose(draft))
-        return draft
+    /** The first pair of offers that can be kept. */
+    private fun keepable(draft: CharacterDraft): List<Int> {
+        val pairs = draft.offer.indices.flatMap { a -> draft.offer.indices.filter { it > a }.map { b -> listOf(a, b) } }
+        return pairs.first(draft::canKeep)
+    }
+
+    private fun draftAll(creator: CharacterCreator, base: Channel, signature: Int = 0): CharacterDraft {
+        val draft = creator.chooseSignature(creator.start("Iris", base), signature)
+        return creator.keep(draft, keepable(draft))
     }
 
     @Test
-    fun threeRoundsOfThreeThenASignatureRound() {
+    fun theSignatureComesFirstThenTwoOfSix() {
         val creator = creator()
         var draft = creator.start("Iris", Channel.BLUE)
 
-        repeat(3) { round ->
-            assertEquals(round + 1, draft.round)
-            assertEquals(3, draft.offer.size)
-            assertFalse(draft.isSignatureRound)
-            assertTrue(draft.offer.none { it.signature })
-            draft = creator.pick(draft, 1)
-        }
-
-        assertTrue(draft.isSignatureRound)
+        assertTrue(draft.isSignatureStep)
         assertEquals(3, draft.offer.size)
         assertTrue(draft.offer.all { it.signature })
-        draft = creator.pick(draft, 2)
 
+        val chosen = draft.offer[1]
+        draft = creator.chooseSignature(draft, 1)
+        assertFalse(draft.isSignatureStep)
+        assertEquals(chosen.name, draft.signature?.name)
+        assertEquals(6, draft.offer.size)
+        assertTrue(draft.offer.none { it.signature })
+
+        val pair = keepable(draft)
+        val names = pair.map { draft.offer[it].name }
+        draft = creator.keep(draft, pair)
         assertTrue(draft.isComplete)
         assertTrue(draft.offer.isEmpty())
-        assertEquals(4, draft.picks.size)
+        assertEquals(listOf(chosen.name) + names, draft.kept.map { it.name })
     }
 
     @Test
-    fun theFinishedDraftIsALevelOneFighterWithItsPicksInTheLoadout() {
-        val draft = draftAll(creator(), Channel.GREEN) { it.round % 3 }
-        val profile = draft.toProfile()
+    fun theFinishedDraftIsALevelOneFighterWithThreeTechniques() {
+        val profile = draftAll(creator(), Channel.GREEN, signature = 2).toProfile()
 
         assertEquals("Iris", profile.name)
         assertEquals(Channel.GREEN, profile.aura.base)
         assertEquals(1, profile.level)
-        assertEquals(draft.picks, profile.catalog)
-        assertEquals(listOf(1, 2, 3, 4), profile.loadout)
-        assertEquals(4, profile.toFighter().actions.filterNotNull().size)
+        assertEquals(CharacterDraft.STARTING_TECHNIQUES, profile.catalog.size)
+        assertEquals(listOf(1, 2, 3), profile.catalog.map { it.id })
+        assertEquals(listOf(1, 2, 3), profile.loadout)
+        assertTrue(profile.catalog.first().signature)
+        assertEquals(3, profile.toFighter().actions.filterNotNull().size)
     }
 
     @Test
-    fun anUnfinishedDraftIsNotAFighterYet() {
-        val draft = creator().start("Iris", Channel.RED)
+    fun onlyExactlyTwoDifferentOffersCanBeKept() {
+        val creator = creator()
+        val start = creator.start("Iris", Channel.RED)
+        assertFalse(start.canKeep(listOf(0, 1)), "the signature comes first")
 
+        val draft = creator.chooseSignature(start, 0)
+        assertFalse(draft.canKeep(listOf(0)))
+        assertFalse(draft.canKeep(listOf(0, 0)))
+        assertFalse(draft.canKeep(listOf(0, 1, 2)))
+        assertFalse(draft.canKeep(listOf(0, 6)))
+        assertFailsWith<IllegalArgumentException> { creator.keep(draft, listOf(0)) }
+        assertFailsWith<IllegalStateException> { start.toProfile() }
         assertFailsWith<IllegalStateException> { draft.toProfile() }
+    }
+
+    @Test
+    fun aFighterWithoutAnAttackIsNotAllowed() {
+        for (seed in 1..80) {
+            val creator = creator(seed)
+            val start = creator.start("Iris", Channel.BLUE)
+            val support = start.offer.indexOfFirst { it.kind != TechniqueKind.ATTACK }
+            if (support < 0) continue
+            val draft = creator.chooseSignature(start, support)
+            assertTrue(draft.offer.any { it.kind == TechniqueKind.ATTACK }, "seed $seed")
+
+            val nonAttacks = draft.offer.indices.filter { draft.offer[it].kind != TechniqueKind.ATTACK }
+            if (nonAttacks.size >= 2) assertFalse(draft.canKeep(nonAttacks.take(2)), "seed $seed")
+        }
     }
 
     @Test
     fun everySignatureOfferIsThePurePrimaryAtFullPowerAndBeatsNormalRolls() {
         for (seed in 1..40) for (base in Channel.entries) {
-            var draft = creator(seed).start("Iris", base)
-            repeat(3) { draft = creator(seed).pick(draft, 0) }
-
-            for (technique in draft.offer) {
+            for (technique in creator(seed).start("Iris", base).offer) {
                 assertEquals(255, technique.color[base], "$technique")
                 assertEquals(255, technique.color.power, "$technique")
                 val rolls = technique.rolls
@@ -84,11 +112,8 @@ class CharacterDraftTest {
     }
 
     @Test
-    fun aSignatureRoundOffersDifferentStandouts() {
-        var draft = creator().start("Iris", Channel.BLUE)
-        repeat(3) { draft = creator().pick(draft, 0) }
-
-        val standouts = draft.offer.map {
+    fun theSignatureOfferHasDifferentStandouts() {
+        val standouts = creator().start("Iris", Channel.BLUE).offer.map {
             when {
                 it.rolls.potency >= 1.3 -> Standout.STRONGER
                 it.rolls.windUp <= 0.7 -> Standout.FASTER
@@ -112,24 +137,6 @@ class CharacterDraftTest {
     }
 
     @Test
-    fun everyOfferHasAnAttackAndEveryFighterCanAttack() {
-        for (seed in 1..60) {
-            // always take a non-attack when there is one, to push the draft toward no attacks
-            val draft = draftAll(creator(seed), Channel.RED) { d ->
-                d.offer.indexOfFirst { it.kind != TechniqueKind.ATTACK }.coerceAtLeast(0)
-            }
-            assertTrue(draft.picks.any { it.kind == TechniqueKind.ATTACK }, "seed $seed")
-        }
-        for (seed in 1..60) {
-            var draft = creator(seed).start("Iris", Channel.GREEN)
-            while (!draft.isComplete) {
-                assertTrue(draft.offer.any { it.kind == TechniqueKind.ATTACK }, "seed $seed round ${draft.round}")
-                draft = creator(seed).pick(draft, 0)
-            }
-        }
-    }
-
-    @Test
     fun theSameSeedDraftsTheSameCharacter() {
         assertEquals(draftAll(creator(3), Channel.RED), draftAll(creator(3), Channel.RED))
     }
@@ -149,6 +156,6 @@ class CharacterDraftTest {
         val reloaded = ProfileJson.decode(ProfileJson.encode(profile))
 
         assertEquals(profile, reloaded)
-        assertTrue(reloaded.catalog.last().signature)
+        assertTrue(reloaded.catalog.first().signature)
     }
 }

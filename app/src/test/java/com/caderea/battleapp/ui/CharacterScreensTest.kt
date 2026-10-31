@@ -23,6 +23,7 @@ import com.caderea.battleapp.ui.character.CharacterCreationScreen
 import com.caderea.battleapp.ui.character.CharactersScreen
 import com.caderea.battleapp.ui.menu.MainMenuScreen
 import com.caderea.battleapp.ui.theme.BattleTheme
+import com.caderea.battleapp.viewmodel.ActionKind
 import com.caderea.battleapp.viewmodel.CharacterCreationViewModel
 import com.caderea.battleapp.viewmodel.CharactersViewModel
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +77,9 @@ class CharacterScreensTest {
                     onName = viewModel::setName,
                     onBase = viewModel::setBase,
                     onStart = viewModel::startDraft,
-                    onPick = viewModel::pick,
+                    onChooseSignature = viewModel::chooseSignature,
+                    onToggle = viewModel::toggle,
+                    onKeep = viewModel::keep,
                     onStartOver = viewModel::startOver,
                     onDone = { done++ },
                     onBack = {},
@@ -91,22 +94,28 @@ class CharacterScreensTest {
         screenshot("create-identity")
 
         composeRule.onNodeWithTag("start").performClick()
-        composeRule.onNodeWithText("Pick 1 of 4").assertExists()
-        screenshot("create-round-1")
-
-        repeat(3) { round ->
-            composeRule.onNodeWithTag("offer${round % 3}").performClick()
-        }
         composeRule.onNodeWithText("Signature move").assertExists()
         screenshot("create-signature")
 
+        composeRule.onNodeWithTag("offer0").performClick()
+        composeRule.onNodeWithText("Pick 2 of 6").assertExists()
+        composeRule.onNodeWithTag("keep").assertIsNotEnabled()
+        val state = viewModel.uiState.value
+        val needsAttack = state.kept.none { it.kind == ActionKind.ATTACK }
+        val first = if (needsAttack) state.offer.indexOfFirst { it.kind == ActionKind.ATTACK } else 0
+        val second = state.offer.indices.first { it != first }
+        composeRule.onNodeWithTag("offer$first").performClick()
+        composeRule.onNodeWithTag("offer$second").performClick()
+        composeRule.onNodeWithTag("keep").assertIsEnabled()
+        screenshot("create-techniques")
+
         assertNull(profiles.active.value)
-        composeRule.onNodeWithTag("offer1").performClick()
+        composeRule.onNodeWithTag("keep").performClick()
         composeRule.onNodeWithText("is ready to fight").assertExists()
         screenshot("create-ready")
 
         assertEquals("Nova", profiles.requireActive().name)
-        assertEquals(4, profiles.requireActive().catalog.size)
+        assertEquals(3, profiles.requireActive().catalog.size)
         composeRule.onNodeWithTag("done").performClick()
         assertEquals(1, done)
     }

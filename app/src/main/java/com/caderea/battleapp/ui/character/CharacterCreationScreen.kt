@@ -50,8 +50,8 @@ import com.caderea.battleapp.viewmodel.CharacterCreationUiState
 import com.caderea.battleapp.viewmodel.CreationStep
 
 /**
- * Character creation: a name and base color, then four rounds of picking one technique out
- * of three, the last round being the signature move, then the finished character.
+ * Character creation: a name and base color, then a signature move picked from three, then
+ * two techniques picked from six, then the finished character.
  */
 @Composable
 fun CharacterCreationScreen(
@@ -59,7 +59,9 @@ fun CharacterCreationScreen(
     onName: (String) -> Unit,
     onBase: (Channel) -> Unit,
     onStart: () -> Unit,
-    onPick: (Int) -> Unit,
+    onChooseSignature: (Int) -> Unit,
+    onToggle: (Int) -> Unit,
+    onKeep: () -> Unit,
     onStartOver: () -> Unit,
     onDone: () -> Unit,
     onBack: () -> Unit,
@@ -86,7 +88,8 @@ fun CharacterCreationScreen(
         }
         when (state.step) {
             CreationStep.IDENTITY -> Identity(state, onName, onBase, onStart)
-            CreationStep.DRAFT -> Draft(state, onPick, onStartOver)
+            CreationStep.SIGNATURE -> Signature(state, onChooseSignature, onStartOver)
+            CreationStep.TECHNIQUES -> Techniques(state, onToggle, onKeep, onStartOver)
             CreationStep.READY -> Ready(state, onDone)
         }
     }
@@ -122,7 +125,7 @@ private fun Identity(
     }
     Spacer(Modifier.height(8.dp))
     Text(
-        stringResource(R.string.create_draft_hint, state.rounds),
+        stringResource(R.string.create_draft_hint, state.picks),
         color = BattleColors.textMuted,
         fontSize = 13.sp,
     )
@@ -165,24 +168,12 @@ private fun BaseChoice(channel: Channel, selected: Boolean, modifier: Modifier =
 }
 
 @Composable
-private fun ColumnScope.Draft(state: CharacterCreationUiState, onPick: (Int) -> Unit, onStartOver: () -> Unit) {
+private fun ColumnScope.Signature(state: CharacterCreationUiState, onChoose: (Int) -> Unit, onStartOver: () -> Unit) {
     state.fighter?.let { FighterSummaryCard(it, Modifier.fillMaxWidth()) }
-    RoundDots(state.round, state.rounds)
+    StepDots(step = 1, steps = 2)
+    Text(stringResource(R.string.create_signature), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
     Text(
-        if (state.signatureRound) {
-            stringResource(R.string.create_round_signature)
-        } else {
-            stringResource(R.string.create_round, state.round, state.rounds)
-        },
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold,
-    )
-    Text(
-        if (state.signatureRound) {
-            stringResource(R.string.create_round_signature_hint, stringResource(state.base!!.nameRes))
-        } else {
-            stringResource(R.string.create_round_hint)
-        },
+        stringResource(R.string.create_signature_hint, stringResource(state.base!!.nameRes)),
         color = BattleColors.textMuted,
         fontSize = 13.sp,
     )
@@ -190,27 +181,61 @@ private fun ColumnScope.Draft(state: CharacterCreationUiState, onPick: (Int) -> 
         TechniqueCard(
             technique,
             Modifier.fillMaxWidth().testTag("offer$index"),
-            onClick = { onPick(index) },
+            onClick = { onChoose(index) },
             showSlot = false,
         )
-    }
-    if (state.picks.isNotEmpty()) {
-        Spacer(Modifier.height(4.dp))
-        Text(stringResource(R.string.create_picked), color = BattleColors.textMuted, fontSize = 13.sp)
-        state.picks.forEach { TechniqueCard(it, Modifier.fillMaxWidth()) }
     }
     TextButton(onStartOver, Modifier.align(Alignment.Start)) {
         Text(stringResource(R.string.button_start_over), color = BattleColors.textMuted)
     }
 }
 
-/** One dot per round: filled for rounds picked, ringed for the current one. */
 @Composable
-private fun RoundDots(round: Int, rounds: Int) {
+private fun ColumnScope.Techniques(
+    state: CharacterCreationUiState,
+    onToggle: (Int) -> Unit,
+    onKeep: () -> Unit,
+    onStartOver: () -> Unit,
+) {
+    state.fighter?.let { FighterSummaryCard(it, Modifier.fillMaxWidth()) }
+    StepDots(step = 2, steps = 2)
+    Text(stringResource(R.string.create_kept), color = BattleColors.textMuted, fontSize = 13.sp)
+    state.kept.forEach { TechniqueCard(it, Modifier.fillMaxWidth()) }
+    Spacer(Modifier.height(4.dp))
+    Text(
+        stringResource(R.string.create_techniques, state.picks, state.offer.size),
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+    )
+    Text(stringResource(R.string.create_techniques_hint), color = BattleColors.textMuted, fontSize = 13.sp)
+    // marked offers show the button they'll get, after the signature's
+    val order = state.selected.sorted()
+    state.offer.forEachIndexed { index, technique ->
+        val slot = order.indexOf(index).takeIf { it >= 0 }?.let { it + state.kept.size }
+        TechniqueCard(
+            technique.copy(slot = slot),
+            Modifier.fillMaxWidth().testTag("offer$index"),
+            onClick = { onToggle(index) },
+        )
+    }
+    if (state.needsAttack) {
+        Text(stringResource(R.string.create_needs_attack), color = BattleColors.text, fontSize = 13.sp)
+    }
+    Button(onKeep, Modifier.fillMaxWidth().height(52.dp).testTag("keep"), enabled = state.canKeep) {
+        Text(stringResource(R.string.button_keep_picks, state.picks), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+    }
+    TextButton(onStartOver, Modifier.align(Alignment.Start)) {
+        Text(stringResource(R.string.button_start_over), color = BattleColors.textMuted)
+    }
+}
+
+/** One bar per step: bright for steps done, grey for the current one. */
+@Composable
+private fun StepDots(step: Int, steps: Int) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        repeat(rounds) { index ->
-            val done = index + 1 < round
-            val current = index + 1 == round
+        repeat(steps) { index ->
+            val done = index + 1 < step
+            val current = index + 1 == step
             Box(
                 Modifier
                     .weight(1f)
@@ -237,7 +262,7 @@ private fun Ready(state: CharacterCreationUiState, onDone: () -> Unit) {
         Text(fighter.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Text(stringResource(R.string.create_ready), color = BattleColors.textMuted)
     }
-    state.picks.forEach { TechniqueCard(it, Modifier.fillMaxWidth()) }
+    state.kept.forEach { TechniqueCard(it, Modifier.fillMaxWidth()) }
     Spacer(Modifier.height(4.dp))
     Button(onDone, Modifier.fillMaxWidth().height(52.dp).testTag("done")) {
         Text(stringResource(R.string.button_to_menu), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
