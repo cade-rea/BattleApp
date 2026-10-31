@@ -26,9 +26,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.caderea.battleapp.R
+import com.caderea.battleapp.ui.technique.effectText
 import com.caderea.battleapp.ui.theme.BattleColors
 import com.caderea.battleapp.ui.theme.compose
 import com.caderea.battleapp.ui.theme.readable
@@ -36,16 +38,19 @@ import com.caderea.battleapp.viewmodel.ActionButtonState
 import com.caderea.battleapp.viewmodel.ActionKind
 
 /**
- * The player's techniques, two to a row.
+ * The player's techniques, two to a row, for the four to six slots an arena allows.
  */
 @Composable
 fun ActionGrid(actions: List<ActionButtonState>, onAction: (slot: Int) -> Unit, modifier: Modifier = Modifier) {
+    // a third row of buttons would squeeze out the type triangle, so more than four get shorter
+    val height = if (actions.size > 4) COMPACT_CARD_HEIGHT else CARD_HEIGHT
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         actions.withIndex().chunked(2).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { (slot, action) ->
                     ActionCard(
                         action,
+                        height,
                         onClick = { onAction(slot) },
                         modifier = Modifier
                             .weight(1f)
@@ -64,18 +69,18 @@ fun ActionGrid(actions: List<ActionButtonState>, onAction: (slot: Int) -> Unit, 
  * what it would do right now, including the type matchup against the enemy.
  */
 @Composable
-private fun ActionCard(action: ActionButtonState, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ActionCard(action: ActionButtonState, height: Dp, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(14.dp)
     val color = action.color.readable
 
     if (action.name.isEmpty()) {
-        Box(modifier.height(CARD_HEIGHT).clip(shape).background(BattleColors.surface))
+        Box(modifier.height(height).clip(shape).background(BattleColors.surface))
         return
     }
 
     Row(
         modifier
-            .height(CARD_HEIGHT)
+            .height(height)
             .alpha(if (action.enabled) 1f else 0.38f)
             .clip(shape)
             .background(BattleColors.surface)
@@ -115,7 +120,7 @@ private fun ActionCard(action: ActionButtonState, onClick: () -> Unit, modifier:
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    effectText(action),
+                    effectText(action.kind, action.effect),
                     color = BattleColors.text,
                     fontSize = 13.sp,
                 )
@@ -132,13 +137,6 @@ private fun ActionCard(action: ActionButtonState, onClick: () -> Unit, modifier:
             }
         }
     }
-}
-
-@Composable
-private fun effectText(action: ActionButtonState): String = when (action.kind) {
-    ActionKind.ATTACK -> stringResource(R.string.effect_damage, action.effect)
-    ActionKind.HEAL -> stringResource(R.string.effect_heal, action.effect)
-    ActionKind.GUARD -> stringResource(R.string.effect_block, action.effect)
 }
 
 /**
@@ -166,3 +164,4 @@ fun MatchupBadge(effectiveness: Double, modifier: Modifier = Modifier) {
 }
 
 private val CARD_HEIGHT = 76.dp
+private val COMPACT_CARD_HEIGHT = 60.dp

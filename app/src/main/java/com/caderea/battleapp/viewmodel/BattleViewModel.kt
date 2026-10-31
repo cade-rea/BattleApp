@@ -10,6 +10,12 @@ import com.caderea.battleapp.core.action.BattleAction
 import com.caderea.battleapp.core.action.Guard
 import com.caderea.battleapp.core.action.Heal
 import com.caderea.battleapp.core.color.TypeWheel
+import com.caderea.battleapp.core.environment.Environment
+import com.caderea.battleapp.core.fighter.Opponents
+import com.caderea.battleapp.core.progression.BattleRewards
+import com.caderea.battleapp.core.progression.Progression
+import com.caderea.battleapp.core.technique.TechniqueRoller
+import com.caderea.battleapp.data.ProfileRepository
 import com.caderea.battleapp.core.fighter.Fighter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -19,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlin.random.Random
 
 /**
  * Owns the battle and its tick loop. The loop runs in [viewModelScope], so it survives
@@ -27,10 +34,13 @@ import kotlin.math.roundToInt
  * Everything here runs on the main thread, so the battle is only ever touched from one thread.
  *
  * @param newBattle makes the battle, again for each rematch
+ * @param onBattleOver called once when a battle ends, by a win, a loss or giving up, to hand
+ * out XP and techniques; null means nothing is tracked
  */
 class BattleViewModel(
     private val tickLengthMs: Long,
     private val newBattle: () -> Battle = { Battle() },
+    private val onBattleOver: (Battle) -> BattleRewards? = { null },
 ) : ViewModel() {
 
     private var battle = newBattle()
@@ -39,6 +49,8 @@ class BattleViewModel(
     // health changes on the last tick
     private var playerHealthChange = 0
     private var enemyHealthChange = 0
+    private var rewards: RewardsState? = null
+    private var rewarded = false
 
     private val _uiState = MutableStateFlow(buildState(tickProgress = 0))
     val uiState: StateFlow<BattleUiState> = _uiState.asStateFlow()
@@ -100,6 +112,8 @@ class BattleViewModel(
         ticker.cancel()
         battle = newBattle()
         log.clear()
+        rewards = null
+        rewarded = false
         playerHealthChange = 0
         enemyHealthChange = 0
         paused.value = false
@@ -108,6 +122,10 @@ class BattleViewModel(
     }
 
     private fun finish() {
+        if (!rewarded) {
+            rewarded = true
+            rewards = onBattleOver(battle)?.toState()
+        }
         addLogLine("Battle Finished")
         paused.value = false
         publish(tickProgress = 0)
@@ -151,6 +169,7 @@ class BattleViewModel(
             battle.player.health <= 0 -> Outcome.LOST
             else -> Outcome.STOPPED
         },
+        rewards = rewards,
     )
 
     private fun BattleAction.toButton(enabled: Boolean): ActionButtonState {
@@ -192,8 +211,34 @@ class BattleViewModel(
         const val SUBTICKS_PER_TICK = 4
         const val MAX_LOG_LINES = 40
 
-        fun factory(tickLengthMs: Long) = viewModelFactory {
-            initializer { BattleViewModel(tickLengthMs) }
+        /**
+         * A battle for the saved fighter against a computer opponent of their level, with
+         * XP and new techniques saved when it ends.
+         */
+        fun factory(tickLengthMs: Long, profiles: ProfileRepository, random: Random = Random.Default) = viewModelFactory {
+            initializer {
+                BattleViewModel(
+                    tickLengthMs,
+                    newBattle = {
+                        val profile = profiles.profile.value
+                        val environment = Environment()
+                        Battle(
+                            player = profile.toFighter(environment),
+                            enemy = Opponents.atLevel(profile.level, random).toFighter(environment),
+                            environment = environment,
+                        )
+                    },
+                    onBattleOver = { battle ->
+                        var rewards: BattleRewards? = null
+                        profiles.update { profile ->
+                            Progression.afterBattle(profile, battle, TechniqueRoller(random))
+                                .also { rewards = it.second }
+                                .first
+                        }
+                        rewards
+                    },
+                )
+            }
         }
     }
 }
