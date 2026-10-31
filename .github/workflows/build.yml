@@ -41,3 +41,10 @@ jobs:
         with:
           name: battleapp-debug
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Upload screen screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: app/build/screenshots/

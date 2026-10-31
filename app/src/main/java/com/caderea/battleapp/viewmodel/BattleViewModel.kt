@@ -5,39 +5,55 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.caderea.battleapp.core.Battle
+import com.caderea.battleapp.core.action.Attack
+import com.caderea.battleapp.core.action.BattleAction
+import com.caderea.battleapp.core.action.Guard
+import com.caderea.battleapp.core.action.Heal
+import com.caderea.battleapp.core.color.TypeWheel
 import com.caderea.battleapp.core.fighter.Fighter
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**
  * Owns the battle and its tick loop. The loop runs in [viewModelScope], so it survives
  * screen rotation and is cancelled when the player leaves the battle screen.
  *
  * Everything here runs on the main thread, so the battle is only ever touched from one thread.
+ *
+ * @param newBattle makes the battle, again for each rematch
  */
 class BattleViewModel(
     private val tickLengthMs: Long,
-    private val battle: Battle = Battle(),
+    private val newBattle: () -> Battle = { Battle() },
 ) : ViewModel() {
 
-    private val log = ArrayDeque<String>(MAX_LOG_LINES)
+    private var battle = newBattle()
+    private val log = ArrayDeque<LogEntry>(MAX_LOG_LINES)
+    private val paused = MutableStateFlow(false)
 
     private val _uiState = MutableStateFlow(buildState(tickProgress = 0))
     val uiState: StateFlow<BattleUiState> = _uiState.asStateFlow()
 
-    private val ticker = viewModelScope.launch {
+    private var ticker: Job = startTicker()
+
+    private fun startTicker() = viewModelScope.launch {
         val subtickLength = tickLengthMs / SUBTICKS_PER_TICK
 
         while (!battle.isOver) {
             for (subtick in 0 until SUBTICKS_PER_TICK) {
+                // waits here while paused, so a paused tick picks up where it stopped
+                paused.first { !it }
                 publish(tickProgress = subtick * 100 / SUBTICKS_PER_TICK)
                 delay(subtickLength)
             }
 
-            battle.tick().forEach(::addLogLine)
+            battle.tick().forEach { addLogLine(it) }
             publish(tickProgress = 0)
         }
 
@@ -56,6 +72,14 @@ class BattleViewModel(
         }
     }
 
+    /** Pauses the tick loop, or resumes it. Queuing and canceling still work while paused. */
+    fun togglePause() {
+        if (battle.isOver) return
+
+        paused.value = !paused.value
+        publish()
+    }
+
     fun stop() {
         if (battle.isOver) return
 
@@ -64,8 +88,19 @@ class BattleViewModel(
         finish()
     }
 
+    /** Starts a fresh battle against the same opponent. */
+    fun rematch() {
+        ticker.cancel()
+        battle = newBattle()
+        log.clear()
+        paused.value = false
+        publish(tickProgress = 0)
+        ticker = startTicker()
+    }
+
     private fun finish() {
         addLogLine("Battle Finished")
+        paused.value = false
         publish(tickProgress = 0)
     }
 
@@ -73,7 +108,12 @@ class BattleViewModel(
         if (log.size >= MAX_LOG_LINES) {
             log.removeFirst()
         }
-        log.addLast(line)
+        val side = when {
+            line.startsWith(battle.player.name) -> Side.PLAYER
+            line.startsWith(battle.enemy.name) -> Side.ENEMY
+            else -> null
+        }
+        log.addLast(LogEntry(battle.tickCount, line, side))
     }
 
     private fun publish(tickProgress: Int = _uiState.value.tickProgress) {
@@ -82,33 +122,61 @@ class BattleViewModel(
 
     private fun buildState(tickProgress: Int) = BattleUiState(
         actions = battle.player.actions.mapIndexed { slot, action ->
-            ActionButtonState(
-                name = action?.name.orEmpty(),
-                cost = action?.cost ?: 0,
-                enabled = !battle.isOver && battle.player.canQueue(slot),
-            )
+            action?.toButton(enabled = !battle.isOver && battle.player.canQueue(slot)) ?: ActionButtonState()
         },
         player = battle.player.toState(),
         enemy = battle.enemy.toState(),
         playerQueue = battle.player.queue.toList(),
         enemyQueue = battle.enemy.queue.toList(),
+        tick = battle.tickCount,
         tickProgress = tickProgress,
+        isPaused = paused.value,
         log = log.toList(),
-        isOver = battle.isOver,
+        outcome = when {
+            !battle.isOver -> null
+            battle.enemy.health <= 0 -> Outcome.WON
+            battle.player.health <= 0 -> Outcome.LOST
+            else -> Outcome.STOPPED
+        },
     )
+
+    private fun BattleAction.toButton(enabled: Boolean): ActionButtonState {
+        val player = battle.player
+        val environment = battle.environment
+        val button = ActionButtonState(
+            name = name,
+            cost = cost,
+            enabled = enabled,
+            kind = kind,
+            color = color,
+            windUpTicks = duration,
+        )
+        return when (this) {
+            is Attack -> button.copy(
+                effect = damage(player, player.target, environment),
+                effectiveness = TypeWheel.effectiveness(color, player.target.color),
+            )
+            is Heal -> button.copy(effect = amount(player, environment))
+            is Guard -> button.copy(
+                effect = (strength(player, environment).coerceAtMost(Guard.MAX_BLOCK) * 100).roundToInt(),
+            )
+            else -> button
+        }
+    }
 
     private fun Fighter.toState() = FighterState(
         name = name,
+        color = color,
         health = health,
         maxHealth = maxHealth,
         energy = energy,
         maxEnergy = Fighter.MAX_ENERGY,
-        guard = activeGuard?.guard?.name,
+        guard = activeGuard?.let { GuardState(it.guard.name, it.guard.color, it.ticksLeft) },
     )
 
     companion object {
-        private const val SUBTICKS_PER_TICK = 4
-        private const val MAX_LOG_LINES = 10
+        const val SUBTICKS_PER_TICK = 4
+        const val MAX_LOG_LINES = 40
 
         fun factory(tickLengthMs: Long) = viewModelFactory {
             initializer { BattleViewModel(tickLengthMs) }

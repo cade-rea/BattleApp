@@ -49,9 +49,7 @@ class Battle(
         opponent?.react(enemy, player)
 
         ++tickCount
-        val log = mutableListOf(
-            "Tick:$tickCount ${player.name}:${player.health} :: ${enemy.name}:${enemy.health}"
-        )
+        val log = mutableListOf<String>()
 
         val landing: List<Pair<Fighter, BattleAction>> = fighters
             .mapNotNull { fighter -> fighter.windUp()?.let { fighter to it } }

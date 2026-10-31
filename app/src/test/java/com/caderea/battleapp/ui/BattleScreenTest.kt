@@ -1,0 +1,163 @@
+package com.caderea.battleapp.ui
+
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import com.caderea.battleapp.ui.battle.BattleScreen
+import com.caderea.battleapp.ui.menu.MainMenuScreen
+import com.caderea.battleapp.ui.theme.BattleTheme
+import com.caderea.battleapp.viewmodel.BattleUiState
+import com.caderea.battleapp.viewmodel.BattleViewModel
+import com.caderea.battleapp.viewmodel.Outcome
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.io.File
+
+/**
+ * Renders the screens on the JVM with Robolectric. Besides checking the controls, each
+ * test saves a screenshot to app/build/screenshots, so a change to the look can be
+ * reviewed without an emulator.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "w400dp-h880dp-xhdpi")
+class BattleScreenTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    private val dispatcher = StandardTestDispatcher()
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun tappingAnActionQueuesItsSlot() {
+        val tapped = mutableListOf<Int>()
+        show(midBattle(), onAction = { tapped += it })
+
+        composeRule.onNodeWithTag("action2").performClick()
+
+        assertEquals(listOf(2), tapped)
+        screenshot("battle")
+    }
+
+    @Test
+    fun actionsYouCantAffordAreDisabled() {
+        val state = midBattle()
+        show(state)
+
+        state.actions.forEachIndexed { slot, action ->
+            val node = composeRule.onNodeWithTag("action$slot")
+            if (action.enabled) node.assertIsEnabled() else node.assertIsNotEnabled()
+        }
+    }
+
+    @Test
+    fun pausedBattleOffersResume() {
+        show(midBattle().copy(isPaused = true))
+
+        composeRule.onNodeWithText("Resume").assertIsEnabled()
+        screenshot("battle-paused")
+    }
+
+    @Test
+    fun finishedBattleOffersARematch() {
+        var rematches = 0
+        show(midBattle().copy(outcome = Outcome.WON), onRematch = { rematches++ })
+
+        composeRule.onNodeWithText("Victory").assertExists()
+        screenshot("battle-won")
+        composeRule.onNodeWithTag("rematch").performClick()
+
+        assertEquals(1, rematches)
+    }
+
+    @Test
+    fun menu() {
+        composeRule.setContent { BattleTheme { MainMenuScreen(onBattle = {}, onMap = {}) } }
+
+        composeRule.onNodeWithText("Fight the computer").assertIsEnabled()
+        screenshot("menu")
+    }
+
+    /**
+     * A battle a few ticks in, played by the real rules: the player has a strike winding
+     * up and a guard queued behind it, and the computer opponent is answering.
+     */
+    private fun midBattle(): BattleUiState {
+        val viewModel = BattleViewModel(TICK_MS)
+        val scope = TestScope(dispatcher)
+
+        viewModel.queueAction(GREEN_STRIKE)
+        scope.advanceTimeBy(TICK_MS * 2 + 1)
+        viewModel.queueAction(GREEN_STRIKE)
+        scope.advanceTimeBy(TICK_MS + TICK_MS / 2 + 1)
+        viewModel.queueAction(BLUE_GUARD)
+
+        return viewModel.uiState.value.also { viewModel.stop() }
+    }
+
+    private fun show(
+        state: BattleUiState,
+        onAction: (Int) -> Unit = {},
+        onRematch: () -> Unit = {},
+    ) {
+        composeRule.setContent {
+            BattleTheme {
+                BattleScreen(
+                    state = state,
+                    tickLengthMs = TICK_MS,
+                    onAction = onAction,
+                    onCancel = {},
+                    onTogglePause = {},
+                    onGiveUp = {},
+                    onRematch = onRematch,
+                    onExit = {},
+                )
+            }
+        }
+        composeRule.waitForIdle()
+    }
+
+    private fun screenshot(name: String) {
+        val dir = File("build/screenshots").apply { mkdirs() }
+        val bitmap = composeRule.onRoot().captureToImage().asAndroidBitmap()
+        File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    private companion object {
+        const val TICK_MS = 1000L
+        const val GREEN_STRIKE = 2
+        const val BLUE_GUARD = 3
+    }
+}
