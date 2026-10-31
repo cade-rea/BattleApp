@@ -1,8 +1,9 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <!-- Base application theme. Compose draws everything; this only sets the dark window
+         behind it, so there's no white flash while a screen starts. -->
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
 </resources>
