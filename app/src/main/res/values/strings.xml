@@ -7,6 +7,7 @@
     <string name="button_battle">Battle!</string>
     <string name="title_activity_battle_screen">BattleScreen</string>
     <string name="button_map">Map</string>
+    <string name="button_return">Return</string>
     <string name="title_activity_map_screen">Map</string>
 
 </resources>
