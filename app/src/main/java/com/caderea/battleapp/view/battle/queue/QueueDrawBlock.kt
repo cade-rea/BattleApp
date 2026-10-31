@@ -15,7 +15,10 @@ internal class QueueDrawBlock(
 ) : View(context) {
 
     private val backgroundPaint = Paint().apply { this.color = color }
-    private val textPaint = Paint().apply { this.color = Color.BLACK }
+    // dark technique colors get light text so the label stays readable
+    private val textPaint = Paint().apply {
+        this.color = if (Color.luminance(color) > 0.2f) Color.BLACK else Color.WHITE
+    }
 
     private var blockLeft = 0
     private var blockTop = 0

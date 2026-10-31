@@ -1,5 +1,7 @@
 package com.caderea.battleapp.viewmodel
 
+import com.caderea.battleapp.core.Battle
+import com.caderea.battleapp.core.fighter.Fighter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -37,7 +39,10 @@ class BattleViewModelTest {
     fun showsTheActionButtons() {
         val viewModel = BattleViewModel(TICK_MS)
 
-        assertEquals(listOf("Attack", "Heal", "", ""), viewModel.uiState.value.actionNames)
+        assertEquals(
+            listOf("Red Strike", "Green Mend", "Green Strike", ""),
+            viewModel.uiState.value.actionNames,
+        )
     }
 
     @Test
@@ -52,14 +57,14 @@ class BattleViewModelTest {
     @Test
     fun battleTicksOncePerTickLength() = runTest(dispatcher) {
         val viewModel = BattleViewModel(TICK_MS)
-        viewModel.queueAction(0)
+        viewModel.queueAction(GREEN_STRIKE)
 
         advanceTimeBy(TICK_MS - 1)
         assertTrue(viewModel.uiState.value.log.isEmpty())
 
         advanceTimeBy(2)
         val log = viewModel.uiState.value.log
-        assertTrue(log.contains("Default Fighter attacks Enemy for 1 damage."))
+        assertTrue(log.contains("Default Fighter attacks Enemy with Green Strike for 414 damage."))
         assertTrue(viewModel.uiState.value.playerQueue.isEmpty())
     }
 
@@ -94,7 +99,8 @@ class BattleViewModelTest {
 
     @Test
     fun logKeepsOnlyTheLatestLines() = runTest(dispatcher) {
-        val viewModel = BattleViewModel(TICK_MS)
+        // a sturdy player makes the fight last long enough to fill the log
+        val viewModel = BattleViewModel(TICK_MS, Battle(player = Fighter(maxHealth = 10_000)))
 
         advanceUntilIdle()
 
@@ -103,5 +109,6 @@ class BattleViewModelTest {
 
     private companion object {
         const val TICK_MS = 1000L
+        const val GREEN_STRIKE = 2
     }
 }

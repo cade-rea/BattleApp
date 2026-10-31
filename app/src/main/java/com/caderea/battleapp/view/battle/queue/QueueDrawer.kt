@@ -2,14 +2,14 @@ package com.caderea.battleapp.view.battle.queue
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.ViewGroup
 import com.caderea.battleapp.core.BattleQueue
 import com.caderea.battleapp.core.QueuedAction
 
 /**
- * Draws one fighter's queue as a column of colored blocks, front of the queue on top.
+ * Draws one fighter's queue as a column of blocks in each technique's own color, front of
+ * the queue on top.
  */
 class QueueDrawer @JvmOverloads constructor(
     context: Context,
@@ -58,17 +58,10 @@ class QueueDrawer @JvmOverloads constructor(
         for (i in queueDrawBlocks.indices) {
             queueDrawBlocks[i]?.let { removeView(it) }
             queueDrawBlocks[i] = actions.getOrNull(i)?.let { queuedAction ->
-                QueueDrawBlock(context, queuedAction.action.name, colorFor(queuedAction)).also { addView(it) }
+                QueueDrawBlock(context, queuedAction.action.name, queuedAction.action.color.argb).also { addView(it) }
             }
         }
 
         invalidate()
-    }
-
-    // each queued action keeps its color while it moves up the queue
-    private fun colorFor(queuedAction: QueuedAction) = BLOCK_COLORS[queuedAction.id % BLOCK_COLORS.size]
-
-    private companion object {
-        val BLOCK_COLORS = intArrayOf(Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN)
     }
 }

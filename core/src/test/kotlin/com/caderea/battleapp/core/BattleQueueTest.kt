@@ -2,6 +2,7 @@ package com.caderea.battleapp.core
 
 import com.caderea.battleapp.core.action.Attack
 import com.caderea.battleapp.core.action.Heal
+import com.caderea.battleapp.core.color.RgbColor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,8 +14,8 @@ import kotlin.test.assertTrue
 class BattleQueueTest {
 
     private val max = BattleQueue.MAX_SIZE
-    private val attack = Attack()
-    private val heal = Heal()
+    private val attack = Attack(color = RgbColor.RED)
+    private val heal = Heal(color = RgbColor.GREEN)
 
     private lateinit var queue: BattleQueue
 
