@@ -37,10 +37,16 @@ import com.caderea.battleapp.viewmodel.TechniqueCardState
 
 /**
  * A technique from the catalog: its color along the edge, then its stats against a neutral
- * opponent and its own potency roll. A technique in the loadout shows its button number.
+ * opponent and its own potency roll. A technique in the loadout shows its button number, and
+ * a signature technique from character creation is starred.
  */
 @Composable
-fun TechniqueCard(technique: TechniqueCardState, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+fun TechniqueCard(
+    technique: TechniqueCardState,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    showSlot: Boolean = onClick != null,
+) {
     val shape = RoundedCornerShape(14.dp)
     val color = technique.color.readable
     val chosen = technique.slot != null
@@ -68,6 +74,10 @@ fun TechniqueCard(technique: TechniqueCardState, modifier: Modifier = Modifier, 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 KindGlyph(technique.kind, color, size = 14.dp)
                 Spacer(Modifier.width(6.dp))
+                if (technique.signature) {
+                    Text(stringResource(R.string.technique_signature_mark), color = color, fontSize = 13.sp)
+                    Spacer(Modifier.width(4.dp))
+                }
                 Text(
                     technique.name,
                     Modifier.weight(1f, fill = false),
@@ -76,13 +86,16 @@ fun TechniqueCard(technique: TechniqueCardState, modifier: Modifier = Modifier, 
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    technique.color.hex,
-                    color = color,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 11.sp,
-                )
+                // a signature is always the pure primary, so its longer name gets the room instead
+                if (!technique.signature) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        technique.color.hex,
+                        color = color,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 11.sp,
+                    )
+                }
                 Spacer(Modifier.weight(1f))
                 Text(
                     stringResource(R.string.action_cost, technique.cost),
@@ -110,7 +123,7 @@ fun TechniqueCard(technique: TechniqueCardState, modifier: Modifier = Modifier, 
                 )
             }
         }
-        if (onClick != null) {
+        if (showSlot) {
             SlotBadge(technique.slot, Modifier.align(Alignment.CenterVertically).padding(end = 12.dp))
         }
     }

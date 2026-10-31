@@ -220,7 +220,7 @@ class BattleViewModel(
                 BattleViewModel(
                     tickLengthMs,
                     newBattle = {
-                        val profile = profiles.profile.value
+                        val profile = profiles.requireActive()
                         val environment = Environment()
                         Battle(
                             player = profile.toFighter(environment),

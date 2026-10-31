@@ -40,6 +40,8 @@ data class TechniqueCardState(
     val potencyPercent: Int,
     // its button in the loadout, from 0, or null if it stays home
     val slot: Int? = null,
+    // the especially good move picked last at character creation
+    val signature: Boolean = false,
 )
 
 /** What the player got out of a battle. */
@@ -92,6 +94,7 @@ fun Technique.toCard(aura: RgbColor, slot: Int? = null): TechniqueCardState {
         effect = effect,
         potencyPercent = ((rolls.potency - 1) * 100).roundToInt(),
         slot = slot,
+        signature = signature,
     )
 }
 

@@ -11,6 +11,46 @@
     <string name="button_map">Map (prototype)</string>
     <string name="button_loadout">Techniques</string>
 
+    <string name="menu_no_character">No characters yet. Make one to start fighting.</string>
+    <string name="button_create_first">Create a character</string>
+    <string name="button_switch_character">Switch character</string>
+
+    <!-- characters list -->
+    <string name="characters_title">Characters</string>
+    <string name="characters_hint">One character is loaded at a time. Only the loaded one fights and earns XP.</string>
+    <string name="characters_loaded">Loaded</string>
+    <string name="characters_tap_to_load">Tap to load</string>
+    <string name="button_new_character">New character</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_keep">Keep</string>
+    <string name="delete_title">Delete %1$s?</string>
+    <string name="delete_message">Their aura, techniques and record are gone for good.</string>
+
+    <!-- character creation -->
+    <string name="create_title">New character</string>
+    <string name="button_cancel_creation">Cancel</string>
+    <string name="create_name">Name</string>
+    <string name="create_base">Base color</string>
+    <string name="create_base_hint">Your type for good. Your aura can drift toward other colors, but always keeps a third of this one.</string>
+    <string name="create_beats">beats %1$s</string>
+    <string name="channel_red">Red</string>
+    <string name="channel_green">Green</string>
+    <string name="channel_blue">Blue</string>
+    <string name="trait_red">fast, lighter hits</string>
+    <string name="trait_green">efficient, heals best</string>
+    <string name="trait_blue">strong, slow</string>
+    <string name="create_draft_hint">Next you draft %1$d techniques: pick one of three, each round.</string>
+    <string name="button_roll_techniques">Roll techniques</string>
+    <string name="create_round">Pick %1$d of %2$d</string>
+    <string name="create_round_hint">Keep one. The other two are gone.</string>
+    <string name="create_round_signature">Signature move</string>
+    <string name="create_round_signature_hint">Every choice is pure %1$s and especially strong, fast or cheap.</string>
+    <string name="create_picked">Your techniques</string>
+    <string name="button_start_over">Start over</string>
+    <string name="create_ready">is ready to fight</string>
+    <string name="button_to_menu">To the menu</string>
+    <string name="technique_signature_mark">★</string>
+
     <!-- fighter -->
     <string name="fighter_level">Lv %1$d</string>
     <string name="fighter_record">%1$dW · %2$dL</string>

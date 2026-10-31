@@ -21,12 +21,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             BattleTheme {
-                val profile by profiles.profile.collectAsStateWithLifecycle()
+                val profile by profiles.active.collectAsStateWithLifecycle()
                 MainMenuScreen(
-                    fighter = profile.toSummary(),
+                    fighter = profile?.toSummary(),
                     onBattle = { startActivity(Intent(this, BattleActivity::class.java)) },
                     onLoadout = { startActivity(Intent(this, LoadoutActivity::class.java)) },
                     onMap = { startActivity(Intent(this, MapActivity::class.java)) },
+                    onCharacters = { startActivity(Intent(this, CharactersActivity::class.java)) },
+                    onCreate = { startActivity(Intent(this, CharacterCreationActivity::class.java)) },
                 )
             }
         }

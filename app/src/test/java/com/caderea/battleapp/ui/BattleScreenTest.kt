@@ -19,7 +19,7 @@ import com.caderea.battleapp.core.fighter.EnemyFighter
 import com.caderea.battleapp.core.fighter.FighterProfile
 import com.caderea.battleapp.core.progression.Progression
 import com.caderea.battleapp.core.technique.TechniqueRoller
-import com.caderea.battleapp.data.ProfileRepository
+import com.caderea.battleapp.data.repositoryWith
 import com.caderea.battleapp.ui.battle.BattleScreen
 import com.caderea.battleapp.ui.loadout.LoadoutScreen
 import com.caderea.battleapp.viewmodel.LoadoutViewModel
@@ -161,7 +161,7 @@ class BattleScreenTest {
         val fighter = FighterProfile.create("Player", Channel.RED).toSummary()
         var loadouts = 0
         composeRule.setContent {
-            BattleTheme { MainMenuScreen(fighter, onBattle = {}, onLoadout = { loadouts++ }, onMap = {}) }
+            BattleTheme { MainMenuScreen(fighter, onBattle = {}, onLoadout = { loadouts++ }, onMap = {}, onCharacters = {}, onCreate = {}) }
         }
 
         composeRule.onNodeWithText("Fight the computer").assertIsEnabled()
@@ -173,11 +173,11 @@ class BattleScreenTest {
 
     @Test
     fun loadoutMarksTheChosenTechniques() {
-        val profiles = ProfileRepository(File.createTempFile("fighter", ".json").apply { delete() }) {
+        val profiles = repositoryWith(run {
             val start = FighterProfile.create("Player", Channel.RED, TechniqueRoller(Random(3)), extraRolls = 4)
             // as if a few battles in, so the aura has a tint
             start.copy(aura = start.aura.gain(listOf(200 to RgbColor.BLUE)))
-        }
+        })
         val viewModel = LoadoutViewModel(profiles)
         val toggled = mutableListOf<Int>()
         composeRule.setContent {

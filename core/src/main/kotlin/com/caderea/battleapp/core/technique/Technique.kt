@@ -10,6 +10,16 @@ import kotlinx.serialization.Serializable
 /** What a technique does when it lands. */
 enum class TechniqueKind { ATTACK, HEAL, GUARD }
 
+/** The one stat a signature technique is especially good at. */
+enum class Standout {
+    /** Hits, heals or guards harder. */
+    STRONGER,
+    /** Winds up faster. */
+    FASTER,
+    /** Costs less energy. */
+    CHEAPER,
+}
+
 /**
  * A technique's own luck, rolled once when it is earned and kept for good. Each is a
  * multiplier around 1.0 on top of the color's traits, so a fast blue or a strong red is a
@@ -34,6 +44,7 @@ data class TechniqueRolls(
  * saved and sent over the network; [toAction] turns it into something a battle can use.
  *
  * @param id unique within one fighter's catalog
+ * @param signature the especially good technique a fighter picks last at character creation
  */
 @Serializable
 data class Technique(
@@ -42,6 +53,7 @@ data class Technique(
     val name: String,
     val color: RgbColor,
     val rolls: TechniqueRolls = TechniqueRolls.NEUTRAL,
+    val signature: Boolean = false,
 ) {
 
     /**
