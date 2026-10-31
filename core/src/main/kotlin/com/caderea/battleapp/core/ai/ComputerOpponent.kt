@@ -34,16 +34,19 @@ class ComputerOpponent {
 
     /**
      * Called right after a tick: guard against anything incoming, otherwise heal when hurt,
-     * otherwise attack.
+     * otherwise attack. Attacks are weighed in the light they'd land in, so under a turning
+     * light it times its hits.
+     *
+     * @param nextTick the number of the next tick to resolve
      */
-    fun plan(me: Fighter, foe: Fighter, environment: Environment) {
+    fun plan(me: Fighter, foe: Fighter, environment: Environment, nextTick: Int = 1) {
         if (guardAgainstIncoming(me, foe)) return
         // anything already queued would delay a guard, so only commit to one action at a time
         if (!me.queue.isEmpty()) return
 
         if (me.health < me.maxHealth * HEAL_BELOW && queueBest<Heal>(me) { 0.0 }) return
 
-        if (queueBest<Attack>(me) { attack -> expectedDamage(attack, me, foe, environment) }) {
+        if (queueBest<Attack>(me) { attack -> expectedDamage(attack, me, foe, environment, nextTick) }) {
             guardedLast = false
         }
     }
@@ -86,9 +89,9 @@ class ComputerOpponent {
     }
 
     /** What [attack] would deal after any guard [foe] will still have up when it lands. */
-    private fun expectedDamage(attack: Attack, me: Fighter, foe: Fighter, environment: Environment): Double {
-        val damage = attack.damage(me, foe, environment)
+    private fun expectedDamage(attack: Attack, me: Fighter, foe: Fighter, environment: Environment, nextTick: Int): Double {
         val landsIn = me.queue.ticksUntilFree + attack.duration
+        val damage = attack.damage(me, foe, environment.at(nextTick + landsIn - 1))
         val blocked = foe.activeGuard?.takeIf { it.ticksLeft >= landsIn }?.blocked(damage, attack.color) ?: 0
         return (damage - blocked).toDouble()
     }

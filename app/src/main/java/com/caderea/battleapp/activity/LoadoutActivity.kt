@@ -13,11 +13,16 @@ import com.caderea.battleapp.ui.loadout.LoadoutScreen
 import com.caderea.battleapp.ui.theme.BattleTheme
 import com.caderea.battleapp.viewmodel.LoadoutViewModel
 
-/** Picks the techniques the player brings into battle. */
+/**
+ * Picks the techniques the player brings into battle: for the arena it was started with,
+ * or in general from the menu.
+ */
 class LoadoutActivity : ComponentActivity() {
 
+    private val arena by lazy { ArenasActivity.arenaOf(intent) }
+
     private val viewModel: LoadoutViewModel by viewModels {
-        LoadoutViewModel.factory(ProfileRepository.get(this))
+        LoadoutViewModel.factory(ProfileRepository.get(this), arena)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +36,12 @@ class LoadoutActivity : ComponentActivity() {
                     state = state,
                     onToggle = viewModel::toggle,
                     onBattle = {
-                        startActivity(Intent(this, BattleActivity::class.java))
+                        val arena = arena
+                        if (arena != null) {
+                            startActivity(ArenasActivity.withArena(Intent(this, BattleActivity::class.java), arena))
+                        } else {
+                            ArenasActivity.start(this)
+                        }
                         finish()
                     },
                     onBack = ::finish,

@@ -42,6 +42,14 @@ object Opponents {
         return FighterProfile(NAME, aura, catalog).withAutoLoadout()
     }
 
+    /**
+     * An opponent for a player at [playerLevel] in [environment]: the player's level, or the
+     * arena's level cap if that's lower, so a capped arena doesn't pit a capped player
+     * against a fighter with a full catalog of high-level rolls.
+     */
+    fun forArena(playerLevel: Int, environment: Environment, random: Random = Random.Default): FighterProfile =
+        atLevel(environment.levelCap?.let { minOf(it, playerLevel) } ?: playerLevel, random)
+
     private fun channelLevel(channel: Channel, base: Channel, tint: Channel, tintShare: Double): Int = when (channel) {
         base -> (255 * (1 - tintShare)).toInt()
         tint -> (255 * tintShare).toInt()

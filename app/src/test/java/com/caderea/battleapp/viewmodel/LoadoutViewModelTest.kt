@@ -1,6 +1,7 @@
 package com.caderea.battleapp.viewmodel
 
 import com.caderea.battleapp.core.color.Channel
+import com.caderea.battleapp.core.environment.Arenas
 import com.caderea.battleapp.core.fighter.FighterProfile
 import com.caderea.battleapp.core.technique.TechniqueRoller
 import com.caderea.battleapp.data.repositoryWith
@@ -12,6 +13,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -38,7 +40,9 @@ class LoadoutViewModelTest {
     fun showsTheLoadoutFirstThenTheRestOfTheCatalog() {
         val state = LoadoutViewModel(profiles).uiState.value
 
-        assertEquals(4, state.slots)
+        // outside an arena, the whole saved order is editable
+        assertEquals(6, state.slots)
+        assertNull(state.arena)
         assertEquals(4, state.chosen)
         assertEquals(listOf(1, 2, 3, 4, 5, 6), state.techniques.map { it.id })
         assertEquals(listOf(0, 1, 2, 3, null, null), state.techniques.map { it.slot })
@@ -62,10 +66,37 @@ class LoadoutViewModelTest {
 
     @Test
     fun aFullLoadoutIgnoresNewPicks() {
-        val viewModel = LoadoutViewModel(profiles)
+        val viewModel = LoadoutViewModel(profiles, Arenas.OPEN)
 
         viewModel.toggle(5)
 
         assertEquals(listOf(1, 2, 3, 4), profiles.requireActive().loadout)
+    }
+
+    @Test
+    fun anArenaEditsOnlyItsOwnSlotsAndKeepsTheRest() {
+        profiles.update { it.withLoadout(listOf(1, 2, 3, 4, 5, 6)) }
+        val viewModel = LoadoutViewModel(profiles, Arenas.OPEN)
+
+        assertEquals(4, viewModel.uiState.value.slots)
+        assertEquals("open", viewModel.uiState.value.arena?.id)
+        assertEquals(listOf(0, 1, 2, 3, null, null), viewModel.uiState.value.techniques.map { it.slot })
+
+        // taking one out moves the next saved pick up into this arena's slots
+        viewModel.toggle(2)
+        assertEquals(listOf(1, 3, 4, 5, 6), profiles.requireActive().loadout)
+        assertEquals(listOf(1, 3, 4, 5), viewModel.uiState.value.techniques.take(4).map { it.id })
+    }
+
+    @Test
+    fun cardsShowTheArenasLight() {
+        val plain = LoadoutViewModel(profiles).uiState.value.techniques.first { it.id == 1 }
+        val red = LoadoutViewModel(profiles, Arenas.RED_GLOW).uiState.value.techniques.first { it.id == 1 }
+        val veiled = LoadoutViewModel(profiles, Arenas.RED_VEIL).uiState.value.techniques.first { it.id == 1 }
+
+        // the starter red strike
+        assertEquals(255, plain.effect)
+        assertTrue(red.effect > plain.effect)
+        assertTrue(veiled.effect in 127..128)
     }
 }

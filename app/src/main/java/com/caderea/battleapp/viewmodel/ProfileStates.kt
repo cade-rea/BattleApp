@@ -8,6 +8,7 @@ import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.fighter.Fighter
 import com.caderea.battleapp.core.fighter.FighterProfile
 import com.caderea.battleapp.core.progression.BattleRewards
+import com.caderea.battleapp.core.progression.Levels
 import com.caderea.battleapp.core.technique.Technique
 import com.caderea.battleapp.core.technique.TechniqueKind
 import kotlin.math.roundToInt
@@ -74,10 +75,19 @@ fun FighterProfile.toSummary() = FighterSummary(
 /** Grey has an equal share of every channel, so every matchup against it is neutral. */
 private val NEUTRAL = RgbColor(85, 85, 85)
 
-fun Technique.toCard(aura: RgbColor, slot: Int? = null): TechniqueCardState {
-    val action = toAction()
+/**
+ * The card for this technique in a fighter with [aura], its effect shown in [environment]'s
+ * light (its first light, if it turns) and dimmed to its level cap, as it would fight there.
+ */
+fun Technique.toCard(
+    aura: RgbColor,
+    slot: Int? = null,
+    environment: Environment = Environment(),
+    level: Int = 1,
+): TechniqueCardState {
+    val budget = environment.levelCap?.let { Levels.powerBudget(minOf(level, it)) } ?: Int.MAX_VALUE
+    val action = toAction(budget)
     val performer = Fighter(color = aura)
-    val environment = Environment()
     val effect = when (action) {
         is Attack -> action.damage(performer, Fighter(color = NEUTRAL), environment)
         is Heal -> action.amount(performer, environment)

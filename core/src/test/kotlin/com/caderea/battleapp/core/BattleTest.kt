@@ -1,5 +1,8 @@
 package com.caderea.battleapp.core
 
+import com.caderea.battleapp.core.action.Attack
+import com.caderea.battleapp.core.environment.Arenas
+import com.caderea.battleapp.core.environment.Environment
 import com.caderea.battleapp.core.fighter.EnemyFighter
 import com.caderea.battleapp.core.fighter.Fighter
 import kotlin.test.BeforeTest
@@ -305,6 +308,30 @@ class BattleTest {
         }
 
         assertTrue(battle.isOver)
+    }
+
+    @Test
+    fun actionsLandInTheLightOfTheirTick() {
+        val arena = Arenas.TURNING
+        battle = Battle(environment = arena, opponent = null)
+        val redStrike = player.actions[RED_STRIKE] as Attack
+        val plain = redStrike.damage(player, enemy, Environment())
+
+        // red winds up in 1 tick, so it lands on tick 1 under the red light
+        assertEquals(arena.lightAt(1), battle.conditions.lights.single())
+        battle.queueAction(RED_STRIKE)
+        tick()
+        val underRed = enemy.maxHealth - enemy.health
+        assertEquals(redStrike.damage(player, enemy, arena.at(1)), underRed)
+        assertTrue(underRed > plain)
+
+        // the light turns green after tick 4, and red does plain damage under it
+        repeat(Arenas.TURN_TICKS - 1) { tick() }
+        assertEquals(arena.lightAt(Arenas.TURN_TICKS + 1), battle.conditions.lights.single())
+        val before = enemy.health
+        battle.queueAction(RED_STRIKE)
+        tick()
+        assertEquals(plain, before - enemy.health)
     }
 
     private companion object {
