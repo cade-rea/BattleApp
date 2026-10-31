@@ -3,7 +3,8 @@ package com.caderea.battleapp.core
 import com.caderea.battleapp.core.action.BattleAction
 
 /**
- * The actions a fighter has lined up, oldest first, holding at most [capacity].
+ * The actions a fighter has lined up, oldest first, holding at most [capacity]. The queue is
+ * short on purpose, so each queued action is a commitment.
  *
  * Not thread-safe: whoever owns the battle should drive it from one thread.
  */
@@ -34,10 +35,31 @@ class BattleQueue(val capacity: Int = MAX_SIZE) : Iterable<QueuedAction> {
 
     fun peek(): QueuedAction? = actions.firstOrNull()
 
+    /** Removes the action at the back of the queue, the one queued last. */
+    fun removeLast(): QueuedAction? = actions.removeLastOrNull()
+
+    /**
+     * Replaces the front of the queue, to count down its wind-up. Does nothing if the
+     * queue is empty.
+     */
+    fun replaceFront(action: QueuedAction) {
+        if (actions.isNotEmpty()) actions[0] = action
+    }
+
     /**
      * The action at [index], counted from the front of the queue, or null past the end.
      */
     operator fun get(index: Int): QueuedAction? = actions.getOrNull(index)
+
+    /**
+     * How many ticks until the action at [index] lands: its own wind-up plus everything
+     * ahead of it. 1 means it lands on the next tick.
+     */
+    fun ticksUntilLands(index: Int): Int = actions.take(index + 1).sumOf { it.ticksLeft }
+
+    /** How many ticks until everything queued has landed, so a new action could start. */
+    val ticksUntilFree: Int
+        get() = actions.sumOf { it.ticksLeft }
 
     fun clear() = actions.clear()
 
@@ -45,6 +67,6 @@ class BattleQueue(val capacity: Int = MAX_SIZE) : Iterable<QueuedAction> {
     override fun iterator(): Iterator<QueuedAction> = actions.toList().iterator()
 
     companion object {
-        const val MAX_SIZE = 10
+        const val MAX_SIZE = 3
     }
 }

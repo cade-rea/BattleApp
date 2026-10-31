@@ -40,9 +40,48 @@ class BattleViewModelTest {
         val viewModel = BattleViewModel(TICK_MS)
 
         assertEquals(
-            listOf("Red Strike", "Green Mend", "Green Strike", ""),
-            viewModel.uiState.value.actionNames,
+            listOf(
+                ActionButtonState("Red Strike", 10, enabled = true),
+                ActionButtonState("Green Mend", 7, enabled = true),
+                ActionButtonState("Green Strike", 7, enabled = true),
+                ActionButtonState("Blue Guard", 10, enabled = true),
+            ),
+            viewModel.uiState.value.actions,
         )
+    }
+
+    @Test
+    fun buttonsYouCantAffordAreDisabled() {
+        val viewModel = BattleViewModel(TICK_MS)
+
+        // two red strikes spend all 20 starting energy
+        viewModel.queueAction(0)
+        viewModel.queueAction(0)
+
+        val state = viewModel.uiState.value
+        assertEquals(0, state.player.energy)
+        assertTrue(state.actions.none { it.enabled })
+    }
+
+    @Test
+    fun cancelTakesBackTheLastQueuedAction() {
+        val viewModel = BattleViewModel(TICK_MS)
+        viewModel.queueAction(0)
+
+        viewModel.cancelLast()
+
+        assertTrue(viewModel.uiState.value.playerQueue.isEmpty())
+        assertEquals(15, viewModel.uiState.value.player.energy)
+    }
+
+    @Test
+    fun showsBothFightersStatus() {
+        val state = BattleViewModel(TICK_MS).uiState.value
+
+        assertEquals(FighterState("Default Fighter", 2000, 2000, 20, 30, null), state.player)
+        assertEquals("Enemy", state.enemy.name)
+        // the computer opponent opens with a telegraphed strike
+        assertEquals(listOf("Strike"), state.enemyQueue.map { it.action.name })
     }
 
     @Test
@@ -62,7 +101,11 @@ class BattleViewModelTest {
         advanceTimeBy(TICK_MS - 1)
         assertTrue(viewModel.uiState.value.log.isEmpty())
 
+        // the green strike winds up on the first tick and lands on the second
         advanceTimeBy(2)
+        assertEquals(1, viewModel.uiState.value.playerQueue.single().ticksLeft)
+
+        advanceTimeBy(TICK_MS)
         val log = viewModel.uiState.value.log
         assertTrue(log.contains("Default Fighter attacks Enemy with Green Strike for 414 damage."))
         assertTrue(viewModel.uiState.value.playerQueue.isEmpty())

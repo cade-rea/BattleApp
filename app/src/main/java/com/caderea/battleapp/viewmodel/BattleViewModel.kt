@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.caderea.battleapp.core.Battle
+import com.caderea.battleapp.core.fighter.Fighter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,6 +50,12 @@ class BattleViewModel(
         }
     }
 
+    fun cancelLast() {
+        if (battle.cancelLast()) {
+            publish()
+        }
+    }
+
     fun stop() {
         if (battle.isOver) return
 
@@ -74,12 +81,29 @@ class BattleViewModel(
     }
 
     private fun buildState(tickProgress: Int) = BattleUiState(
-        actionNames = battle.player.actions.map { it?.name.orEmpty() },
+        actions = battle.player.actions.mapIndexed { slot, action ->
+            ActionButtonState(
+                name = action?.name.orEmpty(),
+                cost = action?.cost ?: 0,
+                enabled = !battle.isOver && battle.player.canQueue(slot),
+            )
+        },
+        player = battle.player.toState(),
+        enemy = battle.enemy.toState(),
         playerQueue = battle.player.queue.toList(),
         enemyQueue = battle.enemy.queue.toList(),
         tickProgress = tickProgress,
         log = log.toList(),
         isOver = battle.isOver,
+    )
+
+    private fun Fighter.toState() = FighterState(
+        name = name,
+        health = health,
+        maxHealth = maxHealth,
+        energy = energy,
+        maxEnergy = Fighter.MAX_ENERGY,
+        guard = activeGuard?.guard?.name,
     )
 
     companion object {

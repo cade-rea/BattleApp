@@ -26,7 +26,7 @@ class BattleInputArea @JvmOverloads constructor(
         val bottomRowHeightMeasureSpec = MeasureSpec.makeMeasureSpec(bottomRowHeight, MeasureSpec.EXACTLY)
 
         for (child in children) {
-            if (child.id == R.id.buttonStop) {
+            if (child.id == R.id.buttonStop || child.id == R.id.buttonCancel) {
                 child.measure(bottomRowWidthMeasureSpec, bottomRowHeightMeasureSpec)
             } else {
                 child.measure(quadrantWidthMeasureSpec, quadrantHeightMeasureSpec)
@@ -52,6 +52,7 @@ class BattleInputArea @JvmOverloads constructor(
                 R.id.button3 -> child.layout(0, halfHeight, halfWidth, buttonAreaBottom)
                 R.id.button4 -> child.layout(halfWidth, halfHeight, r, buttonAreaBottom)
                 R.id.buttonStop -> child.layout(0, buttonAreaBottom, width / 4, b)
+                R.id.buttonCancel -> child.layout(width * 3 / 4, buttonAreaBottom, width, b)
                 else -> child.layout(0, 0, 0, 0)
             }
         }

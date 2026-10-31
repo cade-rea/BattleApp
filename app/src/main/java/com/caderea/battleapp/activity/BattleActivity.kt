@@ -15,6 +15,7 @@ import com.caderea.battleapp.R
 import com.caderea.battleapp.view.battle.BattleViewGroup
 import com.caderea.battleapp.viewmodel.BattleUiState
 import com.caderea.battleapp.viewmodel.BattleViewModel
+import com.caderea.battleapp.viewmodel.FighterState
 import kotlinx.coroutines.launch
 
 /**
@@ -30,6 +31,7 @@ class BattleActivity : ComponentActivity() {
     private lateinit var battleButtons: List<Button>
     private lateinit var stopButton: Button
     private lateinit var battleViewGroup: BattleViewGroup
+    private lateinit var battleStatus: TextView
     private lateinit var battleLog: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +48,10 @@ class BattleActivity : ComponentActivity() {
 
         stopButton = findViewById(R.id.buttonStop)
         stopButton.setOnClickListener { viewModel.stop() }
+        findViewById<Button>(R.id.buttonCancel).setOnClickListener { viewModel.cancelLast() }
 
         battleViewGroup = findViewById(R.id.battleViewGroup)
+        battleStatus = findViewById(R.id.battleStatus)
         battleLog = findViewById(R.id.battleLog)
 
         lifecycleScope.launch {
@@ -59,11 +63,17 @@ class BattleActivity : ComponentActivity() {
 
     private fun render(state: BattleUiState) {
         battleButtons.forEachIndexed { slot, button ->
-            button.text = state.actionNames.getOrElse(slot) { "" }
+            val action = state.actions.getOrNull(slot)
+            button.text = when {
+                action == null || action.name.isEmpty() -> ""
+                else -> getString(R.string.action_button, action.name, action.cost)
+            }
+            button.isEnabled = action?.enabled == true
         }
 
         battleViewGroup.showQueues(state.playerQueue, state.enemyQueue)
         battleViewGroup.updateTickProgress(state.tickProgress)
+        battleStatus.text = listOf(state.player, state.enemy).joinToString("\n", transform = ::statusLine)
         battleLog.text = state.log.joinToString("\n")
 
         if (state.isOver) {
@@ -71,6 +81,14 @@ class BattleActivity : ComponentActivity() {
             stopButton.setText(R.string.button_return)
             stopButton.setOnClickListener { finish() }
         }
+    }
+
+    private fun statusLine(fighter: FighterState): String {
+        val status = getString(
+            R.string.fighter_status,
+            fighter.name, fighter.health, fighter.maxHealth, fighter.energy, fighter.maxEnergy,
+        )
+        return fighter.guard?.let { "$status · ${getString(R.string.fighter_guard, it)}" } ?: status
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

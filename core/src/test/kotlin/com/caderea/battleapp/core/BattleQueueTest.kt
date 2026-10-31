@@ -54,17 +54,65 @@ class BattleQueueTest {
     }
 
     @Test
+    fun queueHoldsThreeActions() {
+        assertEquals(3, max)
+    }
+
+    @Test
     fun queueKeepsWorkingAfterManyAddsAndRemoves() {
-        repeat(max) { queue.offer(attack) }
-        repeat(7) { queue.poll() }
-        assertEquals(max - 7, queue.size)
+        repeat(10) {
+            repeat(max) { queue.offer(attack) }
+            repeat(max - 1) { queue.poll() }
+            queue.offer(heal)
 
-        repeat(5) { queue.offer(heal) }
-        assertEquals(max - 2, queue.size)
+            assertSame(attack, queue.poll()?.action)
+            assertSame(heal, queue.poll()?.action)
+            assertTrue(queue.isEmpty())
+        }
+    }
 
-        repeat(max - 7) { assertSame(attack, queue.poll()?.action) }
-        repeat(5) { assertSame(heal, queue.poll()?.action) }
-        assertTrue(queue.isEmpty())
+    @Test
+    fun removeLastTakesTheNewestAction() {
+        queue.offer(attack)
+        queue.offer(heal)
+
+        assertSame(heal, queue.removeLast()?.action)
+        assertSame(attack, queue.removeLast()?.action)
+        assertNull(queue.removeLast())
+    }
+
+    @Test
+    fun newActionsHaveTheirWholeWindUpLeft() {
+        val blueStrike = Attack(color = RgbColor.BLUE)
+        queue.offer(blueStrike)
+
+        assertEquals(3, queue.peek()?.ticksLeft)
+        assertFalse(queue.peek()!!.isWindingUp)
+    }
+
+    @Test
+    fun replaceFrontOnlyChangesTheFront() {
+        queue.offer(heal)
+        queue.offer(attack)
+
+        queue.replaceFront(queue.peek()!!.copy(ticksLeft = 1))
+
+        assertEquals(1, queue[0]?.ticksLeft)
+        assertTrue(queue[0]!!.isWindingUp)
+        assertEquals(attack.duration, queue[1]?.ticksLeft)
+    }
+
+    @Test
+    fun ticksUntilLandsCountsTheWindUpsAhead() {
+        // green 2, red 1, blue 3
+        queue.offer(heal)
+        queue.offer(attack)
+        queue.offer(Attack(color = RgbColor.BLUE))
+
+        assertEquals(2, queue.ticksUntilLands(0))
+        assertEquals(3, queue.ticksUntilLands(1))
+        assertEquals(6, queue.ticksUntilLands(2))
+        assertEquals(6, queue.ticksUntilFree)
     }
 
     @Test

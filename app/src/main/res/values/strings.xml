@@ -8,6 +8,10 @@
     <string name="title_activity_battle_screen">BattleScreen</string>
     <string name="button_map">Map</string>
     <string name="button_return">Return</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="action_button">%1$s (%2$d)</string>
+    <string name="fighter_status">%1$s: %2$d/%3$d HP · %4$d/%5$d energy</string>
+    <string name="fighter_guard">%1$s up</string>
     <string name="title_activity_map_screen">Map</string>
 
 </resources>
