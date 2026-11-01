@@ -118,6 +118,21 @@ class Battle(
      */
     fun cancelLast(): Boolean = !isOver && player.cancelLast()
 
+    /**
+     * Queues the action in [slot] for either fighter, as the PvP server does for both
+     * players.
+     * @return false if [fighter] isn't in this battle, or for the same reasons as [queueAction]
+     */
+    fun queueAction(fighter: Fighter, slot: Int): Boolean =
+        !isOver && fighter in fighters && fighter.queueAction(slot)
+
+    /**
+     * Takes back the last queued action of either fighter.
+     * @return false if [fighter] isn't in this battle, or for the same reasons as [cancelLast]
+     */
+    fun cancelLast(fighter: Fighter): Boolean =
+        !isOver && fighter in fighters && fighter.cancelLast()
+
     /** The actions [fighter] has landed so far, oldest first. */
     fun used(fighter: Fighter): List<BattleAction> =
         _history.filter { it.performer === fighter }.map { it.action }

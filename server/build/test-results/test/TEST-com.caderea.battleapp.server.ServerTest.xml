@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.caderea.battleapp.server.ServerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-01T00:29:43.194Z" hostname="vm" time="1.84">
+  <properties/>
+  <testcase name="healthCheck()" classname="com.caderea.battleapp.server.ServerTest" time="1.305"/>
+  <testcase name="leavingTheLineFreesTheSpot()" classname="com.caderea.battleapp.server.ServerTest" time="0.178"/>
+  <testcase name="theServerRunsTheTicksAndShowsBothSides()" classname="com.caderea.battleapp.server.ServerTest" time="0.093"/>
+  <testcase name="anUnknownArenaIsRejected()" classname="com.caderea.battleapp.server.ServerTest" time="0.023"/>
+  <testcase name="aQueueTheFighterCantAffordIsRejected()" classname="com.caderea.battleapp.server.ServerTest" time="0.039"/>
+  <testcase name="playersInDifferentArenasAreNotMatched()" classname="com.caderea.battleapp.server.ServerTest" time="0.036"/>
+  <testcase name="twoPlayersInTheSameArenaAreMatched()" classname="com.caderea.battleapp.server.ServerTest" time="0.03"/>
+  <testcase name="leavingForfeitsTheMatch()" classname="com.caderea.battleapp.server.ServerTest" time="0.061"/>
+  <testcase name="droppingOutLosesTheMatch()" classname="com.caderea.battleapp.server.ServerTest" time="0.033"/>
+  <testcase name="inputsBeforeJoiningAreRejected()" classname="com.caderea.battleapp.server.ServerTest" time="0.024"/>
+  <system-out><![CDATA[00:29:44.323 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.373 INFO  io.ktor.test - Application started in 0.091 seconds.
+00:29:44.376 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.377 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.528 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.531 INFO  io.ktor.test - Application started in 0.004 seconds.
+00:29:44.532 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.533 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.692 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.693 INFO  io.ktor.test - Application started in 0.002 seconds.
+00:29:44.693 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.693 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.786 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.787 INFO  io.ktor.test - Application started in 0.002 seconds.
+00:29:44.787 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.787 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.807 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.809 INFO  io.ktor.test - Application started in 0.002 seconds.
+00:29:44.809 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.809 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.849 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.851 INFO  io.ktor.test - Application started in 0.002 seconds.
+00:29:44.851 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.852 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.885 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.886 INFO  io.ktor.test - Application started in 0.002 seconds.
+00:29:44.886 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.886 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.943 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.944 INFO  io.ktor.test - Application started in 0.002 seconds.
+00:29:44.944 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.945 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:44.980 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:44.981 INFO  io.ktor.test - Application started in 0.001 seconds.
+00:29:44.981 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:44.981 INFO  io.ktor.test - Responding at https://localhost:443
+00:29:45.014 INFO  io.ktor.test - No ktor.deployment.watch patterns specified, automatic reload is not active.
+00:29:45.016 INFO  io.ktor.test - Application started in 0.001 seconds.
+00:29:45.016 INFO  io.ktor.test - Responding at http://localhost:80
+00:29:45.016 INFO  io.ktor.test - Responding at https://localhost:443
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

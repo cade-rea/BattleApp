@@ -25,9 +25,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       # the runner image already has the Android SDK; AGP downloads any missing platform
-      # core rules tests, app unit tests, and a debug build of the app and its device tests
+      # core rules tests, PvP server tests, app unit tests, and a debug build of the app and
+      # its device tests
       - name: Build and test
-        run: ./gradlew --continue :core:test :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest
+        run: ./gradlew --continue :core:test :server:test :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest
 
       - name: Upload test reports
         if: failure()

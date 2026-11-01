@@ -22,6 +22,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "BattleApp"
 
-// :core holds the game rules as plain Kotlin/JVM so a server can share them; :app is the Android client
+// :core holds the game rules as plain Kotlin/JVM, shared by :app (the Android client) and
+// :server (the PvP server, which runs online matches with the same rules)
 include(":core")
 include(":app")
+include(":server")
