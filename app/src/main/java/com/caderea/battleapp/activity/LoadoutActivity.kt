@@ -37,7 +37,11 @@ class LoadoutActivity : ComponentActivity() {
                     onToggle = viewModel::toggle,
                     onBattle = {
                         val arena = arena
-                        if (arena != null) {
+                        val server = OnlineActivity.serverOf(intent)
+                        if (arena != null && server != null) {
+                            val battle = Intent(this, OnlineBattleActivity::class.java)
+                            startActivity(OnlineActivity.online(ArenasActivity.withArena(battle, arena), server))
+                        } else if (arena != null) {
                             startActivity(ArenasActivity.withArena(Intent(this, BattleActivity::class.java), arena))
                         } else {
                             ArenasActivity.start(this)

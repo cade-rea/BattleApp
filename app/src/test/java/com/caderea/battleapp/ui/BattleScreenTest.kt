@@ -195,7 +195,7 @@ class BattleScreenTest {
         val fighter = FighterProfile.create("Player", Channel.RED).toSummary()
         var loadouts = 0
         composeRule.setContent {
-            BattleTheme { MainMenuScreen(fighter, onBattle = {}, onLoadout = { loadouts++ }, onCharacters = {}, onCreate = {}) }
+            BattleTheme { MainMenuScreen(fighter, onBattle = {}, onOnline = {}, onLoadout = { loadouts++ }, onCharacters = {}, onCreate = {}) }
         }
 
         composeRule.onNodeWithText("Fight the computer").assertIsEnabled()

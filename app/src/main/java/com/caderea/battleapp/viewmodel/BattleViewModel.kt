@@ -5,11 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.caderea.battleapp.core.Battle
-import com.caderea.battleapp.core.action.Attack
-import com.caderea.battleapp.core.action.BattleAction
-import com.caderea.battleapp.core.action.Guard
-import com.caderea.battleapp.core.action.Heal
-import com.caderea.battleapp.core.color.TypeWheel
 import com.caderea.battleapp.core.environment.Arena
 import com.caderea.battleapp.core.environment.Arenas
 import com.caderea.battleapp.core.fighter.Opponents
@@ -17,7 +12,6 @@ import com.caderea.battleapp.core.progression.BattleRewards
 import com.caderea.battleapp.core.progression.Progression
 import com.caderea.battleapp.core.technique.TechniqueRoller
 import com.caderea.battleapp.data.ProfileRepository
-import com.caderea.battleapp.core.fighter.Fighter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
@@ -149,9 +142,7 @@ class BattleViewModel(
     }
 
     private fun buildState(tickProgress: Int) = BattleUiState(
-        actions = battle.player.actions.mapIndexed { slot, action ->
-            action?.toButton(enabled = !battle.isOver && battle.player.canQueue(slot)) ?: ActionButtonState()
-        },
+        actions = battle.player.toButtons(battle.conditions, battle.isOver),
         player = battle.player.toState(playerHealthChange),
         enemy = battle.enemy.toState(enemyHealthChange),
         playerQueue = battle.player.queue.toList(),
@@ -160,10 +151,7 @@ class BattleViewModel(
         tickProgress = tickProgress,
         isPaused = paused.value,
         log = log.toList(),
-        landed = battle.landed.map { landing ->
-            val side = if (landing.performer === battle.player) Side.PLAYER else Side.ENEMY
-            LandedAction(side, landing.action.kind, landing.action.color)
-        },
+        landed = battle.landed.toLanded(battle.player),
         outcome = when {
             !battle.isOver -> null
             battle.enemy.health <= 0 -> Outcome.WON
@@ -172,42 +160,6 @@ class BattleViewModel(
         },
         rewards = rewards,
         arena = (battle.environment as? Arena)?.toHud(battle.tickCount + 1),
-    )
-
-    private fun BattleAction.toButton(enabled: Boolean): ActionButtonState {
-        val player = battle.player
-        // previews use the light of the next tick, which is when a red technique would land
-        val environment = battle.conditions
-        val button = ActionButtonState(
-            name = name,
-            cost = cost,
-            enabled = enabled,
-            kind = kind,
-            color = color,
-            windUpTicks = duration,
-        )
-        return when (this) {
-            is Attack -> button.copy(
-                effect = damage(player, player.target, environment),
-                effectiveness = TypeWheel.effectiveness(color, player.target.color),
-            )
-            is Heal -> button.copy(effect = amount(player, environment))
-            is Guard -> button.copy(
-                effect = (strength(player, environment).coerceAtMost(Guard.MAX_BLOCK) * 100).roundToInt(),
-            )
-            else -> button
-        }
-    }
-
-    private fun Fighter.toState(healthChange: Int) = FighterState(
-        name = name,
-        color = color,
-        health = health,
-        maxHealth = maxHealth,
-        energy = energy,
-        maxEnergy = Fighter.MAX_ENERGY,
-        guard = activeGuard?.let { GuardState(it.guard.name, it.guard.color, it.ticksLeft) },
-        healthChange = healthChange,
     )
 
     companion object {

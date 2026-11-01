@@ -32,12 +32,19 @@ data class BattleUiState(
     val rewards: RewardsState? = null,
     // where the battle is and its light; null outside a named arena
     val arena: ArenaHudState? = null,
+    // an online match against another player: no pause, and the server keeps the clock
+    val isOnline: Boolean = false,
+    // why an online match ended, when it wasn't a knockout
+    val endNote: EndNote? = null,
 ) {
     val isOver: Boolean
         get() = outcome != null
 }
 
-enum class Outcome { WON, LOST, STOPPED }
+enum class Outcome { WON, LOST, STOPPED, DRAW }
+
+/** Why an online match ended, besides a knockout. */
+enum class EndNote { YOU_GAVE_UP, OPPONENT_GAVE_UP, OPPONENT_DROPPED, YOU_DROPPED, TIME }
 
 enum class ActionKind { ATTACK, HEAL, GUARD }
 

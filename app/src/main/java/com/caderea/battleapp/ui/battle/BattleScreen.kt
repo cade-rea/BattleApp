@@ -60,6 +60,7 @@ import com.caderea.battleapp.ui.theme.BattleColors
 import com.caderea.battleapp.viewmodel.ArenaHudState
 import com.caderea.battleapp.viewmodel.BattleUiState
 import com.caderea.battleapp.viewmodel.BattleViewModel
+import com.caderea.battleapp.viewmodel.EndNote
 import com.caderea.battleapp.viewmodel.Outcome
 import com.caderea.battleapp.viewmodel.RewardsState
 
@@ -152,7 +153,7 @@ fun BattleScreen(
         )
 
         AnimatedVisibility(state.outcome != null, enter = fadeIn(), exit = fadeOut()) {
-            state.outcome?.let { OutcomeOverlay(it, state.tick, state.rewards, onRematch, onExit) }
+            state.outcome?.let { OutcomeOverlay(it, state.tick, state.rewards, state.endNote, state.isOnline, onRematch, onExit) }
         }
     }
 }
@@ -238,8 +239,11 @@ private fun TopBar(state: BattleUiState, tickFraction: Float, onTogglePause: () 
             )
         }
         Spacer(Modifier.width(4.dp))
-        TextButton(onTogglePause, enabled = !state.isOver, modifier = Modifier.testTag("pause")) {
-            Text(stringResource(if (state.isPaused) R.string.button_resume else R.string.button_pause))
+        // an online match runs on the server's clock, so it can't be paused
+        if (!state.isOnline) {
+            TextButton(onTogglePause, enabled = !state.isOver, modifier = Modifier.testTag("pause")) {
+                Text(stringResource(if (state.isPaused) R.string.button_resume else R.string.button_pause))
+            }
         }
         TextButton(onGiveUp, enabled = !state.isOver) {
             Text(stringResource(R.string.button_give_up), color = BattleColors.textMuted)
@@ -252,6 +256,8 @@ private fun OutcomeOverlay(
     outcome: Outcome,
     ticks: Int,
     rewards: RewardsState?,
+    endNote: EndNote?,
+    isOnline: Boolean,
     onRematch: () -> Unit,
     onExit: () -> Unit,
 ) {
@@ -277,11 +283,27 @@ private fun OutcomeOverlay(
                         Outcome.WON -> R.string.outcome_won
                         Outcome.LOST -> R.string.outcome_lost
                         Outcome.STOPPED -> R.string.outcome_stopped
+                        Outcome.DRAW -> R.string.outcome_draw
                     }
                 ),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
+            endNote?.let { note ->
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(
+                        when (note) {
+                            EndNote.YOU_GAVE_UP -> R.string.end_you_gave_up
+                            EndNote.OPPONENT_GAVE_UP -> R.string.end_opponent_gave_up
+                            EndNote.OPPONENT_DROPPED -> R.string.end_opponent_dropped
+                            EndNote.YOU_DROPPED -> R.string.end_you_dropped
+                            EndNote.TIME -> R.string.end_time
+                        }
+                    ),
+                    Modifier.testTag("end_note"),
+                )
+            }
             Spacer(Modifier.height(4.dp))
             Text(stringResource(R.string.outcome_ticks, ticks), color = BattleColors.textMuted)
             rewards?.let {
@@ -291,7 +313,9 @@ private fun OutcomeOverlay(
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onExit) { Text(stringResource(R.string.button_menu)) }
-                Button(onRematch, Modifier.testTag("rematch")) { Text(stringResource(R.string.button_rematch)) }
+                Button(onRematch, Modifier.testTag("rematch")) {
+                    Text(stringResource(if (isOnline) R.string.button_find_another else R.string.button_rematch))
+                }
             }
         }
     }

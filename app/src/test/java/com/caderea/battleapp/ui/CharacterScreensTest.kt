@@ -152,7 +152,7 @@ class CharacterScreensTest {
         var creates = 0
         composeRule.setContent {
             BattleTheme {
-                MainMenuScreen(null, onBattle = {}, onLoadout = {}, onCharacters = {}, onCreate = { creates++ })
+                MainMenuScreen(null, onBattle = {}, onOnline = {}, onLoadout = {}, onCharacters = {}, onCreate = { creates++ })
             }
         }
 
