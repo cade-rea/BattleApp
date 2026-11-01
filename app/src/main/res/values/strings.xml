@@ -117,7 +117,7 @@
     <string name="online_title">Fight online</string>
     <string name="online_intro">Fight another player in real time. The server runs the clock, so there\'s no pause. Online matches don\'t give XP yet.</string>
     <string name="online_server_label">Server address</string>
-    <string name="online_server_hint">The computer running the server, such as 192.168.1.20. On the emulator, 10.0.2.2 is your computer.</string>
+    <string name="online_server_hint">The hosted server, or for testing, a computer running it, such as 192.168.1.20. On the emulator, 10.0.2.2 is your computer.</string>
     <string name="online_server_invalid">That doesn\'t look like an address.</string>
     <string name="online_connecting">Connecting to %1$s…</string>
     <string name="online_waiting">Looking for an opponent in %1$s…</string>

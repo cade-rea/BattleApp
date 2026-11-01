@@ -49,3 +49,24 @@ jobs:
         with:
           name: screenshots
           path: app/build/screenshots/
+
+  # the server's container image, as Fly.io builds it, answering its health check
+  server-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build the image
+        run: docker build -t battleapp-server .
+
+      - name: Start it and check /health
+        run: |
+          docker run -d --name server -p 8080:8080 battleapp-server
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:8080/health; then echo; exit 0; fi
+            sleep 2
+          done
+          docker logs server
+          exit 1

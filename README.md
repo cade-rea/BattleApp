@@ -15,6 +15,12 @@ Implementation of Battle as an app.
     - Battle screen, top to bottom: the enemy's aura, health and energy; a shared timeline where each queued action is a block ending on the tick it lands (enemy lane on top, yours below, guards as bands), so you can see whether a guard covers an incoming attack; the red › green › blue type triangle with both auras ringed; your panel; and your techniques, each showing its cost, wind-up, damage/heal/block and its type matchup against the enemy (▲ strong, ▼ weak). When an action lands, its lane pulses, a streak in its color flies to whoever it hits, and the health change floats off their orb (`Battle.landed` says what landed).
     - Colors on screen always mean type and power; everything else is greyscale.
 
+## Hosting the server
+
+The PvP server runs on [Fly.io](https://fly.io) as one always-on machine (`fly.toml`); matches live in its memory, so it must stay one machine. The `Dockerfile` builds it from this repository, and `.github/workflows/deploy.yml` deploys it whenever server or rules code lands on `main`, once the `FLY_API_TOKEN` repository secret is set. CI builds the image on every pull request and checks `/health`. The app's default server address is `wss://battleapp-pvp.fly.dev/play`.
+
+First-time setup: install `flyctl`, run `fly auth login`, then `fly apps create battleapp-pvp` (or another name, changing `app` in `fly.toml` and `ServerAddress.DEFAULT` to match), and add the output of `fly tokens create deploy -a battleapp-pvp` as the `FLY_API_TOKEN` secret.
+
 ## Building
 
 Needs JDK 17 or newer and the Android SDK.

@@ -1,0 +1,8 @@
+# only sources go into the image build; the build makes everything else
+.git
+.gradle
+**/build
+local.properties
+docs
+*.iml
+.idea
