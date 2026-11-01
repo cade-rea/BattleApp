@@ -124,6 +124,7 @@
     <string name="online_waiting_hint">Someone else has to pick the same arena.</string>
     <string name="online_failed">Couldn\'t play online</string>
     <string name="online_lost_connection">The connection to the server dropped.</string>
+    <string name="online_local_network_denied">Without access to devices on your network, the app can only reach a server on the internet.</string>
     <string name="button_stop_looking">Stop looking</string>
     <string name="button_try_again">Try again</string>
     <string name="outcome_ticks">after %1$d ticks</string>

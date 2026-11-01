@@ -3,6 +3,9 @@
 
     <!-- online matches talk to the PvP server -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 17 blocks connections to the local network without it, and until the server
+         is hosted it runs on a computer on the same Wi-Fi -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <application
         android:allowBackup="true"
