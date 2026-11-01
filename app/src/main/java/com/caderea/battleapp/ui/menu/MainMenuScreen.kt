@@ -46,8 +46,8 @@ import com.caderea.battleapp.ui.theme.readable
 import com.caderea.battleapp.viewmodel.FighterSummary
 
 /**
- * The title, the loaded character, and the ways in: a battle (by way of the arenas) or the
- * loadout.
+ * The title, the loaded character, and the ways in: a battle against the computer or online
+ * (both by way of the arenas), or the loadout.
  * Tapping the character opens the character list to switch. With no character yet, the
  * only way in is making one.
  */
@@ -55,6 +55,7 @@ import com.caderea.battleapp.viewmodel.FighterSummary
 fun MainMenuScreen(
     fighter: FighterSummary?,
     onBattle: () -> Unit,
+    onOnline: () -> Unit,
     onLoadout: () -> Unit,
     onCharacters: () -> Unit,
     onCreate: () -> Unit,
@@ -106,6 +107,10 @@ fun MainMenuScreen(
 
         Button(onBattle, Modifier.fillMaxWidth().height(52.dp)) {
             Text(stringResource(R.string.button_battle), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        }
+        Spacer(Modifier.height(12.dp))
+        Button(onOnline, Modifier.fillMaxWidth().height(52.dp).testTag("online")) {
+            Text(stringResource(R.string.button_online), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         }
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onLoadout, Modifier.fillMaxWidth().height(52.dp).testTag("loadout")) {

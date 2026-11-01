@@ -8,6 +8,7 @@
     <!-- main menu -->
     <string name="menu_tagline">Color is power. Brighter hits harder.</string>
     <string name="button_battle">Fight the computer</string>
+    <string name="button_online">Fight online</string>
     <string name="button_loadout">Techniques</string>
 
     <string name="menu_no_character">No characters yet. Make one to start fighting.</string>
@@ -104,6 +105,28 @@
     <string name="outcome_won">Victory</string>
     <string name="outcome_lost">Defeat</string>
     <string name="outcome_stopped">Battle stopped</string>
+    <string name="outcome_draw">Draw</string>
+    <string name="end_you_gave_up">You gave up.</string>
+    <string name="end_opponent_gave_up">Your opponent gave up.</string>
+    <string name="end_opponent_dropped">Your opponent\'s connection dropped.</string>
+    <string name="end_you_dropped">Your connection dropped.</string>
+    <string name="end_time">The match ran out of time.</string>
+    <string name="button_find_another">Find another match</string>
+
+    <!-- online play -->
+    <string name="online_title">Fight online</string>
+    <string name="online_intro">Fight another player in real time. The server runs the clock, so there\'s no pause. Online matches don\'t give XP yet.</string>
+    <string name="online_server_label">Server address</string>
+    <string name="online_server_hint">The computer running the server, such as 192.168.1.20. On the emulator, 10.0.2.2 is your computer.</string>
+    <string name="online_server_invalid">That doesn\'t look like an address.</string>
+    <string name="online_connecting">Connecting to %1$s…</string>
+    <string name="online_waiting">Looking for an opponent in %1$s…</string>
+    <string name="online_waiting_hint">Someone else has to pick the same arena.</string>
+    <string name="online_failed">Couldn\'t play online</string>
+    <string name="online_lost_connection">The connection to the server dropped.</string>
+    <string name="online_local_network_denied">Without access to devices on your network, the app can only reach a server on the internet.</string>
+    <string name="button_stop_looking">Stop looking</string>
+    <string name="button_try_again">Try again</string>
     <string name="outcome_ticks">after %1$d ticks</string>
     <string name="button_rematch">Rematch</string>
     <string name="button_menu">Menu</string>

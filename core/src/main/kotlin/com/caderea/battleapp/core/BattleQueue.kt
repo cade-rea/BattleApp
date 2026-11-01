@@ -63,6 +63,17 @@ class BattleQueue(val capacity: Int = MAX_SIZE) : Iterable<QueuedAction> {
 
     fun clear() = actions.clear()
 
+    /**
+     * Replaces everything queued with [queued], ids and wind-ups included. For a phone showing
+     * a battle the server runs, so its queue matches the server's exactly.
+     */
+    fun restore(queued: List<QueuedAction>) {
+        require(queued.size <= capacity) { "the queue holds at most $capacity: ${queued.size}" }
+        actions.clear()
+        actions.addAll(queued)
+        nextId = maxOf(nextId, (queued.maxOfOrNull { it.id } ?: -1) + 1)
+    }
+
     // iterates front to back without removing anything
     override fun iterator(): Iterator<QueuedAction> = actions.toList().iterator()
 

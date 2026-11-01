@@ -25,6 +25,7 @@ class MainActivity : ComponentActivity() {
                 MainMenuScreen(
                     fighter = profile?.toSummary(),
                     onBattle = { ArenasActivity.start(this) },
+                    onOnline = { OnlineActivity.start(this) },
                     onLoadout = { startActivity(Intent(this, LoadoutActivity::class.java)) },
                     onCharacters = { startActivity(Intent(this, CharactersActivity::class.java)) },
                     onCreate = { startActivity(Intent(this, CharacterCreationActivity::class.java)) },

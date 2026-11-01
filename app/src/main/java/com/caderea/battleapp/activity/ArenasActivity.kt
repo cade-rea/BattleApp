@@ -16,7 +16,10 @@ import com.caderea.battleapp.ui.theme.BattleTheme
 import com.caderea.battleapp.viewmodel.toCard
 import com.caderea.battleapp.viewmodel.toSummary
 
-/** Picks where to fight, then goes on to the loadout for that arena. */
+/**
+ * Picks where to fight, then goes on to the loadout for that arena: against the computer, or
+ * online when started from [OnlineActivity].
+ */
 class ArenasActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +35,10 @@ class ArenasActivity : ComponentActivity() {
                     fighter = profile?.toSummary(),
                     arenas = arenas,
                     onPick = { id ->
-                        startActivity(withArena(Intent(this, LoadoutActivity::class.java), Arenas.byId(id)))
+                        val loadout = withArena(Intent(this, LoadoutActivity::class.java), Arenas.byId(id))
+                        // an online pick stays online through the loadout
+                        val server = OnlineActivity.serverOf(intent)
+                        startActivity(if (server != null) OnlineActivity.online(loadout, server) else loadout)
                     },
                     onBack = ::finish,
                 )
