@@ -334,6 +334,37 @@ class BattleTest {
         assertEquals(plain, before - enemy.health)
     }
 
+    @Test
+    fun eitherFighterCanBeQueuedFor() {
+        // the PvP server queues for both players this way
+        assertTrue(battle.queueAction(enemy, ENEMY_STRIKE))
+        assertEquals(1, enemy.queue.size)
+        assertTrue(battle.queueAction(player, RED_STRIKE))
+        assertEquals(1, player.queue.size)
+
+        assertTrue(battle.cancelLast(enemy))
+        assertTrue(enemy.queue.isEmpty())
+        assertEquals(1, player.queue.size)
+    }
+
+    @Test
+    fun aFighterFromAnotherBattleCantBeQueuedFor() {
+        val stranger = Fighter()
+        stranger.target = player
+
+        assertFalse(battle.queueAction(stranger, RED_STRIKE))
+        assertFalse(battle.cancelLast(stranger))
+        assertTrue(stranger.queue.isEmpty())
+    }
+
+    @Test
+    fun nobodyCanQueueOnceTheBattleIsOver() {
+        battle.stop()
+
+        assertFalse(battle.queueAction(enemy, ENEMY_STRIKE))
+        assertFalse(battle.queueAction(player, RED_STRIKE))
+    }
+
     private companion object {
         // the default red fighter's buttons
         const val RED_STRIKE = 0
