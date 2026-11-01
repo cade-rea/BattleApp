@@ -3,14 +3,14 @@ package com.caderea.battleapp.online
 import android.content.Context
 
 /**
- * Where the PvP server is. Until it's hosted, it runs on someone's computer, so the address
- * can be typed in as anything from `192.168.1.20` to `ws://192.168.1.20:8080/play`; the
- * missing parts are filled in.
+ * Where the PvP server is: the hosted one by default, or one run on a computer for testing,
+ * typed in as anything from `192.168.1.20` to `ws://192.168.1.20:8080/play`; the missing
+ * parts are filled in.
  */
 object ServerAddress {
 
-    /** The computer running the emulator, as the emulator sees it. */
-    const val DEFAULT = "ws://10.0.2.2:8080/play"
+    /** The hosted server on Fly.io (see fly.toml). */
+    const val DEFAULT = "wss://battleapp-pvp.fly.dev/play"
 
     const val DEFAULT_PORT = 8080
     const val PATH = "/play"
